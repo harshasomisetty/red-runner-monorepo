@@ -128,7 +128,11 @@ namespace RedRunner
             {
                 m_HighScore = 0f;
             }
-
+            
+        }
+        public void ChangeSkinWithIndex(int skinIndex)
+        {
+            m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
         }
 
         void UpdateDeathEvent(bool isDead)
@@ -154,7 +158,14 @@ namespace RedRunner
             {
                 OnScoreChanged(m_Score, m_HighScore, m_LastScore);
             }
-
+            Debug.Log("Score Submit");
+            if (StaticStrings.playerlocalid != "")
+            {
+                GoogleAndFirebaseAuth.instance.Score_Submit(m_Score.ToString(), StaticStrings.playerlocalid, delegate
+                {
+                    Debug.Log(" score submited to server");
+                });
+            }
             yield return new WaitForSecondsRealtime(1.5f);
 
             EndGame();

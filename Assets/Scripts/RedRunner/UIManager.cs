@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using RedRunner.UI;
 using System.Linq;
+using UnityEngine.UI;
 
 namespace RedRunner
 {
@@ -38,7 +39,7 @@ namespace RedRunner
         private Texture2D m_CursorClickTexture;
         [SerializeField]
         private float m_CursorHideDelay = 1f;
-
+        public InputField email, Password;
         public List<UIScreen> UISCREENS
         {
             get
@@ -170,6 +171,71 @@ namespace RedRunner
             }
 
             return false;
+        }
+        bool CheckInputField(string checkstring)
+        {
+            if(!string.IsNullOrEmpty(checkstring) && !string.IsNullOrWhiteSpace(checkstring))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public void UserLogInFirebase()
+        {
+            if(CheckInputField (email.text)&& CheckInputField(Password.text)&&
+                email.text.Contains(".com",System.StringComparison.OrdinalIgnoreCase)&&Password.text.Length>=6)
+            {
+                GoogleAndFirebaseAuth.instance.SignInUserWithFirebase(email.text, Password.text, OnSignInCompleted);
+            }
+            else
+            {
+                Debug.Log("email or password is incorrect");
+            }
+        }
+        public void UserSignUpFirebase()
+        {
+            if (CheckInputField(email.text) && CheckInputField(Password.text) &&
+                email.text.Contains(".com", System.StringComparison.OrdinalIgnoreCase) && Password.text.Length >= 6)
+            {
+                GoogleAndFirebaseAuth.instance.SignUpUserWithFirebase(email.text, Password.text, OnSignUpCompleted);
+            }
+            else
+            {
+                Debug.Log("email or password is incorrect");
+            }
+        }
+        public void SignInWithGoogle()
+        {
+            if (CheckInputField(email.text) && CheckInputField(Password.text) &&
+                email.text.Contains(".com", System.StringComparison.OrdinalIgnoreCase) && Password.text.Length >= 6)
+            {
+                GoogleAndFirebaseAuth.instance.SignInWithGoogle(OnSignInCompleted);
+            }
+        }
+        void OnSignUpCompleted(bool success, string message)
+        {
+            if (success)
+            {
+                Debug.Log("Sign-up succeeded: " + message);
+            }
+            else
+            {
+                Debug.LogError("Sign-up failed: " + message);
+            }
+        }
+        void OnSignInCompleted(bool success, string message)
+        {
+            if (success)
+            {
+                Debug.Log("Sign-up succeeded: " + message);
+            }
+            else
+            {
+                Debug.LogError("Sign-up failed: " + message);
+            }
         }
     }
 

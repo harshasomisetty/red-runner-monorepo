@@ -300,8 +300,6 @@ namespace RedRunner.Characters
 			m_Block = false;
 			m_CurrentFootstepSoundIndex = 0;
 			GameManager.OnReset += GameManager_OnReset;
-			Skeleton.ChangeCharacterSkin(2, GameManager.Singleton.CharacterSkins);
-
         }
 
 		void Update ()

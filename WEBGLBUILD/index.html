@@ -23,6 +23,7 @@
         <div id="unity-build-title">Red Runner</div>
       </div>
     </div>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script>
 
       var container = document.querySelector("#unity-container");
@@ -31,7 +32,7 @@
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
       var fullscreenButton = document.querySelector("#unity-fullscreen-button");
       var warningBanner = document.querySelector("#unity-warning");
-
+      var unityGameInstance = null;
       // Shows a temporary message banner/ribbon for a few seconds, or
       // a permanent error message on top of the canvas if type=='error'.
       // If type=='warning', a yellow highlight color is used.
@@ -59,9 +60,9 @@
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/WEBGLBUILD.loader.js";
       var config = {
-        dataUrl: buildUrl + "/WEBGLBUILD.data.gz",
-        frameworkUrl: buildUrl + "/WEBGLBUILD.framework.js.gz",
-        codeUrl: buildUrl + "/WEBGLBUILD.wasm.gz",
+        dataUrl: buildUrl + "/WEBGLBUILD.data",
+        frameworkUrl: buildUrl + "/WEBGLBUILD.framework.js",
+        codeUrl: buildUrl + "/WEBGLBUILD.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Bayat Games",
         productName: "Red Runner",
@@ -106,10 +107,12 @@
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
               }).then((unityInstance) => {
+                  unityGameInstance = unityInstance;
                 loadingBar.style.display = "none";
                 fullscreenButton.onclick = () => {
                   unityInstance.SetFullscreen(1);
                 };
+                document.dispatchEvent(new Event('UnityReady'));
               }).catch((message) => {
                 alert(message);
               });
@@ -118,5 +121,6 @@
       document.body.appendChild(script);
 
     </script>
+    <script src="OAuth.js"></script>
   </body>
 </html>
