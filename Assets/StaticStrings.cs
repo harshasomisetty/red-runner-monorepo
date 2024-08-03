@@ -23,5 +23,6 @@ public static class StaticStrings
     public static readonly string Get_LeaderBoard = BackendBaseUrl + "leaderboard/getLeaderboard";
 
     public static string playerlocalid = "";
-    public static string tokenId = "";
+    public static string jwttoken = "";
+    public static string walletAddress = "";
 }

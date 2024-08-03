@@ -10,6 +10,7 @@ using BayatGames.SaveGameFree.Serializers;
 using RedRunner.Characters;
 using RedRunner.Collectables;
 using RedRunner.TerrainGeneration;
+using RedRunner.Utilities;
 
 namespace RedRunner
 {
@@ -158,10 +159,11 @@ namespace RedRunner
             {
                 OnScoreChanged(m_Score, m_HighScore, m_LastScore);
             }
-            Debug.Log("Score Submit");
+            Debug.Log("Score Submit" + m_Score);
             if (StaticStrings.playerlocalid != "")
             {
-                GoogleAndFirebaseAuth.instance.Score_Submit(m_Score.ToString(), StaticStrings.playerlocalid, delegate
+                string myscore = m_Score.ToLength();
+                GoogleAndFirebaseAuth.instance.Score_Submit(myscore.ToString(), StaticStrings.playerlocalid, delegate
                 {
                     Debug.Log(" score submited to server");
                 });

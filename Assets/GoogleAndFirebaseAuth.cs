@@ -3,6 +3,8 @@ using UnityEngine.Networking;
 using System.Collections;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 public class GoogleAndFirebaseAuth : MonoBehaviour
 {
@@ -11,7 +13,7 @@ public class GoogleAndFirebaseAuth : MonoBehaviour
     public delegate void SignInCallback(bool success, string message);
     public delegate void SignInWithGoogleCallback (bool success, string message);
     public delegate void ScoreSubmit (bool success, string message);
-    public delegate void LeaderBoardData (bool success, LeaderboarData data);
+    public delegate void LeaderBoardData (bool success, List<Root> data);
     SignInWithGoogleCallback GoogleAuth;
 
 
@@ -167,13 +169,15 @@ public class GoogleAndFirebaseAuth : MonoBehaviour
 
             string _idToken = resoponse["idToken"].ToString();
 
-            string getemail = resoponse["email"].ToString();
+            //string getemail = resoponse["email"].ToString();
 
             string localId = resoponse["localId"].ToString();
 
-            Debug.Log("ID token : " + _idToken + " email : " + email + " localId : " + localId);
+            Debug.Log("ID token : " + _idToken +  " localId : " + localId);
+            StaticStrings.playerlocalid = localId;
+
             signInCallback(true, "Sign In Success");
-            //string email=
+
             StartCoroutine(BackendLogIn(_idToken, localId));
         }
     }
@@ -274,8 +278,10 @@ public class GoogleAndFirebaseAuth : MonoBehaviour
             {
                 string jsonResponse = www.downloadHandler.text;
                 Debug.Log(jsonResponse);
+                JObject resoponse = JObject.Parse(jsonResponse);
+                string jwttoken = resoponse["tokens"]["access"]["token"].ToString();
                 StaticStrings.playerlocalid = localId;
-                StaticStrings.tokenId = _idToken;
+                StaticStrings.jwttoken = jwttoken;
             }
         }
     }
@@ -291,7 +297,7 @@ public class GoogleAndFirebaseAuth : MonoBehaviour
 
         using (UnityWebRequest www = UnityWebRequest.Post(StaticStrings.LeaderBoard_Submit, form))
         {
-            www.SetRequestHeader("Authorization", "Bearer " + StaticStrings.tokenId);
+            www.SetRequestHeader("Authorization", "Bearer " + StaticStrings.jwttoken);
 
             yield return www.SendWebRequest();
 
@@ -316,7 +322,7 @@ public class GoogleAndFirebaseAuth : MonoBehaviour
     {
         using (UnityWebRequest www = UnityWebRequest.Get(StaticStrings.Get_LeaderBoard))
         {
-            www.SetRequestHeader("Authorization", "Bearer " + StaticStrings.tokenId);
+            www.SetRequestHeader("Authorization", "Bearer " + StaticStrings.jwttoken);
 
             yield return www.SendWebRequest();
 
@@ -329,22 +335,18 @@ public class GoogleAndFirebaseAuth : MonoBehaviour
             {
                 string jsonResponse = www.downloadHandler.text;
                 Debug.Log(jsonResponse);
-                LeaderboarData leaderboarddata = JsonUtility.FromJson<LeaderboarData>(jsonResponse);
-                Debug.Log(leaderboarddata.data[0].name);
+                List<Root> leaderboarddata = JsonConvert.DeserializeObject<List<Root>>(jsonResponse);
                 data(true, leaderboarddata);
             }
         }
     }
 }
-[System.Serializable]
-public class Root
+[Serializable]
+public struct Root
 {
-    public string userId;
-    public int score;
     public string name;
-}
-[System.Serializable]
-public class LeaderboarData
-{
-    public Root[] data;
+    public string userId;
+    public float score;
+    public DateTime createdAt;
+    public DateTime updatedAt;
 }

@@ -40,6 +40,11 @@ namespace RedRunner
         [SerializeField]
         private float m_CursorHideDelay = 1f;
         public InputField email, Password;
+        public GameObject LogInScreen;
+        public Text PlayerID, WalletAddress;
+        public GameObject[] ActiveGamePlay;
+
+
         public List<UIScreen> UISCREENS
         {
             get
@@ -231,6 +236,13 @@ namespace RedRunner
             if (success)
             {
                 Debug.Log("Sign-up succeeded: " + message);
+                LogInScreen.SetActive(false);
+                PlayerID.text = "Player#" + StaticStrings.playerlocalid;
+                WalletAddress.text = "Player#" + StaticStrings.walletAddress;
+                foreach(GameObject go in ActiveGamePlay)
+                {
+                    go.SetActive(true);
+                }
             }
             else
             {
