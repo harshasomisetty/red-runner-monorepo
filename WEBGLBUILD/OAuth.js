@@ -145,3 +145,56 @@ function sendAuthDataToUnity(accessToken) {
     // Assuming you have a Unity object named 'gameInstance'
     gameInstance.SendMessage('GoogleAndFirebaseAuth', 'OnGoogleSignIn', accessToken);
 }
+function copyToClipboard(text) {
+    let str = typeof text === 'number' ? utf8ToString(text) : text;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            console.log('Text copied to clipboard');
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    } else {
+        fallbackCopyTextToClipboard(text);
+        console.warn('Clipboard API not available');
+    }
+}
+
+function utf8ToString(ptr) {
+    let str = '';
+    let u8Array = new Uint8Array(Module.HEAPU8.buffer, ptr);
+    let idx = 0;
+    while (u8Array[idx]) {
+        str += String.fromCharCode(u8Array[idx++]);
+    }
+    return decodeURIComponent(escape(str));
+}
+function fallbackCopyTextToClipboard(text) {
+    // Create a temporary <textarea> element
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+
+    // Prevent scrolling to the bottom of the page in some browsers
+    textArea.style.position = 'fixed';
+    textArea.style.top = 0;
+    textArea.style.left = 0;
+
+    // Append the textarea to the document body
+    document.body.appendChild(textArea);
+
+    // Focus the textarea and select its content
+    textArea.focus();
+    textArea.select();
+
+    try {
+        // Execute the copy command
+        const successful = document.execCommand('copy');
+        const msg = successful ? 'successful' : 'unsuccessful';
+        console.log('Fallback: Copying text command was ' + msg);
+    } catch (err) {
+        console.error('Fallback: Unable to copy', err);
+    }
+
+    // Remove the textarea from the document body
+    document.body.removeChild(textArea);
+}

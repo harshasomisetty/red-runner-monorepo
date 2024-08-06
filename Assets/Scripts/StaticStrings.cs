@@ -17,12 +17,14 @@ public static class StaticStrings
 
     //public static readonly string BackendBaseUrl = "http://192.168.68.134:3000/v1/";
     static readonly string BackendBaseUrl = "http://clv.services:3000/v1/";
-    public static readonly string Register = BackendBaseUrl + "auth/register";
-    public static readonly string LogIn = BackendBaseUrl + "auth/login";
+    public static readonly string registerOrLogin = BackendBaseUrl + "auth/registerOrLogin";
+    //public static readonly string Register = BackendBaseUrl + "auth/register";
+    //public static readonly string LogIn = BackendBaseUrl + "auth/login";
     public static readonly string LeaderBoard_Submit = BackendBaseUrl + "leaderboard/addEntry";
     public static readonly string Get_LeaderBoard = BackendBaseUrl + "leaderboard/getLeaderboard";
 
     public static string playerlocalid = "";
+    public static string UserName = "";
     public static string jwttoken = "";
     public static string walletAddress = "";
 }

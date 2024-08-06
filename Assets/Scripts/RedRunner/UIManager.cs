@@ -4,6 +4,8 @@ using UnityEngine;
 using RedRunner.UI;
 using System.Linq;
 using UnityEngine.UI;
+using UnityEditor;
+using TMPro;
 
 namespace RedRunner
 {
@@ -39,11 +41,16 @@ namespace RedRunner
         private Texture2D m_CursorClickTexture;
         [SerializeField]
         private float m_CursorHideDelay = 1f;
+
+        [Header("UI Items")]
         public InputField email, Password;
         public GameObject LogInScreen;
-        public Text PlayerID, WalletAddress;
+        public TextMeshProUGUI PlayerID, WalletAddress;
         public GameObject[] ActiveGamePlay;
-
+        public GameObject PopUpScreen;
+        public Text FailedPopText;
+        public GameObject LoginPanel;
+        public Button OkButton;
 
         public List<UIScreen> UISCREENS
         {
@@ -66,12 +73,33 @@ namespace RedRunner
                 return;
             }
             m_Singleton = this;
+
             Cursor.SetCursor(m_CursorDefaultTexture, Vector2.zero, CursorMode.Auto);
+
+            OkButton.SetButtonAction(() =>
+            {
+                TogglePopUpPanel(false, "");
+            });
         }
 
         void Start()
         {
             Init();
+            CheckForReplayingCondition();
+        }
+
+        void CheckForReplayingCondition()
+        {
+            if (PlayerPrefs.GetInt("ReplayingGame",0) == 1)
+            {
+                OnSignInCompleted(true, "");
+                PlayerPrefs.SetInt("ReplayingGame", 0);
+            }
+            else
+            {
+
+            }
+            
         }
 
         public void Init()
@@ -197,6 +225,7 @@ namespace RedRunner
             }
             else
             {
+                TogglePopUpPanel(true, "email or password is incorrect");
                 Debug.Log("email or password is incorrect");
             }
         }
@@ -209,36 +238,37 @@ namespace RedRunner
             }
             else
             {
-                Debug.Log("email or password is incorrect");
+                TogglePopUpPanel(true, "email or password is incorrect");
+                //Debug.Log("email or password is incorrect");
             }
         }
         public void SignInWithGoogle()
         {
-            if (CheckInputField(email.text) && CheckInputField(Password.text) &&
-                email.text.Contains(".com", System.StringComparison.OrdinalIgnoreCase) && Password.text.Length >= 6)
-            {
-                GoogleAndFirebaseAuth.instance.SignInWithGoogle(OnSignInCompleted);
-            }
+            GoogleAndFirebaseAuth.instance.SignInWithGoogle(OnSignInCompleted);
         }
         void OnSignUpCompleted(bool success, string message)
         {
             if (success)
             {
                 Debug.Log("Sign-up succeeded: " + message);
+                TogglePopUpPanel(true, "Please Now Click On Sign In To Play Game");
             }
             else
             {
-                Debug.LogError("Sign-up failed: " + message);
+                email.text = "";
+                Password.text = "";
+                TogglePopUpPanel(true, "Sign Up Failed" + message);
+                //Debug.LogError("Sign-up failed: " + message);
             }
         }
         void OnSignInCompleted(bool success, string message)
         {
             if (success)
             {
-                Debug.Log("Sign-up succeeded: " + message);
+                Debug.Log("Sign In succeeded: " + message);
                 LogInScreen.SetActive(false);
-                PlayerID.text = "Player#" + StaticStrings.playerlocalid;
-                WalletAddress.text = "Player#" + StaticStrings.walletAddress;
+                PlayerID.text = "" + StaticStrings.UserName;
+                WalletAddress.text = "" + StaticStrings.walletAddress;
                 foreach(GameObject go in ActiveGamePlay)
                 {
                     go.SetActive(true);
@@ -246,8 +276,28 @@ namespace RedRunner
             }
             else
             {
-                Debug.LogError("Sign-up failed: " + message);
+                email.text = "";
+                Password.text = "";
+                TogglePopUpPanel(true, "Sign In Failed : "+ message);
+                //Debug.LogError("Sign In failed: " + message);
             }
+        }
+
+        public void TogglePopUpPanel(bool State, string message = "")
+        {
+            PopUpScreen.SetActive(State);
+            LoginPanel.SetActive(!State);
+            FailedPopText.text = message;
+        }
+
+        public void CopyWalletAdress()
+        {
+#if UNITY_WEBGL
+            GoogleAndFirebaseAuth.instance.CopyText();
+#else
+            GUIUtility.systemCopyBuffer = WalletAddress.text;
+            Debug.Log("Copy wallet Address");
+#endif
         }
     }
 

@@ -11,6 +11,9 @@ using RedRunner.Characters;
 using RedRunner.Collectables;
 using RedRunner.TerrainGeneration;
 using RedRunner.Utilities;
+using UnityEngine.UIElements;
+using UnityEngine.UI;
+using TMPro;
 
 namespace RedRunner
 {
@@ -58,6 +61,20 @@ namespace RedRunner
         /// with this in-house developed callbacks feature, we garantee that the callback will be removed when we don't need it.
         /// </summary>
         public Property<int> m_Coin = new Property<int>(0);
+
+        //Jump Boosters//
+        [Header ("Jump Booster")]
+        public int NumberOfJumpBoosters = 0;
+        public bool IsJumpBoosterActive = false;
+        public UnityEngine.UI.Button JumpBoosterButton;
+        public TextMeshProUGUI JumpBoosterCountText;
+
+        [Header("Speed Booster")]
+        public int NumberOfSpeedBoosters = 0;
+        public bool IsSpeedBoosterActive = false;
+        public UnityEngine.UI.Button SpeedBoosterButton;
+        public TextMeshProUGUI SpeedBoosterCountText;
+
 
 
         #region Getters
@@ -131,6 +148,7 @@ namespace RedRunner
             }
             
         }
+
         public void ChangeSkinWithIndex(int skinIndex)
         {
             m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
@@ -180,6 +198,7 @@ namespace RedRunner
             m_MainCharacter.IsDead.AddEventAndFire(UpdateDeathEvent, this);
             m_StartScoreX = m_MainCharacter.transform.position.x;
             Init();
+            FetchBoosters();
         }
 
         public void Init()
@@ -246,6 +265,7 @@ namespace RedRunner
         {
             m_GameStarted = true;
             ResumeGame();
+            ReactivateJumpBoosterIfAvailable();
         }
 
         public void StopGame()
@@ -270,11 +290,7 @@ namespace RedRunner
         {
             RespawnCharacter(m_MainCharacter);
         }
-        public void ActivateBooster()
-        {
-			Debug.Log("m_boosterActive");
-            m_MainCharacter.BoosterAcitve = true;
-        }
+
 
         public void RespawnCharacter(Character character)
         {
@@ -288,6 +304,68 @@ namespace RedRunner
                 character.Reset();
             }
         }
+
+        //BOOSTER METHODS//
+        void FetchBoosters()
+        {
+            //TO BE REPLACED BY API CALLS IN FUTURE//
+            NumberOfJumpBoosters = 9;
+            UpdateJumpBoosterCount();
+            NumberOfSpeedBoosters = 9;
+            UpdateSpeedBoosterCount();
+        }
+
+        //BOOSTER START//
+        public void ConsumeJumpBooster()
+        {
+            if (NumberOfJumpBoosters > 0)
+            {
+                NumberOfJumpBoosters--;
+                UpdateJumpBoosterCount();
+                JumpBoosterButton.interactable = false;
+                IsJumpBoosterActive = true;
+            }
+        }
+        void UpdateJumpBoosterCount()
+        {
+            JumpBoosterCountText.text = NumberOfJumpBoosters.ToString();
+        }
+        public void ReactivateJumpBoosterIfAvailable()
+        {
+            if (NumberOfJumpBoosters > 0)
+            {
+                JumpBoosterButton.interactable = true;
+            }
+        }
+   
+        public void ConsumeSpeedBooster()
+        {
+            if (NumberOfSpeedBoosters > 0)
+            {
+                NumberOfSpeedBoosters--;
+                UpdateSpeedBoosterCount();
+                SpeedBoosterButton.interactable = false;
+                IsSpeedBoosterActive = true;
+            }
+        }
+        void UpdateSpeedBoosterCount()
+        {
+            SpeedBoosterCountText.text = NumberOfSpeedBoosters.ToString();
+        }
+
+        public void ReactivateSpeedBoosterIfAvailable()
+        {
+            if (NumberOfSpeedBoosters > 0)
+            {
+                SpeedBoosterButton.interactable = true;
+            }
+        }
+
+        public void SpeedBoosterNotAllowed()
+        {
+            SpeedBoosterButton.interactable = false;
+        }
+        //BOOSTERS METHOD END//
 
         public void Reset()
         {
