@@ -294,15 +294,19 @@ namespace RedRunner.Characters
 		{
 			m_InitialPosition = transform.position;
 			m_InitialScale = transform.localScale;
-			m_GroundCheck.OnGrounded += GroundCheck_OnGrounded;
-			m_Skeleton.OnActiveChanged += Skeleton_OnActiveChanged;
             IsDead = new Property<bool>(false);
 			m_ClosingEye = false;
 			m_Guard = false;
 			m_Block = false;
 			m_CurrentFootstepSoundIndex = 0;
-			GameManager.OnReset += GameManager_OnReset;
-		}
+			
+        }
+        private void Start()
+        {
+            m_GroundCheck.OnGrounded += GroundCheck_OnGrounded;
+            m_Skeleton.OnActiveChanged += Skeleton_OnActiveChanged;
+            GameManager.OnReset += GameManager_OnReset;
+        }
 
         void Update ()
 		{
@@ -618,10 +622,13 @@ namespace RedRunner.Characters
 				AudioManager.Singleton.PlayGroundedSound ( m_JumpAndGroundedAudioSource );
 			}
 		}
+        private void OnDisable()
+        {
+            GameManager.OnReset -= GameManager_OnReset;
+        }
+        #endregion
 
-		#endregion
-
-		[System.Serializable]
+        [System.Serializable]
 		public class CharacterDeadEvent : UnityEvent
 		{
 

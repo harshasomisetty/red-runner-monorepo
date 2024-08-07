@@ -8,10 +8,11 @@ public class LeaderboardManager : MonoBehaviour
     public GameObject LeaderBoardCell;
     public Sprite[] Medals, Gifts;
     public List<Cell> cells;
-
+    public GameObject BackButton;
     private void OnEnable()
     {
-        GoogleAndFirebaseAuth.instance.Leadboard_GetAll(GetAllScores);
+        BackButton.SetActive(false);
+        API_Manager.instance.Leadboard_GetAll(GetAllScores);
     }
     private Cell GetCell(int index)
     {
@@ -26,7 +27,8 @@ public class LeaderboardManager : MonoBehaviour
     }
     public void GetAllScores(bool success, List<Root> data)
     {
-        if(success)
+        BackButton.SetActive(true);
+        if (success)
         {
             Debug.Log("Leaderboard Data Success");
             if (data.Count == cells.Count)

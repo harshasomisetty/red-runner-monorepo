@@ -14,6 +14,8 @@ using RedRunner.Utilities;
 using UnityEngine.UIElements;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SocialPlatforms.Impl;
+using System.Text.RegularExpressions;
 
 namespace RedRunner
 {
@@ -178,10 +180,10 @@ namespace RedRunner
                 OnScoreChanged(m_Score, m_HighScore, m_LastScore);
             }
             Debug.Log("Score Submit" + m_Score);
-            if (StaticStrings.playerlocalid != "")
+            if (StaticDataBank.playerlocalid != "")
             {
-                string myscore = m_Score.ToLength();
-                GoogleAndFirebaseAuth.instance.Score_Submit(myscore.ToString(), StaticStrings.playerlocalid, delegate
+                int myscore = ExtractInteger(m_Score.ToLength());
+                API_Manager.instance.Score_Submit(myscore, StaticDataBank.playerlocalid, delegate
                 {
                     Debug.Log(" score submited to server");
                 });
@@ -189,10 +191,20 @@ namespace RedRunner
             yield return new WaitForSecondsRealtime(1.5f);
 
             EndGame();
-            var endScreen = UIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.END_SCREEN);
-            UIManager.Singleton.OpenScreen(endScreen);
+            var endScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.END_SCREEN);
+            GameTemplateUIManager.Singleton.OpenScreen(endScreen);
         }
+        public static int ExtractInteger(string s)
+        {
+            Match match = Regex.Match(s, @"\d+");
 
+            if (match.Success)
+            {
+                return int.Parse(match.Value);
+            }
+
+            throw new InvalidOperationException("No integer found in the string.");
+        }
         private void Start()
         {
             m_MainCharacter.IsDead.AddEventAndFire(UpdateDeathEvent, this);
@@ -204,7 +216,7 @@ namespace RedRunner
         public void Init()
         {
             EndGame();
-            UIManager.Singleton.Init();
+            //UIManager.Singleton.Init();
             StartCoroutine(Load());
         }
 
@@ -225,9 +237,9 @@ namespace RedRunner
 
         IEnumerator Load()
         {
-            var startScreen = UIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.START_SCREEN);
+            var startScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.START_SCREEN);
             yield return new WaitForSecondsRealtime(3f);
-            UIManager.Singleton.OpenScreen(startScreen);
+           // UIManager.Singleton.OpenScreen(startScreen);
         }
 
         void OnApplicationQuit()

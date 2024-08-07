@@ -21,16 +21,15 @@ namespace RedRunner.UI
             {
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 GameManager.Singleton.Reset();
-                var ingameScreen = UIManager.Singleton.GetUIScreen(UIScreenInfo.IN_GAME_SCREEN);
-                UIManager.Singleton.OpenScreen(ingameScreen);
+                var ingameScreen = GameTemplateUIManager.Singleton.GetUIScreen(UIScreenInfo.IN_GAME_SCREEN);
+                GameTemplateUIManager.Singleton.OpenScreen(ingameScreen);
                 GameManager.Singleton.StartGame();
             });
             HomeButton.SetButtonAction(() =>
             {
-                GameManager.Singleton.Reset();
-                GameManager.Singleton.Init();
-                //PlayerPrefs.SetInt("ReplayingGame", 1);
-                //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                //GameManager.Singleton.Reset();
+                //GameManager.Singleton.Init();
+                Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
         }
 

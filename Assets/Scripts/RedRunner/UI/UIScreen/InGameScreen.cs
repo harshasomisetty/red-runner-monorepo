@@ -14,8 +14,8 @@ namespace RedRunner.UI
         {
             PauseButton.SetButtonAction(() =>
             {
-                var pauseScreen = UIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.PAUSE_SCREEN);
-                UIManager.Singleton.OpenScreen(pauseScreen);
+                var pauseScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.PAUSE_SCREEN);
+                GameTemplateUIManager.Singleton.OpenScreen(pauseScreen);
                 GameManager.Singleton.StopGame();
             });
         }

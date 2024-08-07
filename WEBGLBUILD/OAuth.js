@@ -70,7 +70,7 @@ document.addEventListener('UnityReady', function() {
 function sendAuthCodeToUnity(authCode) {
     // Assuming you have a Unity object named 'gameInstance'
     if (gameInstance) {
-        gameInstance.SendMessage('GoogleAndFirebaseAuth', 'OnGoogleSignIn', authCode);
+        gameInstance.SendMessage('API_Manager', 'OnGoogleSignIn', authCode);
     }else {
         console.error("Unity game instance is not yet initialized.");
       }
@@ -143,7 +143,7 @@ function generateCodeChallenge() {
 // and after you've exchanged the code for an access token
 function sendAuthDataToUnity(accessToken) {
     // Assuming you have a Unity object named 'gameInstance'
-    gameInstance.SendMessage('GoogleAndFirebaseAuth', 'OnGoogleSignIn', accessToken);
+    gameInstance.SendMessage('API_Manager', 'OnGoogleSignIn', accessToken);
 }
 function copyToClipboard(text) {
     let str = typeof text === 'number' ? utf8ToString(text) : text;
