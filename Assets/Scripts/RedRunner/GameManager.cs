@@ -148,7 +148,9 @@ namespace RedRunner
             {
                 m_HighScore = 0f;
             }
-            
+            //ChangeSkinWithIndex(0);
+
+
         }
 
         public void ChangeSkinWithIndex(int skinIndex)
@@ -183,9 +185,11 @@ namespace RedRunner
             if (StaticDataBank.playerlocalid != "")
             {
                 int myscore = ExtractInteger(m_Score.ToLength());
-                API_Manager.instance.Score_Submit(myscore, StaticDataBank.playerlocalid, delegate
-                {
-                    Debug.Log(" score submited to server");
+                API_Manager.instance.Score_Submit(myscore, StaticDataBank.playerlocalid, (success, message) => {
+                    if (success)
+                    {
+                        Debug.Log("Score Submited");
+                    }
                 });
             }
             yield return new WaitForSecondsRealtime(1.5f);

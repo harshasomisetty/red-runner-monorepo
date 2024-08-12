@@ -29,6 +29,8 @@ public static class StaticDataBank
     //public static readonly string LogIn = BackendBaseUrl + "auth/login";
     public static readonly string LeaderBoard_Submit = BackendBaseUrl + "leaderboard/addEntry";
     public static readonly string Get_LeaderBoard = BackendBaseUrl + "leaderboard/getLeaderboard";
+    public static readonly string Get_ShopData = BackendBaseUrl + "shop/getShopData?userId=";
+    public static readonly string Get_Inventory = BackendBaseUrl + "gs/getInventory?userId=";
 
 
     #endregion

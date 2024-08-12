@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class LeaderboardManager : MonoBehaviour
 {
@@ -25,7 +24,7 @@ public class LeaderboardManager : MonoBehaviour
             return Instantiate(LeaderBoardCell, cellContainer).GetComponent<Cell>();
         }
     }
-    public void GetAllScores(bool success, List<Root> data)
+    public void GetAllScores(bool success, List<Leaderboard> data)
     {
         BackButton.SetActive(true);
         if (success)
