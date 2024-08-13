@@ -35,6 +35,13 @@ public class LeaderboardManager : MonoBehaviour
                 Debug.Log("Same data as previous");
                 return;
             }
+            foreach(Cell curcell in cells)
+            {
+                if (curcell != null)
+                {
+                    curcell.gameObject.SetActive(false);
+                }
+            }
             cells.Clear();
             for (int i = 0; i < data.Count; i++)
             {
@@ -42,6 +49,7 @@ public class LeaderboardManager : MonoBehaviour
                 cell.name = i.ToString();
                 cell.SetValues(i, Medals, data[i].name, data[i].score, Gifts);
                 cells.Add(cell);
+                cell.gameObject.SetActive(true);
             }
         }
         else
