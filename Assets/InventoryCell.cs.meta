@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/UIManager.cs.meta
+guid: a1bc5d35e86ec9c449e73d3ef9211658
+========
+guid: 1b2bf16eb6c55ff4c9c9afc83a1593ba
+>>>>>>>> farhan/backup-develop:Assets/InventoryCell.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

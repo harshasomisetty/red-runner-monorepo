@@ -17,9 +17,9 @@ public class API_Manager : MonoBehaviour
     public delegate void SignInCallback(bool success, string message);
     public delegate void ScoreSubmit (bool success, string message);
     public delegate void LeaderBoardData (bool success, List<Leaderboard> data);
-    public delegate void GameShopCall (bool success, string data);
+    public delegate void GameShopCall (bool success, GameShop data);
     public delegate void GetImage (bool success, Sprite data);
-    public delegate void GetInventory (bool success, string message);
+    public delegate void GetInventory(bool success, InventoryData.Root data);
     SignInCallback GoogleAuth = null;
 
 
@@ -339,7 +339,7 @@ public class API_Manager : MonoBehaviour
     }
     private IEnumerator Leadboard_Get(LeaderBoardData data)
     {
-        using (UnityWebRequest www = UnityWebRequest.Get(StaticDataBank.Get_LeaderBoard))
+        using (UnityWebRequest www = UnityWebRequest.Get(StaticDataBank.Get_LeaderBoard + StaticDataBank.playerlocalid))
         {
             www.SetRequestHeader("Content-Type", "application/json");
 
@@ -387,9 +387,8 @@ public class API_Manager : MonoBehaviour
             {
                 string jsonResponse = www.downloadHandler.text;
                 Debug.Log(jsonResponse);
-                //GameShop Shop_Data = JsonConvert.DeserializeObject<GameShop>(jsonResponse);
-                //Debug.Log(Shop_Data.boosters.speed_boosters.speed_booster_10.price + " : speed booster price");
-                Call(true, jsonResponse);
+                GameShop gameShop = JsonUtility.FromJson<GameShop>(jsonResponse);
+                Call(true, gameShop);
             }
         }
     }
@@ -473,16 +472,27 @@ public class API_Manager : MonoBehaviour
 
         yield return request.SendWebRequest();
 
+        InventoryData.Root inventoryData;
+
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            getInventory(false, "Failed to Get Inventory");
-            Debug.LogError(request.error);
+            InventoryData.Meta meta = new InventoryData.Meta();
+            meta.page = 1;
+            meta.perPage = 10;
+            meta.totalPages = 1;
+            meta.totalResults = 3;
+            inventoryData.data = null;
+            inventoryData.meta = meta;
+            getInventory(false, inventoryData);
+            Debug.Log(request.error);
         }
         else
         {
             string jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
-            getInventory(true, jsonResponse);
+            inventoryData = JsonConvert.DeserializeObject<InventoryData.Root>(jsonResponse);
+            //Debug.Log(inventory.data[0].item.name);
+            getInventory(true, inventoryData);
         }
     }
 
