@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Cell : MonoBehaviour
+public class LeaderboardCell : MonoBehaviour
 {
     public int CellNumber = 0;
     public TextMeshProUGUI rank;

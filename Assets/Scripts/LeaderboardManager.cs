@@ -6,22 +6,22 @@ public class LeaderboardManager : MonoBehaviour
     public Transform cellContainer;
     public GameObject LeaderBoardCell;
     public Sprite[] Medals, Gifts;
-    public List<Cell> cells;
+    public List<LeaderboardCell> cells;
     public GameObject BackButton;
     private void OnEnable()
     {
         BackButton.SetActive(false);
         API_Manager.instance.Leadboard_GetAll(GetAllScores);
     }
-    private Cell GetCell(int index)
+    private LeaderboardCell GetCell(int index)
     {
         if (index < cellContainer.childCount)
         {
-            return cellContainer.GetChild(index).GetComponent<Cell>();
+            return cellContainer.GetChild(index).GetComponent<LeaderboardCell>();
         }
         else
         {
-            return Instantiate(LeaderBoardCell, cellContainer).GetComponent<Cell>();
+            return Instantiate(LeaderBoardCell, cellContainer).GetComponent<LeaderboardCell>();
         }
     }
     public void GetAllScores(bool success, List<Leaderboard> data)
@@ -35,7 +35,7 @@ public class LeaderboardManager : MonoBehaviour
                 Debug.Log("Same data as previous");
                 return;
             }
-            foreach(Cell curcell in cells)
+            foreach(LeaderboardCell curcell in cells)
             {
                 if (curcell != null)
                 {
@@ -45,7 +45,7 @@ public class LeaderboardManager : MonoBehaviour
             cells.Clear();
             for (int i = 0; i < data.Count; i++)
             {
-                Cell cell = GetCell(i);
+                LeaderboardCell cell = GetCell(i);
                 cell.name = i.ToString();
                 cell.SetValues(i, Medals, data[i].name, data[i].score, Gifts);
                 cells.Add(cell);
