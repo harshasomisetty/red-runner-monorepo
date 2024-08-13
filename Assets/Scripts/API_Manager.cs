@@ -418,13 +418,13 @@ public class API_Manager : MonoBehaviour
             }
             else
             {
-                Debug.Log("A");
                 // Get the downloaded texture
                 Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
 
                 // Convert the texture to a sprite and assign it to the Image component
                 if (texture != null)
                 {
+                    Debug.Log("Texture creating");
                     // Create a sprite from the downloaded texture
                     Sprite sprite = Sprite.Create(
                         texture,
@@ -432,7 +432,6 @@ public class API_Manager : MonoBehaviour
                         new Vector2(0.5f, 0.5f));
 
                     // Set the sprite to the Image component
-                    //previewImage.sprite = sprite;
                     spritecallback(true, sprite);
                 }
             }

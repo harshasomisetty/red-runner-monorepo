@@ -1,8 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+[Serializable]
+public class UIDataConatainer
+{
+    public string boosterName;
+    public TextMeshProUGUI boosterNameText;
+    public Image boosterImage;
+}
+
 
 public class ShopManager : MonoBehaviour
 {
@@ -12,7 +22,10 @@ public class ShopManager : MonoBehaviour
     public TextMeshProUGUI BoosterName;
     public TextMeshProUGUI Description;
     public Image boosterImage;
-    public Dictionary<string, Sprite> spriteDictionary;
+    public List<UIDataConatainer> speedbooster;
+    public List<UIDataConatainer> doublejump;
+    public List<UIDataConatainer> skins;
+    public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
 
 
     public GameShop _gameShop;
@@ -27,44 +40,66 @@ public class ShopManager : MonoBehaviour
         {
             _gameShop = response; 
             Debug.Log("Game Shop Data Fetch");
-            spriteDictionary.Add(_gameShop.boosters.double_jump_boosters.double_jump_3.name, DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_3.imageUrl));
-            spriteDictionary.Add(_gameShop.boosters.double_jump_boosters.double_jump_6.name, DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_6.imageUrl));
-            spriteDictionary.Add(_gameShop.boosters.double_jump_boosters.double_jump_10.name, DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_10.imageUrl));
-            spriteDictionary.Add(_gameShop.boosters.double_jump_boosters.double_jump_999.name, DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_999.imageUrl));
-            spriteDictionary.Add(_gameShop.boosters.speed_boosters.speed_booster_3.name, DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_3.imageUrl));
-            spriteDictionary.Add(_gameShop.boosters.speed_boosters.speed_booster_6.name, DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_6.imageUrl));
-            spriteDictionary.Add(_gameShop.boosters.speed_boosters.speed_booster_10.name, DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_10.imageUrl));
-            spriteDictionary.Add(_gameShop.boosters.speed_boosters.speed_booster_999.name, DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_999.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.alienSkin.name, DownloadImage(_gameShop.skins.alienSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.christmasSkin.name, DownloadImage(_gameShop.skins.christmasSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.halloweenSkin.name, DownloadImage(_gameShop.skins.halloweenSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.polkaDotSkin.name, DownloadImage(_gameShop.skins.polkaDotSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.robotSkin.name, DownloadImage(_gameShop.skins.robotSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.solanaSkin.name, DownloadImage(_gameShop.skins.solanaSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.spaceSkin.name, DownloadImage(_gameShop.skins.spaceSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.thiefSkin.name, DownloadImage(_gameShop.skins.thiefSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.wrestlerSkin.name, DownloadImage(_gameShop.skins.wrestlerSkin.imageUrl));
-            spriteDictionary.Add(_gameShop.skins.zombieSkin.name, DownloadImage(_gameShop.skins.zombieSkin.imageUrl));
+            DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_3.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_3.name, doublejump[0]);
+            DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_6.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_6.name, doublejump[1]);
+            DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_10.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_10.name, doublejump[2]);
+            DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_999.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_999.name, doublejump[3]);
+            DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_3.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_3.name, speedbooster[0]);
+            DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_6.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_6.name, speedbooster[1]);
+            DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_10.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_10.name, speedbooster[2]);
+            DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_999.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_999.name, speedbooster[3]);
+            DownloadImage(_gameShop.skins.alienSkin.imageUrl, _gameShop.skins.alienSkin.name, skins[0]);
+            DownloadImage(_gameShop.skins.christmasSkin.imageUrl, _gameShop.skins.christmasSkin.name, skins[1]);
+            DownloadImage(_gameShop.skins.halloweenSkin.imageUrl, _gameShop.skins.halloweenSkin.name, skins[2]);
+            DownloadImage(_gameShop.skins.polkaDotSkin.imageUrl, _gameShop.skins.polkaDotSkin.name, skins[3]);
+            DownloadImage(_gameShop.skins.robotSkin.imageUrl, _gameShop.skins.robotSkin.name, skins[4]);
+            DownloadImage(_gameShop.skins.solanaSkin.imageUrl, _gameShop.skins.solanaSkin.name, skins[5]);
+            DownloadImage(_gameShop.skins.spaceSkin.imageUrl, _gameShop.skins.spaceSkin.name, skins[6]);
+            DownloadImage(_gameShop.skins.thiefSkin.imageUrl, _gameShop.skins.thiefSkin.name, skins[7]);
+            DownloadImage(_gameShop.skins.wrestlerSkin.imageUrl, _gameShop.skins.wrestlerSkin.name, skins[8]);
+            DownloadImage(_gameShop.skins.zombieSkin.imageUrl, _gameShop.skins.zombieSkin.name, skins[9]);
         }
         else
         {
             Debug.Log("Data failed");
         }
     }
-    Sprite DownloadImage(string imageUrl)
+    //Sprite DownloadImage(string imageUrl)
+    //{
+    //    Sprite get_sprite = null;
+    //    API_Manager.instance.DownloadImage(imageUrl, (success, m_sprite) => {
+    //        if (success)
+    //        {
+    //            m_sprite = get_sprite;
+    //        }
+    //        else
+    //        {
+    //            Debug.Log("Failed to fetch image");
+    //        }
+    //    });
+    //    return get_sprite;
+    //}
+    void DownloadImage(string imageUrl,string imageName,UIDataConatainer data)
     {
-        Sprite mysprite = null;
-        API_Manager.instance.DownloadImage(imageUrl, (success, sprite) => {
+        API_Manager.instance.DownloadImage(imageUrl, (success, m_sprite) => {
             if (success)
             {
-                sprite = mysprite;
+                if (spriteDictionary.ContainsKey(imageName))
+                {
+                    spriteDictionary[imageName] = m_sprite;
+                }
+                else
+                {
+                    spriteDictionary.Add(imageName, m_sprite);
+                }
+                data.boosterNameText.text = imageName;
+                data.boosterImage.sprite = m_sprite;
             }
             else
             {
                 Debug.Log("Failed to fetch image");
             }
         });
-        return mysprite;
     }
     public void GetSkinsDetails(int index)
     {
@@ -115,7 +150,7 @@ public class ShopManager : MonoBehaviour
         }
     }
     
-    public void GetBoostersDetails(int index)
+    public void GetSpeedBoostersDetails(int index)
     {
         DetailPanel.SetActive(true);
         switch (index)
@@ -136,19 +171,27 @@ public class ShopManager : MonoBehaviour
                 GameShop.Booster speed3 = _gameShop.boosters.speed_boosters.speed_booster_999;
                 ShowDetailPanel(speed3);
                 break;
-            case 4:
+
+        }
+    }
+    public void GetJumpBoostersDetails(int index)
+    {
+        DetailPanel.SetActive(true);
+        switch (index)
+        {
+            case 0:
                 GameShop.Booster jump = _gameShop.boosters.double_jump_boosters.double_jump_3;
                 ShowDetailPanel(jump);
                 break;
-            case 5:
+            case 1:
                 GameShop.Booster jump1 = _gameShop.boosters.double_jump_boosters.double_jump_6;
                 ShowDetailPanel(jump1);
                 break;
-            case 6:
+            case 2:
                 GameShop.Booster jump2 = _gameShop.boosters.double_jump_boosters.double_jump_10;
                 ShowDetailPanel(jump2);
                 break;
-            case 7:
+            case 3:
                 GameShop.Booster jump3 = _gameShop.boosters.double_jump_boosters.double_jump_999;
                 ShowDetailPanel(jump3);
                 break;
@@ -158,14 +201,16 @@ public class ShopManager : MonoBehaviour
 
     public void ShowDetailPanel(GameShop.Skin skin)
     {
-        //DownloadImage(skin.imageUrl);
+        boosterImage.sprite = spriteDictionary[skin.name];
+        boosterImage.SetNativeSize();
         BoosterName.text = skin.name;
         Description.text = skin.description;
         attribute.text = skin.attributes[0].traitType + ":" + skin.attributes[0].value;
     }
     public void ShowDetailPanel(GameShop.Booster booster)
     {
-        //DownloadImage(booster.imageUrl);
+        boosterImage.sprite = spriteDictionary[booster.name];
+        boosterImage.SetNativeSize();
         BoosterName.text = booster.name;
         Description.text = booster.description;
         attribute.text = booster.attributes[0].traitType + ":" + booster.attributes[0].value;
