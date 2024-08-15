@@ -1,14 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
     #region FeatureScreens
+    [Header("Detail Panel UI")]
+    public GameObject DetailPanel;
+    public TextMeshProUGUI attribute;
+    public TextMeshProUGUI BoosterName;
+    public TextMeshProUGUI Description;
+    public Image boosterImage;
+
     [Header("Features Screen")]
     public GameObject FeaturesScreen;
     public void ToggleFeaturesScreen(bool State)
@@ -37,11 +42,11 @@ public class UIManager : MonoBehaviour
             for (int j = 0; j < FeatureScreenButtons.Length; j++)
             {
                 if (NormalFeatureButtonSprite != null)
-                    FeatureScreenButtons[j].GetComponent<UnityEngine.UI.Image>().sprite = NormalFeatureButtonSprite;
+                    FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
                 else
-                    FeatureScreenButtons[j].GetComponent<UnityEngine.UI.Image>().sprite = NormalFeatureButtonSprite;
+                    FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
             }
-            FeatureScreenButtons[i].GetComponent<UnityEngine.UI.Image>().sprite = HighlightedFeatureButtonSprite;
+            FeatureScreenButtons[i].GetComponent<Image>().sprite = HighlightedFeatureButtonSprite;
             CloseAllFeatureWindows();
             LaunchFeatureWindow(i);
         }
@@ -81,11 +86,11 @@ public class UIManager : MonoBehaviour
             for (int j = 0; j < ShopCategoryButtons.Length; j++)
             {
                 if (NormalShopCateogyButtonSprite != null)
-                    ShopCategoryButtons[j].GetComponent<UnityEngine.UI.Image>().sprite = NormalFeatureButtonSprite;
+                    ShopCategoryButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
                 else
-                    ShopCategoryButtons[j].GetComponent<UnityEngine.UI.Image>().sprite = HighlightedShopCategoryButtonSprite;
+                    ShopCategoryButtons[j].GetComponent<Image>().sprite = HighlightedShopCategoryButtonSprite;
             }
-            ShopCategoryButtons[i].GetComponent<UnityEngine.UI.Image>().sprite = HighlightedShopCategoryButtonSprite;
+            ShopCategoryButtons[i].GetComponent<Image>().sprite = HighlightedShopCategoryButtonSprite;
             CloseAllShopVerticals();
             LaunchShopVertical(i);
         }
