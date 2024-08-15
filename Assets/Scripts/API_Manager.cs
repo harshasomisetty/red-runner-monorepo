@@ -20,6 +20,7 @@ public class API_Manager : MonoBehaviour
     public delegate void GameShopCall (bool success, GameShop data);
     public delegate void GetImage (bool success, Sprite data);
     public delegate void GetInventory(bool success, InventoryData.Root data);
+    public delegate void MintingNft(bool success, string message);
     SignInCallback GoogleAuth = null;
 
 
@@ -295,6 +296,8 @@ public class API_Manager : MonoBehaviour
 
                 StaticDataBank.jwttoken = jwttoken;
 
+                //Debug.Log("jwttoken : " + jwttoken);
+
                 signUp(true, "SuccessFully Loged In");
             }
         }
@@ -313,7 +316,7 @@ public class API_Manager : MonoBehaviour
         form.AddField("userId", localId);
 
 
-        using (UnityWebRequest www = UnityWebRequest.Post(StaticDataBank.LeaderBoard_Submit, form))
+        using (UnityWebRequest www = UnityWebRequest.Post(StaticDataBank.LeaderBoard_Submit + StaticDataBank.playerlocalid, form))
         {
             www.SetRequestHeader("Content-Type", "application/json");
             www.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
@@ -440,15 +443,15 @@ public class API_Manager : MonoBehaviour
     #endregion
 
     #region Inventory
-    public void GetInvectory(GetInventory getInventory)
+    public void GetInvectory(GetInventory getInventory,int pageNumber)
     {
-        StartCoroutine(Get_Inventory(getInventory));
+        StartCoroutine(Get_Inventory(getInventory, pageNumber));
     }
-    private IEnumerator Get_Inventory(GetInventory getInventory)
+    private IEnumerator Get_Inventory(GetInventory getInventory,int page_Number)
     {
         var userData = new
         {
-            pageNumber = 1,
+            pageNumber = page_Number,
             types = "UniqueAsset,Currency",
             forSale = false
         };
@@ -476,6 +479,7 @@ public class API_Manager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             inventoryData.data = null;
+            inventoryData.meta = null;
             getInventory(false, inventoryData);
             Debug.Log(request.error);
         }
@@ -486,6 +490,52 @@ public class API_Manager : MonoBehaviour
             inventoryData = JsonConvert.DeserializeObject<InventoryData.Root>(jsonResponse);
             //Debug.Log(inventory.data[0].item.name);
             getInventory(true, inventoryData);
+        }
+    }
+
+    #endregion
+
+    #region Minting API
+
+    public void MintNft(string mintId, MintingNft ismint)
+    {
+        StartCoroutine(Mint_Nft(mintId, ismint));
+    }
+    private IEnumerator Mint_Nft(string mintId, MintingNft ismint)
+    {
+        var userData = new
+        {
+            itemId = mintId
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.Mint + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            ismint(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            ismint(true, jsonResponse);
         }
     }
 

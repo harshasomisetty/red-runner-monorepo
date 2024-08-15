@@ -1,18 +1,73 @@
 using System.Collections.Generic;
-using UnityEditor.VersionControl;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
+    public static InventoryManager Instance;
+
+
     public GameObject inventoryCell;
-    public Transform cellContainer;
+    public Transform speedContainer;
+    public Transform doubleJumpContainer;
+    public Transform skinsContainer;
+    public Transform currencyContainer;
     public List<InventoryCell> cells;
+    public List<int> SpeedBoosterIndex;
+    public List<int> DoubleJumpIndex;
+    public List<int> SkinsIndex;
+    public List<int> Currencies;
     public GameObject BackButton;
+
+    [Header("Detail Panel UI")]
+    public GameObject DetailPanel;
+    public TextMeshProUGUI attribute;
+    public TextMeshProUGUI BoosterName;
+    public TextMeshProUGUI Description;
+    public Image boosterImage;
+    public Button MarketPlace;
+
+
+    public List<InventoryData.Root> m_data;
+
+    int current_page = 1;
+    public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
+
+    private void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+    }
     private void OnEnable()
     {
-        API_Manager.instance.GetInvectory(GetInventory_Data);
+        CheckInventoryDataForMultiplePages();
     }
-    private InventoryCell GetCell(int index)
+    bool dataFetchCompleted = false;
+    public void CheckInventoryDataForMultiplePages()
+    {
+        if (m_data.Count == 0 ||m_data[0].meta.totalPages >= current_page)
+        {
+            API_Manager.instance.GetInvectory(Get_InventoryData, current_page++);
+        }
+        else
+        {
+            dataFetchCompleted = true;
+            GetInventory_Data(dataFetchCompleted, m_data[0]);
+        }
+    }
+    public void Get_InventoryData(bool success, InventoryData.Root data)
+    {
+        if (success)
+        {
+            Debug.Log("Number of Call Backs");
+            m_data.Add(data);
+            CheckInventoryDataForMultiplePages();
+        }
+    }
+    private InventoryCell GetCell(int index,Transform cellContainer)
     {
         if (index < cellContainer.childCount)
         {
@@ -43,11 +98,37 @@ public class InventoryManager : MonoBehaviour
             cells.Clear();
             for (int i = 0; i < data.data.Count; i++)
             {
-                InventoryCell cell = GetCell(i);
-                cell.name = i.ToString();
-                cell.SetValues(data.data[i].item, GetInventoryItemImage(data.data[i].item.imageUrl));
+                InventoryCell cell = null;
+                if (data.data[i].type.Contains("UniqueAsset"))
+                {
+                    if (data.data[i].item.collection.id == "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14")
+                    {
+                        SpeedBoosterIndex.Add(i);
+                        cell = GetCell(SpeedBoosterIndex[SpeedBoosterIndex.Count-1], speedContainer);
+                    }
+                    else if(data.data[i].item.collection.id == "0b9d2116-b3a2-4452-affb-03282313ab77")
+                    {
+                        DoubleJumpIndex.Add(i);
+                        cell = GetCell(DoubleJumpIndex[DoubleJumpIndex.Count - 1], doubleJumpContainer);
+                    }
+                    else if (data.data[i].item.collection.id == "36399a18-941c-4c18-bb0d-8cc2aaaa8b06")
+                    {
+                        SkinsIndex.Add(i);
+                        cell = GetCell(SkinsIndex[SkinsIndex.Count - 1], skinsContainer);
+                    }
+                    cell.name = data.data[i].item.name;
+                }
+                else if (data.data[i].type.Contains("Currency"))
+                {
+                    Currencies.Add(i);
+                    cell = GetCell(Currencies[Currencies.Count - 1], currencyContainer);
+                }
+                string dataSetName = data.data[i].item.name;
+                cell.name = dataSetName;
+                //cell.SetValues(i, dataSetName, );
                 cells.Add(cell);
                 cell.gameObject.SetActive(true);
+                GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, i);
             }
         }
         else
@@ -55,16 +136,68 @@ public class InventoryManager : MonoBehaviour
             Debug.Log("Inventory data failed");
         }
     }
-    Sprite GetInventoryItemImage(string url)
+    void GetInventoryItemImage(string url, string datasetname, InventoryCell cell, int index)
     {
-        Sprite sprit = null;
+        if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
+        {
+            cell.SetValues(index, datasetname, null);
+            return;
+        }
         API_Manager.instance.DownloadImage(url, (success, sprite) =>
         {
             if (success)
             {
-                sprit = sprite;
+                Sprite m_sprite = sprite;
+                if (spriteDictionary.ContainsKey(datasetname))
+                {
+                    spriteDictionary[datasetname] = m_sprite;
+                }
+                else
+                {
+                    spriteDictionary.Add(datasetname, m_sprite);
+                }
             }
+            cell.SetValues(index, datasetname, spriteDictionary[datasetname]);
         });
-        return sprit;
+    }
+    public void ShowDetailsPanel(int dataindex)
+    {
+        Description.text = m_data[0].data[dataindex].item.description;
+        BoosterName.text = m_data[0].data[dataindex].item.name;
+        Debug.Log(m_data[0].data[dataindex].item.status);
+        if (spriteDictionary.ContainsKey(m_data[0].data[dataindex].item.name))
+        {
+            boosterImage.sprite = spriteDictionary[m_data[0].data[dataindex].item.name];
+            boosterImage.SetNativeSize();
+        }
+        DetailPanel.SetActive(true);
+    }
+
+    public string getvalueofspeedbooster(int getvalue)
+    {
+        return m_data[0].data[getvalue].item.attributes[0].value;
+    }
+    public Sprite getspriteofspeedbooster(int getvalue)
+    {
+        Sprite sprite = spriteDictionary[m_data[0].data[getvalue].item.name];
+        return sprite;
+    }
+    public string getvalueofdoublejumbbooster(int getvalue)
+    {
+        return m_data[0].data[getvalue].item.attributes[0].value;
+    }
+    public Sprite getspriteofdoublejumbbooster(int getvalue)
+    {
+        Sprite sprite = spriteDictionary[m_data[0].data[getvalue].item.name];
+        return sprite;
+    }
+    public Sprite getspriteofskinbooster(int getvalue)
+    {
+        Sprite sprite = spriteDictionary[m_data[0].data[getvalue].item.name];
+        return sprite;
+    }
+    public string getskinamebyindex(int getvalue)
+    {
+        return m_data[0].data[getvalue].item.attributes[0].value;
     }
 }

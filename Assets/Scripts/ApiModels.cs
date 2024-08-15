@@ -63,5 +63,14 @@ public struct InventoryData
     public struct Root
     {
         public List<Datum> data;
+        public Meta meta;
+    }
+    [Serializable]
+    public class Meta
+    {
+        public int page;
+        public int perPage;
+        public int totalPages;
+        public int totalResults;
     }
 }

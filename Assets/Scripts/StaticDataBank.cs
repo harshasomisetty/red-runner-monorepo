@@ -28,10 +28,11 @@ public static class StaticDataBank
     public static readonly string registerOrLogin = BackendBaseUrl + "auth/registerOrLogin";
     //public static readonly string Register = BackendBaseUrl + "auth/register";
     //public static readonly string LogIn = BackendBaseUrl + "auth/login";
-    public static readonly string LeaderBoard_Submit = BackendBaseUrl + "leaderboard/addEntry";
+    public static readonly string LeaderBoard_Submit = BackendBaseUrl + "leaderboard/addEntry?userId=";
     public static readonly string Get_LeaderBoard = BackendBaseUrl + "leaderboard/getLeaderboard?userId=";
     public static readonly string Get_ShopData = BackendBaseUrl + "shop/getShopData?userId=";
     public static readonly string Get_Inventory = BackendBaseUrl + "gs/getInventory?userId=";
+    public static readonly string Mint = BackendBaseUrl + "gs/mintAsset?userId=";
 
 
     #endregion
