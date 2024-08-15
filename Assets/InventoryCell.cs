@@ -14,7 +14,7 @@ public class InventoryCell : MonoBehaviour
     {
         Name.text = items.name;
         Description.text = items.description;
-        Type.text=items.collection.name;
+        //Type.text=items.collection.name;
         BoosterImage.sprite = _boosterImage;
     }
 }

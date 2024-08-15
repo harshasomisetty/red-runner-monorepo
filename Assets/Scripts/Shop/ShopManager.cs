@@ -107,46 +107,45 @@ public class ShopManager : MonoBehaviour
         switch (index)
         {
             case 0:
-                GameShop.Skin zombieSkin = _gameShop.skins.zombieSkin;
-                ShowDetailPanel(zombieSkin);
-                break;
-            case 1:
                 GameShop.Skin alienSkin = _gameShop.skins.alienSkin;
                 ShowDetailPanel(alienSkin);
                 break;
-            case 2:
-                GameShop.Skin robotSkin = _gameShop.skins.robotSkin;
-                ShowDetailPanel(robotSkin);
-                break;
-            case 3:
-                GameShop.Skin spaceSkin = _gameShop.skins.spaceSkin;
-                ShowDetailPanel(spaceSkin);
-                break;
-            case 4:
+            case 1:
                 GameShop.Skin christmasSkin = _gameShop.skins.christmasSkin;
                 ShowDetailPanel(christmasSkin);
+                break;
+            case 2:
+                GameShop.Skin halloweenSkin = _gameShop.skins.halloweenSkin;
+                ShowDetailPanel(halloweenSkin);
+                break;
+            case 3:
+                GameShop.Skin polkaDotSkin = _gameShop.skins.polkaDotSkin;
+                ShowDetailPanel(polkaDotSkin);
+                break;
+            case 4:
+                GameShop.Skin robotSkin = _gameShop.skins.robotSkin;
+                ShowDetailPanel(robotSkin);
                 break;
             case 5:
                 GameShop.Skin solanaSkin = _gameShop.skins.solanaSkin;
                 ShowDetailPanel(solanaSkin);
                 break;
             case 6:
-                GameShop.Skin halloweenSkin = _gameShop.skins.halloweenSkin;
-                ShowDetailPanel(halloweenSkin);
+                GameShop.Skin spaceSkin = _gameShop.skins.spaceSkin;
+                ShowDetailPanel(spaceSkin);
                 break;
             case 7:
-                GameShop.Skin polkaDotSkin = _gameShop.skins.polkaDotSkin;
-                ShowDetailPanel(polkaDotSkin);
-                break;
-            case 8:
                 GameShop.Skin thiefSkin = _gameShop.skins.thiefSkin;
                 ShowDetailPanel(thiefSkin);
                 break;
-            case 9:
+            case 8:
                 GameShop.Skin wrestlerSkin = _gameShop.skins.wrestlerSkin;
                 ShowDetailPanel(wrestlerSkin);
                 break;
-
+            case 9:
+                GameShop.Skin zombieSkin = _gameShop.skins.zombieSkin;
+                ShowDetailPanel(zombieSkin);
+                break;
         }
     }
     
