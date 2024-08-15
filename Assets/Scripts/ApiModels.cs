@@ -28,13 +28,6 @@ public struct InventoryData
     public struct Collection
     {
         public string id;
-        public string name;
-        public string description;
-        public string environment;
-        public string imageUrl;
-        public bool imported;
-        public string mintAddress;
-        public object created;
     }
     [Serializable]
     public struct Datum
@@ -52,34 +45,23 @@ public struct InventoryData
         public string symbol;
         public Collection collection;
         public long? created;
+        public string itemId;
         public List<Attribute> attributes;
         public string description;
-        public string environment ;
-        public bool? escrow ;
-        public string imageUrl ;
-        public bool? imported ;
-        public object priceCents ;
-        public string status ;
-        public Owner owner ;
-    }
-    [Serializable]
-    public struct Meta
-    {
-        public int page ;
-        public int perPage ;
-        public int totalPages ;
-        public int totalResults ;
+        public string environment;
+        public string imageUrl;
+        public string status;
+        public Owner owner;
     }
     [Serializable]
     public struct Owner
     {
-        public string address ;
-        public string referenceId ;
+        public string address;
+        public string referenceId;
     }
     [Serializable]
     public struct Root
     {
-        public List<Datum> data ;
-        public Meta meta ;
+        public List<Datum> data;
     }
 }

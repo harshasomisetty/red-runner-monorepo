@@ -475,13 +475,7 @@ public class API_Manager : MonoBehaviour
 
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            InventoryData.Meta meta = new InventoryData.Meta();
-            meta.page = 1;
-            meta.perPage = 10;
-            meta.totalPages = 1;
-            meta.totalResults = 3;
             inventoryData.data = null;
-            inventoryData.meta = meta;
             getInventory(false, inventoryData);
             Debug.Log(request.error);
         }
