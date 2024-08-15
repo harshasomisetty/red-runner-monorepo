@@ -7,14 +7,23 @@ public class InventoryCell : MonoBehaviour
 
     public Image BoosterImage;
     public TextMeshProUGUI Name;
-    public TextMeshProUGUI Description;
-    public TextMeshProUGUI Type;
-    public TextMeshProUGUI Price;
-    public void SetValues(InventoryData.Item items, Sprite _boosterImage)
+    public Button ShowPanelButton;
+    public int DataIndex;
+    //public TextMeshProUGUI Description;
+    public void SetValues(int dataIndex,string assetname, Sprite _boosterImage)
     {
-        Name.text = items.name;
-        Description.text = items.description;
+        Name.text = assetname;
+        //Description.text = items.description;
         //Type.text=items.collection.name;
         BoosterImage.sprite = _boosterImage;
+        DataIndex = dataIndex;
+        ShowPanelButton.onClick.RemoveAllListeners();
+        ShowPanelButton.onClick.AddListener(delegate {
+            GetDataFromMangertoDisplay(dataIndex);
+        });
+    }
+    public void GetDataFromMangertoDisplay(int index)
+    {
+        InventoryManager.Instance.ShowDetailsPanel(index);
     }
 }

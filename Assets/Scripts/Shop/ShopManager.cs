@@ -1,3 +1,4 @@
+using RedRunner.TerrainGeneration;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,12 +23,18 @@ public class ShopManager : MonoBehaviour
     public TextMeshProUGUI BoosterName;
     public TextMeshProUGUI Description;
     public Image boosterImage;
+    public Button MintButton;
+    public GameObject Blocker;
+
+
     public List<UIDataConatainer> speedbooster;
     public List<UIDataConatainer> doublejump;
     public List<UIDataConatainer> skins;
+
+
+
+
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
-
-
     public GameShop _gameShop;
 
     private void OnEnable()
@@ -156,19 +163,19 @@ public class ShopManager : MonoBehaviour
         {
             case 0:
                 GameShop.Booster speed = _gameShop.boosters.speed_boosters.speed_booster_3;
-                ShowDetailPanel(speed);
+                ShowDetailPanel(speed, "speed_booster_3");
                 break;
             case 1:
                 GameShop.Booster speed1 = _gameShop.boosters.speed_boosters.speed_booster_6;
-                ShowDetailPanel(speed1);
+                ShowDetailPanel(speed1, "speed_booster_6");
                 break;
             case 2:
                 GameShop.Booster speed2 = _gameShop.boosters.speed_boosters.speed_booster_10;
-                ShowDetailPanel(speed2);
+                ShowDetailPanel(speed2, "speed_booster_10");
                 break;
             case 3:
                 GameShop.Booster speed3 = _gameShop.boosters.speed_boosters.speed_booster_999;
-                ShowDetailPanel(speed3);
+                ShowDetailPanel(speed3, "speed_booster_999");
                 break;
 
         }
@@ -180,19 +187,19 @@ public class ShopManager : MonoBehaviour
         {
             case 0:
                 GameShop.Booster jump = _gameShop.boosters.double_jump_boosters.double_jump_3;
-                ShowDetailPanel(jump);
+                ShowDetailPanel(jump, "double_jump_3");
                 break;
             case 1:
                 GameShop.Booster jump1 = _gameShop.boosters.double_jump_boosters.double_jump_6;
-                ShowDetailPanel(jump1);
+                ShowDetailPanel(jump1, "double_jump_6");
                 break;
             case 2:
                 GameShop.Booster jump2 = _gameShop.boosters.double_jump_boosters.double_jump_10;
-                ShowDetailPanel(jump2);
+                ShowDetailPanel(jump2, "double_jump_10");
                 break;
             case 3:
                 GameShop.Booster jump3 = _gameShop.boosters.double_jump_boosters.double_jump_999;
-                ShowDetailPanel(jump3);
+                ShowDetailPanel(jump3, "double_jump_999");
                 break;
 
         }
@@ -200,19 +207,43 @@ public class ShopManager : MonoBehaviour
 
     public void ShowDetailPanel(GameShop.Skin skin)
     {
-        boosterImage.sprite = spriteDictionary[skin.name];
+        if (spriteDictionary.ContainsKey(skin.name))
+            boosterImage.sprite = spriteDictionary[skin.name];
         boosterImage.SetNativeSize();
         BoosterName.text = skin.name;
         Description.text = skin.description;
         attribute.text = skin.attributes[0].traitType + ":" + skin.attributes[0].value;
+        Minting(skin.attributes[0].value);
     }
-    public void ShowDetailPanel(GameShop.Booster booster)
+    public void ShowDetailPanel(GameShop.Booster booster, string mintid)
     {
-        boosterImage.sprite = spriteDictionary[booster.name];
+        if (spriteDictionary.ContainsKey(booster.name))
+            boosterImage.sprite = spriteDictionary[booster.name];
         boosterImage.SetNativeSize();
         BoosterName.text = booster.name;
         Description.text = booster.description;
         attribute.text = booster.attributes[0].traitType + ":" + booster.attributes[0].value;
+        Minting(mintid);
     }
-    
+    public void Minting(string MintID)
+    {
+        MintButton.gameObject.SetActive(true);
+        MintButton.onClick.RemoveAllListeners();
+        MintButton.onClick.AddListener(delegate
+        {
+            MintNFT(MintID);
+        });
+    }
+    public void MintNFT(string itemName)
+    {
+        Blocker.SetActive(true);
+        API_Manager.instance.MintNft(itemName, (success, message) =>
+        {
+            Blocker.SetActive(false);
+            if (success)
+            {
+                Debug.Log("NFT  : " + message);
+            }
+        });
+    }
 }

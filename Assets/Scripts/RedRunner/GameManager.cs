@@ -148,14 +148,13 @@ namespace RedRunner
             {
                 m_HighScore = 0f;
             }
-            //ChangeSkinWithIndex(0);
-
-
+            string SkinEquipped = PlayerPrefs.GetString("SkinEquipped");
+            ChangeSkinWithIndex(SkinEquipped);
         }
 
-        public void ChangeSkinWithIndex(int skinIndex)
+        public void ChangeSkinWithIndex(string _SkinEquipped)
         {
-            m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
+            m_MainCharacter.Skeleton.ChangeCharacterSkin(_SkinEquipped, CharacterSkins);
         }
 
         void UpdateDeathEvent(bool isDead)
@@ -324,13 +323,43 @@ namespace RedRunner
         //BOOSTER METHODS//
         void FetchBoosters()
         {
-            //TO BE REPLACED BY API CALLS IN FUTURE//
-            NumberOfJumpBoosters = 9;
-            UpdateJumpBoosterCount();
-            NumberOfSpeedBoosters = 9;
-            UpdateSpeedBoosterCount();
+            bool FoundSpeedBoosters = false;
+            if (PlayerPrefs.GetInt("SpeedBoostersEquipped") != 0)
+            {
+                FoundSpeedBoosters = true;
+            }
+            bool FoundJumpBoosters = false;
+            if (PlayerPrefs.GetInt("JumpBoostersEquipped") != 0)
+            {
+                FoundJumpBoosters = true;
+            }
+            if (FoundSpeedBoosters)
+            {
+                NumberOfSpeedBoosters = PlayerPrefs.GetInt("SpeedBoostersEquipped");
+                UpdateSpeedBoosterCount();
+            }
+            else
+            {
+                KillSpeedBoosters();
+            }
+            if (FoundJumpBoosters)
+            {
+                NumberOfJumpBoosters = PlayerPrefs.GetInt("JumpBoostersEquipped"); ;
+                UpdateJumpBoosterCount();
+            }
+            else
+            {
+                KillJumpBoosters();
+            }
         }
-
+        void KillSpeedBoosters()
+        {
+            SpeedBoosterButton.gameObject.SetActive(false);
+        }
+        void KillJumpBoosters()
+        {
+            JumpBoosterButton.gameObject.SetActive(false);
+        }
         //BOOSTER START//
         public void ConsumeJumpBooster()
         {

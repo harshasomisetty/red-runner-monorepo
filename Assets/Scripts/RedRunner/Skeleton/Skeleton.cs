@@ -93,8 +93,42 @@ namespace RedRunner
 				}
 			}
 		}
-        public void ChangeCharacterSkin(int skinIndex, CharacterSkins character)
+        public void ChangeCharacterSkin(string SkinName, CharacterSkins character)
         {
+            int skinIndex = 0;
+            switch (SkinName)
+            {
+                case "halloweenSkin":
+                    skinIndex = 3;
+                    break;
+                case "alienSkin":
+                    skinIndex = 4;
+                    break;
+                case "christmasSkin":
+                    skinIndex = 5;
+                    break;
+                case "polkaDotSkin":
+                    skinIndex = 6;
+                    break;
+                case "robotSkin":
+                    skinIndex = 7;
+                    break;
+                case "solanaSkin":
+                    skinIndex = 8;
+                    break;
+                case "spaceSkin":
+                    skinIndex = 9;
+                    break;
+                case "thiefSkin":
+                    skinIndex = 10;
+                    break;
+                case "wrestlerSkin":
+                    skinIndex = 11;
+                    break;
+                case "zombieSkin":
+                    skinIndex = 12;
+                    break;
+            }
             m_Body.GetComponent<SpriteRenderer>().sprite = character.Skins[skinIndex].Body;
             m_LeftEye.GetComponent<SpriteRenderer>().sprite = character.Skins[skinIndex].Eye;
             m_LeftArm.GetComponent<SpriteRenderer>().sprite = character.Skins[skinIndex].LeftArm;
@@ -105,7 +139,6 @@ namespace RedRunner
             m_RightFoot.GetComponent<SpriteRenderer>().sprite = character.Skins[skinIndex].RightFoot;
             m_RightHand.GetComponent<SpriteRenderer>().sprite = character.Skins[skinIndex].RightHand;
         }
-
         #endregion
 
     }
