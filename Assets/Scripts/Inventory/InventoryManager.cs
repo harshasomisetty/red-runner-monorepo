@@ -43,13 +43,29 @@ public class InventoryManager : MonoBehaviour
     }
     private void OnEnable()
     {
+        ClearDataToUpdate();
         CheckInventoryDataForMultiplePages();
     }
     private void OnDisable()
     {
-        m_data.Clear();
         dataFetchCompleted = false;
         current_page = 1;
+    }
+    public void ClearDataToUpdate()
+    {
+        foreach (InventoryCell curcell in cells)
+        {
+            if (curcell != null)
+            {
+                curcell.gameObject.SetActive(false);
+            }
+        }
+        SpeedBoosterIndex.Clear();
+        DoubleJumpIndex.Clear();
+        SkinsIndex.Clear();
+        Currencies.Clear();
+        cells.Clear();
+        m_data.Clear();
     }
     bool dataFetchCompleted = false;
     public void CheckInventoryDataForMultiplePages()
@@ -89,14 +105,7 @@ public class InventoryManager : MonoBehaviour
         if (success)
         {
             Debug.Log("Inventory Data Success");
-            foreach (InventoryCell curcell in cells)
-            {
-                if (curcell != null)
-                {
-                    curcell.gameObject.SetActive(false);
-                }
-            }
-            cells.Clear();
+            
             for (int i = 0; i < data.data.Count; i++)
             {
                 InventoryCell cell = null;
@@ -105,28 +114,27 @@ public class InventoryManager : MonoBehaviour
                     if (data.data[i].item.collection.id == "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14")
                     {
                         SpeedBoosterIndex.Add(i);
-                        cell = GetCell(SpeedBoosterIndex[SpeedBoosterIndex.Count-1], speedContainer);
+                        cell = GetCell(SpeedBoosterIndex.Count - 1, speedContainer);
                     }
                     else if(data.data[i].item.collection.id == "0b9d2116-b3a2-4452-affb-03282313ab77")
                     {
                         DoubleJumpIndex.Add(i);
-                        cell = GetCell(DoubleJumpIndex[DoubleJumpIndex.Count - 1], doubleJumpContainer);
+                        cell = GetCell(DoubleJumpIndex.Count - 1, doubleJumpContainer);
                     }
                     else if (data.data[i].item.collection.id == "36399a18-941c-4c18-bb0d-8cc2aaaa8b06")
                     {
                         SkinsIndex.Add(i);
-                        cell = GetCell(SkinsIndex[SkinsIndex.Count - 1], skinsContainer);
+                        cell = GetCell(SkinsIndex.Count - 1, skinsContainer);
                     }
                     cell.name = data.data[i].item.name;
                 }
                 else if (data.data[i].type.Contains("Currency"))
                 {
                     Currencies.Add(i);
-                    cell = GetCell(Currencies[Currencies.Count - 1], currencyContainer);
+                    cell = GetCell(Currencies.Count - 1, currencyContainer);
                 }
                 string dataSetName = data.data[i].item.name;
                 cell.name = dataSetName;
-                //cell.SetValues(i, dataSetName, );
                 cells.Add(cell);
                 cell.gameObject.SetActive(true);
                 GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, i);
