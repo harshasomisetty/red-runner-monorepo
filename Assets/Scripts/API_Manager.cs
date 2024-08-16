@@ -309,31 +309,41 @@ public class API_Manager : MonoBehaviour
     {
         StartCoroutine(Leadboard_SubmitScore(score, localId, submit));
     }
-    private IEnumerator Leadboard_SubmitScore(int score, string localId, ScoreSubmit submit)
+    private IEnumerator Leadboard_SubmitScore(int m_score, string localId, ScoreSubmit submit)
     {
-        WWWForm form = new WWWForm();
-        form.AddField("score", score.ToString());
-        form.AddField("userId", localId);
-
-
-        using (UnityWebRequest www = UnityWebRequest.Post(StaticDataBank.LeaderBoard_Submit + StaticDataBank.playerlocalid, form))
+        var userData = new
         {
-            www.SetRequestHeader("Content-Type", "application/json");
-            www.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+            score = m_score
+        };
 
-            yield return www.SendWebRequest();
+        string userDatajson = JsonConvert.SerializeObject(userData);
 
-            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-            {
-                submit(false, "Failed to submit score");
-                Debug.LogError(www.error);
-            }
-            else
-            {
-                string jsonResponse = www.downloadHandler.text;
-                Debug.Log(jsonResponse);
-                submit(true, "Successfully to submit score");
-            }
+        string url = StaticDataBank.LeaderBoard_Submit + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+        
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            submit(false, "Failed to submit score");
+            Debug.LogError(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            submit(true, "Successfully to submit score");
         }
     }
     public void Leadboard_GetAll(LeaderBoardData data)
