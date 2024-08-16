@@ -45,6 +45,12 @@ public class InventoryManager : MonoBehaviour
     {
         CheckInventoryDataForMultiplePages();
     }
+    private void OnDisable()
+    {
+        m_data.Clear();
+        dataFetchCompleted = false;
+        current_page = 1;
+    }
     bool dataFetchCompleted = false;
     public void CheckInventoryDataForMultiplePages()
     {
@@ -83,11 +89,6 @@ public class InventoryManager : MonoBehaviour
         if (success)
         {
             Debug.Log("Inventory Data Success");
-            if (data.data.Count == cells.Count)
-            {
-                Debug.Log("Same data as previous");
-                return;
-            }
             foreach (InventoryCell curcell in cells)
             {
                 if (curcell != null)
