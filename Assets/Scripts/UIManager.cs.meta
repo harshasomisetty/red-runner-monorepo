@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/BoosterInGame.cs.meta
+guid: 5666f0eefda4f4a4496944b400e64274
+========
 guid: a1bc5d35e86ec9c449e73d3ef9211658
+>>>>>>>> farhan/umer-additions:Assets/Scripts/UIManager.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
