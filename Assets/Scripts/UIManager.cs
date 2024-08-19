@@ -5,6 +5,15 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
+    #region MainScreen
+    [Header("Main Screen")]
+    public GameObject MainScreen;
+    public void ToggleMainScreen(bool State)
+    {
+        MainScreen.SetActive(State);
+    }
+    #endregion
+
     #region FeatureScreens
     [Header("Features Screen")]
     public GameObject FeaturesScreen;

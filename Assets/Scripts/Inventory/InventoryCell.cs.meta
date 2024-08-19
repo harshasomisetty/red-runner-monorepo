@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/UIManager.cs.meta
+guid: d2b366df887c5054facdb9f51153629b
+========
 guid: 1b2bf16eb6c55ff4c9c9afc83a1593ba
+>>>>>>>> farhan/backup-develop:Assets/InventoryCell.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

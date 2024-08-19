@@ -46,7 +46,6 @@ public class API_Manager : MonoBehaviour
     }
     #endregion
 
-
     #region Goodle Auth Token
     public void ExchangeCodeForTokens(string authCode)
     {
@@ -446,7 +445,6 @@ public class API_Manager : MonoBehaviour
     }
 
     #endregion
-
 
     #region Inventory
     public void GetInvectory(GetInventory getInventory,int pageNumber)
