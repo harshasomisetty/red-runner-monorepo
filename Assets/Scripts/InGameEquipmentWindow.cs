@@ -1,12 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using UnityEditor.Search;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
-using static UnityEditorInternal.ReorderableList;
+
+
 public class InGameEquipmentWindow : MonoBehaviour
 {
     [Header("In Game Equipment Window")]

@@ -3,14 +3,8 @@ using UnityEngine.Networking;
 using System.Collections;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using UnityEditor.PackageManager.Requests;
-using UnityEngine.SocialPlatforms.Impl;
-using UnityEngine.SocialPlatforms;
 using System.Text;
-using UnityEngine.Purchasing.MiniJSON;
-using System.Net;
 
 public class API_Manager : MonoBehaviour
 {
