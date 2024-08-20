@@ -20,6 +20,7 @@ public class LeaderboardCell : MonoBehaviour
             userName.text = name;
             rank.gameObject.SetActive(false);
             userGift.sprite = getgift[ranknum];
+            userGift.enabled = false;
             score.text = getscore+" m";
         }
         else

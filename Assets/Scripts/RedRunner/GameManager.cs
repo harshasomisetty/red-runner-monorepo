@@ -8,13 +8,9 @@ using BayatGames.SaveGameFree;
 using BayatGames.SaveGameFree.Serializers;
 
 using RedRunner.Characters;
-using RedRunner.Collectables;
 using RedRunner.TerrainGeneration;
 using RedRunner.Utilities;
-using UnityEngine.UIElements;
-using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SocialPlatforms.Impl;
 using System.Text.RegularExpressions;
 
 namespace RedRunner

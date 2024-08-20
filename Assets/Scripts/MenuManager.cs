@@ -29,11 +29,23 @@ public class MenuManager : MonoBehaviour
     {
         HelpWindow.SetActive(State);
     }
+    string InsertAsteriskInMiddle(string input)
+    {
+        int length = input.Length;
+
+        int middle = length / 2;
+
+        string firstHalf = input.Substring(0, (middle / 2));
+        //string secondHalf = input.Substring(middle);
+
+        return firstHalf + "****";
+    }
 
     void PopulateProfileDetails()
     {
         PlayerName_Placeholder.text = StaticDataBank.UserName.ToString();
-        WalletID_Placeholder.text = StaticDataBank.walletAddress.ToString();
+        string walletaddress = InsertAsteriskInMiddle(StaticDataBank.walletAddress.ToString());
+        WalletID_Placeholder.text = walletaddress;
     }
 
     public void CopyWalletAdress()
