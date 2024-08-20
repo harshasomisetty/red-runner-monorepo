@@ -103,43 +103,50 @@ public class API_Manager : MonoBehaviour
             returnSecureToken = true
         };
 
+
+        //*
         string jsonRequestBody = JsonConvert.SerializeObject(requestBody);
 
-        using (UnityWebRequest www = UnityWebRequest.PostWwwForm(StaticDataBank.firebaseEndpoint, ""))
+        string url = StaticDataBank.firebaseEndpoint;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonRequestBody);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+        //
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            byte[] bodyRaw = new System.Text.UTF8Encoding().GetBytes(jsonRequestBody);
-            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
+            Debug.LogError(request.error);
+            GoogleAuth(false, "Google Auth Failed");
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
 
-            yield return www.SendWebRequest();
+            Debug.Log("Firebase Auth Response: " + jsonResponse);
 
-            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.LogError(www.error);
-                GoogleAuth(false, "Google Auth Failed");
-            }
-            else
-            {
-                string jsonResponse = www.downloadHandler.text;
+            JObject resoponse = JObject.Parse(jsonResponse);
 
-                Debug.Log("Firebase Auth Response: " + jsonResponse);
+            string _idToken = resoponse["idToken"].ToString();
 
-                JObject resoponse = JObject.Parse(jsonResponse);
+            string email = resoponse["email"].ToString();
 
-                string _idToken = resoponse["idToken"].ToString();
-
-                string email = resoponse["email"].ToString();
-
-                string localId = resoponse["localId"].ToString();
+            string localId = resoponse["localId"].ToString();
 
 
-                Debug.Log("ID token : " + _idToken + " email : " + email + " localId : " + localId);
+            Debug.Log("ID token : " + _idToken + " email : " + email + " localId : " + localId);
 
-                //GoogleAuth(true, "Google Auth Success");
+            //GoogleAuth(true, "Google Auth Success");
 
-                StartCoroutine(BackendRegisterorLogIn(_idToken, email, localId, GoogleAuth));
-            }
+            StartCoroutine(BackendRegisterorLogIn(_idToken, email, localId, GoogleAuth));
         }
     }
     #endregion
@@ -150,13 +157,13 @@ public class API_Manager : MonoBehaviour
         StartCoroutine(SignUpFirebase(email, password, callback));
     }
 
-    private IEnumerator SignUpFirebase(string email, string password, SignInCallback callback)
+    private IEnumerator SignUpFirebase(string _email, string _password, SignInCallback callback)
     {
 
         var userData = new 
         {
-            email = email,
-            password = password,
+            email = _email,
+            password = _password,
             returnSecureToken = true
         };
 
@@ -186,9 +193,9 @@ public class API_Manager : MonoBehaviour
 
             string localId = resoponse["localId"].ToString();
 
-            Debug.Log("ID token : " + _idToken + " email : " + email + " localId : " + localId);
+            Debug.Log("ID token : " + _idToken + " email : " + _email + " localId : " + localId);
 
-            StartCoroutine(BackendRegisterorLogIn(_idToken, email, localId, callback));
+            StartCoroutine(BackendRegisterorLogIn(_idToken, _email, localId, callback));
         }
     }
 
@@ -197,17 +204,16 @@ public class API_Manager : MonoBehaviour
         StartCoroutine(SignInFirebase(email, password, signInCallback));
     }
 
-    private IEnumerator SignInFirebase(string email, string password, SignInCallback signInCallback)
+    private IEnumerator SignInFirebase(string _email, string _password, SignInCallback signInCallback)
     {
 
         var userData = new 
         {
-            email = email,
-            password = password,
+            email = _email,
+            password = _password,
             returnSecureToken = true
         };
 
-        //string json = JsonUtility.ToJson(userData);
         string json = JsonConvert.SerializeObject(userData);
 
         UnityWebRequest request = new UnityWebRequest(StaticDataBank.signInUrl, "POST");
@@ -221,7 +227,7 @@ public class API_Manager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             Debug.LogError(request.result);
-            // CODE HERE //
+
             signInCallback(false, "Check password or username!");
         }
         else
@@ -238,7 +244,7 @@ public class API_Manager : MonoBehaviour
             Debug.Log("ID token : " + _idToken +  " localId : " + localId);
 
 
-            StartCoroutine(BackendRegisterorLogIn(_idToken, email, localId, signInCallback));
+            StartCoroutine(BackendRegisterorLogIn(_idToken, _email, localId, signInCallback));
         }
     }
     #endregion
@@ -540,6 +546,49 @@ public class API_Manager : MonoBehaviour
             string jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
             ismint(true, jsonResponse);
+        }
+    }
+
+    #endregion
+
+
+    #region Generic API Caller
+    //you can add more two or more prams for callback to make more generic like this
+    //public delegate void ApiCallback<T1, T2>(bool success, T1 responseData, T2 additionalData);
+    public delegate void ApiCallback<T>(bool success, T response);
+
+    public IEnumerator CallApi<T>(string endpoint, string httpMethod, object requestData, ApiCallback<T> callback)
+    {
+        string jsonData = JsonConvert.SerializeObject(requestData);
+
+        string url = endpoint + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, httpMethod);
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            callback(false, default(T));
+            Debug.LogError(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            T responseData = JsonConvert.DeserializeObject<T>(jsonResponse);
+
+            callback(true, responseData);
         }
     }
 

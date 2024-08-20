@@ -206,7 +206,7 @@ public class InGameEquipmentWindow : MonoBehaviour
     }
     public void SelectSkinAsset(int SelectIndex, Sprite sprite,string skinid)
     {
-        Debug.Log("Selectskin asset : "+SelectIndex);
+        Debug.Log("Selectskin asset : " + SelectIndex + "Skin id : " + skinid);
         if (SelectIndex == CurrentSelectedSkinAsset)
         {
             return;

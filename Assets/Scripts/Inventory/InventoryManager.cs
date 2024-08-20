@@ -8,7 +8,7 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance;
 
 
-    public GameObject inventoryCell;
+    public GameObject inventoryCellBosster, inventoryCellSkin;
     public Transform speedContainer;
     public Transform doubleJumpContainer;
     public Transform skinsContainer;
@@ -89,7 +89,7 @@ public class InventoryManager : MonoBehaviour
             CheckInventoryDataForMultiplePages();
         }
     }
-    private InventoryCell GetCell(int index,Transform cellContainer)
+    private InventoryCell GetCell(int index,Transform cellContainer,GameObject inventoryCell)
     {
         if (index < cellContainer.childCount)
         {
@@ -114,24 +114,24 @@ public class InventoryManager : MonoBehaviour
                     if (data.data[i].item.collection.id == "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14")
                     {
                         SpeedBoosterIndex.Add(i);
-                        cell = GetCell(SpeedBoosterIndex.Count - 1, speedContainer);
+                        cell = GetCell(SpeedBoosterIndex.Count - 1, speedContainer,inventoryCellBosster);
                     }
                     else if(data.data[i].item.collection.id == "0b9d2116-b3a2-4452-affb-03282313ab77")
                     {
                         DoubleJumpIndex.Add(i);
-                        cell = GetCell(DoubleJumpIndex.Count - 1, doubleJumpContainer);
+                        cell = GetCell(DoubleJumpIndex.Count - 1, doubleJumpContainer, inventoryCellBosster);
                     }
                     else if (data.data[i].item.collection.id == "36399a18-941c-4c18-bb0d-8cc2aaaa8b06")
                     {
                         SkinsIndex.Add(i);
-                        cell = GetCell(SkinsIndex.Count - 1, skinsContainer);
+                        cell = GetCell(SkinsIndex.Count - 1, skinsContainer, inventoryCellSkin);
                     }
                     cell.name = data.data[i].item.name;
                 }
                 else if (data.data[i].type.Contains("Currency"))
                 {
                     Currencies.Add(i);
-                    cell = GetCell(Currencies.Count - 1, currencyContainer);
+                    cell = GetCell(Currencies.Count - 1, currencyContainer, inventoryCellBosster);
                 }
                 string dataSetName = data.data[i].item.name;
                 cell.name = dataSetName;
