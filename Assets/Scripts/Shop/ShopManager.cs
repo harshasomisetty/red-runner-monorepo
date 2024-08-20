@@ -17,6 +17,12 @@ public class UIDataConatainer
 
 public class ShopManager : MonoBehaviour
 {
+    public static ShopManager Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     [Header("Detail Panel UI")]
     public GameObject DetailPanel;
     public TextMeshProUGUI attribute;
@@ -26,21 +32,17 @@ public class ShopManager : MonoBehaviour
     public Button MintButton;
     public GameObject Blocker;
 
-
     public List<UIDataConatainer> speedbooster;
     public List<UIDataConatainer> doublejump;
     public List<UIDataConatainer> skins;
 
-
-
-
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
     public GameShop _gameShop;
 
-    private void OnEnable()
-    {
-        API_Manager.instance.GetShopData(GetAllShopData);
-    }
+    //private void OnEnable()
+    //{
+    //    API_Manager.instance.GetShopData(GetAllShopData);
+    //}
     void GetAllShopData(bool sucess, GameShop response)
     {
         if (sucess)
@@ -65,9 +67,13 @@ public class ShopManager : MonoBehaviour
             DownloadImage(_gameShop.skins.thiefSkin.imageUrl, _gameShop.skins.thiefSkin.name, skins[7]);
             DownloadImage(_gameShop.skins.wrestlerSkin.imageUrl, _gameShop.skins.wrestlerSkin.name, skins[8]);
             DownloadImage(_gameShop.skins.zombieSkin.imageUrl, _gameShop.skins.zombieSkin.name, skins[9]);
+            UIManager.Instance.SelectDefaultFeatureWindowOption();
+            //CODE HERE
         }
         else
         {
+            //CODE HERE
+            UIManager.Instance.ActivateFailureScreen("Shop");
             Debug.Log("Data failed");
         }
     }
@@ -245,5 +251,10 @@ public class ShopManager : MonoBehaviour
                 Debug.Log("NFT  : " + message);
             }
         });
+    }
+
+    public void FetchShopData()
+    {
+        API_Manager.instance.GetShopData(GetAllShopData);
     }
 }

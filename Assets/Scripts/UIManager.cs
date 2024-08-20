@@ -1,10 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
     #region MainScreen
     [Header("Main Screen")]
     public GameObject MainScreen;
@@ -13,13 +18,42 @@ public class UIManager : MonoBehaviour
         MainScreen.SetActive(State);
     }
     #endregion
-
     #region FeatureScreens
     [Header("Features Screen")]
+    public GameObject FeatureScreenBackButton;
     public GameObject FeaturesScreen;
+    public GameObject LoadingScreen;
+    public GameObject FailureScreen;
+    public TextMeshProUGUI LoadingScreenText;
+    public TextMeshProUGUI FailureScreenText;
     public void ToggleFeaturesScreen(bool State)
     {
         FeaturesScreen.SetActive(State);
+        ToggleMainScreen(!State);
+        if (State)
+        {
+            LoadingScreen.SetActive(true);
+            LoadingScreenText.text = "Loading Shop Data!";
+            ShopManager.Instance.FetchShopData();
+        }
+        else
+        {
+            CurrentSelectedFeatureButton = -1;
+            CurrentSelectedInventoryVertical = -1;
+            CurrentSelectedShopVertical = -1;
+            FailureScreenText.text = "";
+            FailureScreen.SetActive(false);
+            for (int i = 0; i < FeatureScreenButtons.Length; i++)
+            {
+                FeatureScreenButtons[i].gameObject.SetActive(false);
+            }
+            for (int i = 0; i < FeatureScreenWindows.Length; i++)
+            {
+                FeatureScreenWindows[i].SetActive(false);
+            }
+            ShopHeaderBar.SetActive(false);
+            FeatureScreenBackButton.SetActive(false);
+        }
     }
     [Header("Feature Screen Buttons")]
     public UnityEngine.UI.Button[] FeatureScreenButtons;
@@ -36,7 +70,22 @@ public class UIManager : MonoBehaviour
         }
         else
         {
+            ResetTrackingVariables();
+
+            bool LoadInventoryFromOtherFeature = false;
+            bool LoadShopFromOtherFeature = false;
+
+            if (CurrentSelectedFeatureButton != 0 && i == 0)
+            {
+                LoadShopFromOtherFeature = true;
+            }
+            else if (CurrentSelectedFeatureButton != 1 && i == 1)
+            {
+                LoadInventoryFromOtherFeature = true;
+            }
+        
             CurrentSelectedFeatureButton = i;
+
             for (int j = 0; j < FeatureScreenButtons.Length; j++)
             {
                 if (NormalFeatureButtonSprite != null)
@@ -44,10 +93,38 @@ public class UIManager : MonoBehaviour
                 else
                     FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
             }
+
             FeatureScreenButtons[i].GetComponent<Image>().sprite = HighlightedFeatureButtonSprite;
+
             CloseAllFeatureWindows();
-            LaunchFeatureWindow(i);
+
+            if (LoadInventoryFromOtherFeature)
+            {
+                FeatureScreenBackButton.SetActive(false);
+                ToggleInventory(true);
+            }
+            else if (LoadShopFromOtherFeature)
+            {
+                LoadingScreen.SetActive(true);
+                LoadingScreenText.text = "Loading Shop Data!";
+                ShopManager.Instance.FetchShopData();
+                LaunchFeatureWindow(i);
+            }
+            else
+            {
+                LaunchFeatureWindow(i);
+            }
         }
+    }
+    void ResetTrackingVariables()
+    {
+        CloseAllInventoryVerticals();
+        CloseAllShopVerticals();
+        InventoryHeaderBar.SetActive(false);
+        ShopHeaderBar.SetActive(false);
+        ToggleInventory(false);
+        CurrentSelectedInventoryVertical = -1;
+        CurrentSelectedShopVertical = -1;
     }
     void CloseAllFeatureWindows()
     {
@@ -60,8 +137,38 @@ public class UIManager : MonoBehaviour
     {
         FeatureScreenWindows[i].SetActive(true);
     }
+    public void SelectDefaultFeatureWindowOption()
+    {
+        LoadingScreen.SetActive(false);
+        LoadingScreenText.text = "";
+        OnClickFeatureButton(0);
+        OnClickShopVerticalButton(0);
+        for (int i = 0; i < FeatureScreenButtons.Length; i++)
+        {
+            FeatureScreenButtons[i].gameObject.SetActive(true);
+        }
+        ShopHeaderBar.SetActive(true);
+        FeatureScreenBackButton.SetActive(true);
+    }
+    public void ActivateFailureScreen(string Key)
+    {
+        switch (Key)
+        {
+            case "Shop":
+                FailureScreenText.text = "Failed To Load Shop Data!";
+                break;
+            case "Inventory":
+                FailureScreenText.text = "Failed To Load Inventory Data!";
+                break;
+        }
+        LoadingScreenText.text = "";
+        LoadingScreen.SetActive(false);
+        FailureScreen.SetActive(true);
+        FeatureScreenBackButton.SetActive(true);
+    }
     #endregion
     #region ShopVerticals
+    public GameObject ShopHeaderBar;
     [Header("ShopCategoryButtons")]
     public UnityEngine.UI.Button[] ShopCategoryButtons;
     public Sprite NormalShopCategoryButtonSprite;
@@ -103,6 +210,7 @@ public class UIManager : MonoBehaviour
     }
     #endregion
     #region InventoryVerticals
+    public GameObject InventoryHeaderBar;
     [Header("Inventory Category Windows")]
     public UnityEngine.UI.Button[] InventoryCategoryButtons;
     public Sprite NormalInventoryCategoryButtonSprite;
@@ -110,6 +218,37 @@ public class UIManager : MonoBehaviour
     int CurrentSelectedInventoryVertical = 1;
     [Header("Inventory Vertical Windows")]
     public GameObject[] InventoryVerticalWindows;
+
+    public void ToggleInventory(bool State)
+    {
+        if (State)
+        {
+            LoadingScreenText.text = "Loading Inventory Data!";
+            LoadingScreen.SetActive(true);
+            InventoryManager.Instance.FetchInventoryData();
+        }
+        else
+        {
+            InventoryManager.Instance.OnResetInventory();
+        }
+    }
+    public void LaunchInventory()
+    {
+        LoadingScreenText.text = "";
+        LoadingScreen.SetActive(false);
+        InventoryHeaderBar.SetActive(true);
+        LaunchFeatureWindow(1);
+        OnClickInventoryVerticalButton(0);
+        FeatureScreenBackButton.SetActive(true);
+    }
+    public void SignalInventoryFailure()
+    {
+        LoadingScreenText.text = "";
+        LoadingScreen.SetActive(false);
+        FailureScreenText.text = "Failed To Load Inventory Data!";
+        FailureScreen.SetActive(true);
+        FeatureScreenBackButton.SetActive(true);
+    }
     public void OnClickInventoryVerticalButton(int i)
     {
         if (i == CurrentSelectedInventoryVertical)
@@ -143,4 +282,5 @@ public class UIManager : MonoBehaviour
         InventoryVerticalWindows[i].SetActive(true);
     }
     #endregion
+
 }

@@ -41,12 +41,14 @@ public class InventoryManager : MonoBehaviour
             Instance = this;
         }
     }
-    private void OnEnable()
+
+    public void FetchInventoryData()
     {
         ClearDataToUpdate();
         CheckInventoryDataForMultiplePages();
     }
-    private void OnDisable()
+
+    public void OnResetInventory()
     {
         dataFetchCompleted = false;
         current_page = 1;
@@ -87,6 +89,12 @@ public class InventoryManager : MonoBehaviour
             Debug.Log("Number of Call Backs");
             m_data.Add(data);
             CheckInventoryDataForMultiplePages();
+        }
+        else
+        {
+            Debug.Log("Inventory data failed");
+            UIManager.Instance.SignalInventoryFailure();
+            //CODE HERE//
         }
     }
     private InventoryCell GetCell(int index,Transform cellContainer,GameObject inventoryCell)
@@ -139,10 +147,14 @@ public class InventoryManager : MonoBehaviour
                 cell.gameObject.SetActive(true);
                 GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, i);
             }
+            UIManager.Instance.LaunchInventory();
+            //CODE HERE//
         }
         else
         {
             Debug.Log("Inventory data failed");
+            UIManager.Instance.SignalInventoryFailure();
+            //CODE HERE//
         }
     }
     void GetInventoryItemImage(string url, string datasetname, InventoryCell cell, int index)

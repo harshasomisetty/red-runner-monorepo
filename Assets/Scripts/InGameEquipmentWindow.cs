@@ -28,10 +28,6 @@ public class InGameEquipmentWindow : MonoBehaviour
     int CurrentSelectedSpeedBoosterAsset = -1;
     int CurrentSelectedJumpBoosterAsset = -1;
     int CurrentSelectedSkinAsset = -1;
-
-    [Header("MainScreen")]
-    public GameObject MainScreen;
-
     void Start ()
     {
         SetDefaultValues();
@@ -114,8 +110,7 @@ public class InGameEquipmentWindow : MonoBehaviour
             ClearPlaceHolders();
         }
         InGameEquipmentDialog.SetActive(State);
-        MainScreen.SetActive(!State);
-        //UIManager.Instance.ToggleMainScreen(!State);
+        UIManager.Instance.ToggleMainScreen(!State);
     }
     void CreateNFT_SelectorUnits (int Variation)
     {

@@ -491,7 +491,7 @@ public class API_Manager : MonoBehaviour
             inventoryData.data = null;
             inventoryData.meta = null;
             getInventory(false, inventoryData);
-            Debug.Log(request.error);
+            Debug.LogError(request.error);
         }
         else
         {
