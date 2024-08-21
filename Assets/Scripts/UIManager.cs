@@ -225,7 +225,7 @@ public class UIManager : MonoBehaviour
         {
             LoadingScreenText.text = "Loading Inventory Data!";
             LoadingScreen.SetActive(true);
-            InventoryManager.Instance.FetchInventoryData();
+            InventoryManager.Instance.FetchInventoryData(false);
         }
         //else
         //{
@@ -282,5 +282,71 @@ public class UIManager : MonoBehaviour
         InventoryVerticalWindows[i].SetActive(true);
     }
     #endregion
+    #region GameEquipmentWindow
+
+    [Header("Game Equipment")]
+    public GameObject GameEquipmentStatus;
+    public TextMeshProUGUI GameEquipmentStatusText;
+    public GameObject GameEquipmentFeatures;
+    public GameObject GameEquipmentBackButton;
+
+    public void ToggleGameEquipmentStatus(bool State)
+    {
+        GameEquipmentStatus.SetActive(State);
+    }
+    public void SetGameEquipmentStatusText(string Msg)
+    {
+        GameEquipmentStatusText.text = Msg;
+    }
+    public void ToggleGameEquipmentFeatures(bool State)
+    {
+        GameEquipmentFeatures.SetActive(State);
+    }
+    #endregion
+    #region Minting
+    [Header ("Minting")]
+    public GameObject MintingDialogPanel;
+    public TextMeshProUGUI MintingStatusText;
+    public GameObject MintingPanelSuccessCloseButton;
+    public GameObject MintingPanelFailureCloseButton;
+
+    public void ToggleMintingDialog(bool State)
+    {
+        MintingDialogPanel.SetActive(State);
+    }
+    public void SetMintingStatusText(string Msg)
+    {
+        MintingStatusText.text = Msg;
+    }
+    public void ToggleMintingPanelCloseButton(bool State, bool Failure)
+    {
+        if (State == false)
+        {
+            MintingPanelSuccessCloseButton.SetActive(State);
+            MintingPanelFailureCloseButton.SetActive(State);
+        }
+        else
+        {
+            if (Failure)
+            {
+                MintingPanelFailureCloseButton.SetActive(State);
+            }
+            else
+            {
+                MintingPanelSuccessCloseButton.SetActive(State);
+            }
+        }
+    }
+    public void CloseMintingPanelWithDetails()
+    {
+        ToggleMintingDialog(false);
+    }
+    public void CloseMintingPanelKeepDetails()
+    {
+        ShopManager.Instance.ReactivateDetailPanel();
+        ToggleMintingDialog(false);
+    }
+    #endregion
+
 
 }

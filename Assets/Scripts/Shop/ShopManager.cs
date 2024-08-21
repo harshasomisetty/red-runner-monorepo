@@ -243,14 +243,30 @@ public class ShopManager : MonoBehaviour
     public void MintNFT(string itemName)
     {
         Blocker.SetActive(true);
+        DetailPanel.SetActive(false);
+        UIManager.Instance.SetMintingStatusText("Minting Asset Please Wait");
+        UIManager.Instance.ToggleMintingDialog(true);
+        UIManager.Instance.ToggleMintingPanelCloseButton(false, false);
         API_Manager.instance.MintNft(itemName, (success, message) =>
         {
             Blocker.SetActive(false);
             if (success)
             {
+                UIManager.Instance.SetMintingStatusText("Minting Asset Successful!");
+                UIManager.Instance.ToggleMintingPanelCloseButton(true,false);
                 Debug.Log("NFT  : " + message);
             }
+            else
+            {
+                UIManager.Instance.SetMintingStatusText("Minting Asset Failure!");
+                UIManager.Instance.ToggleMintingPanelCloseButton(true,true);
+            } 
         });
+    }
+
+    public void ReactivateDetailPanel()
+    {
+        DetailPanel.SetActive(true);
     }
 
     public void FetchShopData()

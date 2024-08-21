@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class InGameEquipmentWindow : MonoBehaviour
 {
+    public static InGameEquipmentWindow Instance;
+
     [Header("In Game Equipment Window")]
     public GameObject InGameEquipmentDialog;
 
@@ -28,6 +30,11 @@ public class InGameEquipmentWindow : MonoBehaviour
     int CurrentSelectedSpeedBoosterAsset = -1;
     int CurrentSelectedJumpBoosterAsset = -1;
     int CurrentSelectedSkinAsset = -1;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
     void Start ()
     {
         SetDefaultValues();
@@ -98,8 +105,10 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         if (State)
         {
-            InventoryManager.Instance.FetchInventoryData();
-            SetDefaultSelectedOption();
+            UIManager.Instance.GameEquipmentBackButton.SetActive(false);
+            UIManager.Instance.SetGameEquipmentStatusText("Loading Assets Please Wait!");
+            UIManager.Instance.ToggleGameEquipmentStatus(true);
+            InventoryManager.Instance.FetchInventoryData(true);
         }
         else
         {
@@ -108,7 +117,11 @@ public class InGameEquipmentWindow : MonoBehaviour
             CurrentSelectedSkinAsset = -1;
             PlayerPrefs.SetInt("SpeedBoostersEquipped", 0);
             PlayerPrefs.SetInt("JumpBoostersEquipped", 0);
+            UIManager.Instance.SetGameEquipmentStatusText("");
+            UIManager.Instance.ToggleGameEquipmentStatus(false);
+            UIManager.Instance.ToggleGameEquipmentFeatures(false);
             ClearPlaceHolders();
+            SetDefaultValues();
         }
         InGameEquipmentDialog.SetActive(State);
         UIManager.Instance.ToggleMainScreen(!State);
@@ -168,7 +181,7 @@ public class InGameEquipmentWindow : MonoBehaviour
                 break;
         }
     }
-    void SetDefaultSelectedOption()
+    public void SetDefaultSelectedOption()
     {
         ChangeGameEquipmentOption(0);
     }
@@ -183,6 +196,7 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedSpeedBoosterAsset = SelectIndex;
             CurrentSpeedBoosterHolder.sprite = sprite;
+            CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             EquipSpeedBooster(boostervalue);
         }
     }
@@ -197,6 +211,7 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedJumpBoosterAsset = SelectIndex;
             CurrentJumpBoosterHolder.sprite = sprite;
+            CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             EquipJumpBooster(boostervalue);
         }
     }
@@ -211,14 +226,18 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedSkinAsset = SelectIndex;
             CurrentSkinHolder.sprite = sprite;
+            CurrentSkinHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             EquipSkin(skinid);
         }
     }
     void ClearPlaceHolders()
     {
        CurrentSpeedBoosterHolder.sprite = null;
+       CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
        CurrentJumpBoosterHolder.sprite = null;
+       CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
        CurrentSkinHolder.sprite = null;
+       CurrentSkinHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
     }
     public void EquipSpeedBooster(int BoosterValue = 0)
     {
