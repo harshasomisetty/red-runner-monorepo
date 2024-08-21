@@ -98,6 +98,7 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         if (State)
         {
+            InventoryManager.Instance.FetchInventoryData();
             SetDefaultSelectedOption();
         }
         else

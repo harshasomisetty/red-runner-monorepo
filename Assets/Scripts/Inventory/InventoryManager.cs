@@ -57,14 +57,14 @@ public class InventoryManager : MonoBehaviour
         ClearDataToUpdate();
         CheckInventoryDataForMultiplePages();
     }
-
-    public void OnResetInventory()
+    //public void OnResetInventory()
+    //{
+        
+    //}
+    public void ClearDataToUpdate()
     {
         dataFetchCompleted = false;
         current_page = 1;
-    }
-    public void ClearDataToUpdate()
-    {
         foreach (InventoryCell curcell in cells)
         {
             if (curcell != null)

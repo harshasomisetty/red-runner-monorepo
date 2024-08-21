@@ -227,10 +227,10 @@ public class UIManager : MonoBehaviour
             LoadingScreen.SetActive(true);
             InventoryManager.Instance.FetchInventoryData();
         }
-        else
-        {
-            InventoryManager.Instance.OnResetInventory();
-        }
+        //else
+        //{
+        //    InventoryManager.Instance.OnResetInventory();
+        //}
     }
     public void LaunchInventory()
     {
