@@ -1,7 +1,17 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+
+
+[Serializable]
+public class DataIndex
+{
+    public int pageNumber = 0;
+    public int boosterindex = 0;
+}
 
 public class InventoryManager : MonoBehaviour
 {
@@ -14,10 +24,10 @@ public class InventoryManager : MonoBehaviour
     public Transform skinsContainer;
     public Transform currencyContainer;
     public List<InventoryCell> cells;
-    public List<int> SpeedBoosterIndex;
-    public List<int> DoubleJumpIndex;
-    public List<int> SkinsIndex;
-    public List<int> Currencies;
+    public List<DataIndex> SpeedBoosterIndex;
+    public List<DataIndex> DoubleJumpIndex;
+    public List<DataIndex> SkinsIndex;
+    public List<DataIndex> Currencies;
     public GameObject BackButton;
 
     [Header("Detail Panel UI")]
@@ -79,7 +89,10 @@ public class InventoryManager : MonoBehaviour
         else
         {
             dataFetchCompleted = true;
-            GetInventory_Data(dataFetchCompleted, m_data[0]);
+            for(int i= 0; i < m_data.Count; i++)
+            {
+                GetInventory_Data(dataFetchCompleted, m_data[i], i);
+            }
         }
     }
     public void Get_InventoryData(bool success, InventoryData.Root data)
@@ -108,7 +121,7 @@ public class InventoryManager : MonoBehaviour
             return Instantiate(inventoryCell, cellContainer).GetComponent<InventoryCell>();
         }
     }
-    public void GetInventory_Data(bool success, InventoryData.Root data)
+    public void GetInventory_Data(bool success, InventoryData.Root data, int pageNumber)
     {
         if (success)
         {
@@ -117,31 +130,40 @@ public class InventoryManager : MonoBehaviour
             for (int i = 0; i < data.data.Count; i++)
             {
                 InventoryCell cell = null;
+                DataIndex _data =new DataIndex();
+                _data.boosterindex = i;
+                _data.pageNumber = pageNumber;
+                Debug.Log("Iteration : " + i + " : " + data.data[i].type + " : type");
                 if (data.data[i].type.Contains("UniqueAsset"))
                 {
                     if (data.data[i].item.collection.id == "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14")
                     {
-                        SpeedBoosterIndex.Add(i);
+                        _data.boosterindex = i;
+                        SpeedBoosterIndex.Add(_data);
                         cell = GetCell(SpeedBoosterIndex.Count - 1, speedContainer,inventoryCellBosster);
                     }
                     else if(data.data[i].item.collection.id == "0b9d2116-b3a2-4452-affb-03282313ab77")
                     {
-                        DoubleJumpIndex.Add(i);
+                        _data.boosterindex = i;
+                        DoubleJumpIndex.Add(_data);
                         cell = GetCell(DoubleJumpIndex.Count - 1, doubleJumpContainer, inventoryCellBosster);
                     }
                     else if (data.data[i].item.collection.id == "36399a18-941c-4c18-bb0d-8cc2aaaa8b06")
                     {
-                        SkinsIndex.Add(i);
+                        _data.boosterindex = i;
+                        SkinsIndex.Add(_data);
                         cell = GetCell(SkinsIndex.Count - 1, skinsContainer, inventoryCellSkin);
                     }
-                    cell.name = data.data[i].item.name;
+                    //cell.name = data.data[i].item.name;
                 }
                 else if (data.data[i].type.Contains("Currency"))
                 {
-                    Currencies.Add(i);
+                    _data.boosterindex = i;
+                    Currencies.Add(_data);
                     cell = GetCell(Currencies.Count - 1, currencyContainer, inventoryCellBosster);
                 }
-                string dataSetName = data.data[i].item.name;
+
+                string dataSetName = data.data[i].item.name + "";
                 cell.name = dataSetName;
                 cells.Add(cell);
                 cell.gameObject.SetActive(true);
@@ -194,31 +216,31 @@ public class InventoryManager : MonoBehaviour
         DetailPanel.SetActive(true);
     }
 
-    public string getvalueofspeedbooster(int getvalue)
+    public string getvalueofspeedbooster(DataIndex _data)
     {
-        return m_data[0].data[getvalue].item.attributes[0].value;
+        return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
     }
-    public Sprite getspriteofspeedbooster(int getvalue)
+    public Sprite getspriteofspeedbooster(DataIndex _data)
     {
-        Sprite sprite = spriteDictionary[m_data[0].data[getvalue].item.name];
+        Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
         return sprite;
     }
-    public string getvalueofdoublejumbbooster(int getvalue)
+    public string getvalueofdoublejumbbooster(DataIndex _data)
     {
-        return m_data[0].data[getvalue].item.attributes[0].value;
+        return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
     }
-    public Sprite getspriteofdoublejumbbooster(int getvalue)
+    public Sprite getspriteofdoublejumbbooster(DataIndex _data)
     {
-        Sprite sprite = spriteDictionary[m_data[0].data[getvalue].item.name];
+        Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
         return sprite;
     }
-    public Sprite getspriteofskinbooster(int getvalue)
+    public Sprite getspriteofskinbooster(DataIndex _data)
     {
-        Sprite sprite = spriteDictionary[m_data[0].data[getvalue].item.name];
+        Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
         return sprite;
     }
-    public string getskinamebyindex(int getvalue)
+    public string getskinamebyindex(DataIndex _data)
     {
-        return m_data[0].data[getvalue].item.attributes[0].value;
+        return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
     }
 }
