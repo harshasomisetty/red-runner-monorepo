@@ -9,12 +9,15 @@ public class InventoryCell : MonoBehaviour
     public TextMeshProUGUI Name;
     public Button ShowPanelButton;
     public int DataIndex;
-    //public TextMeshProUGUI Description;
+
+
     public void SetValues(int dataIndex,string assetname, Sprite _boosterImage)
     {
         Name.text = assetname;
-        //Description.text = items.description;
-        //Type.text=items.collection.name;
+        if (_boosterImage == null)
+        {
+            BoosterImage.enabled = false;
+        }
         BoosterImage.sprite = _boosterImage;
         DataIndex = dataIndex;
         ShowPanelButton.onClick.RemoveAllListeners();

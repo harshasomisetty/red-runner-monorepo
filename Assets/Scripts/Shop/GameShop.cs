@@ -53,7 +53,7 @@ public class GameShop
         public string description;
         public string imageUrl;
         public string name;
-        public List<Price> price;
+        public Price price;
     }
     [Serializable]
     public struct Skin
@@ -63,7 +63,7 @@ public class GameShop
         public string description;
         public string imageUrl;
         public string name;
-        public List<Price> price;
+        public Price price;
     }
     [Serializable]
     public struct Attribute
@@ -72,10 +72,11 @@ public class GameShop
         public string value;
     }
     [Serializable]
-    public struct Price
+    public class Price
     {
-        public string currencyId;
-        public string price;
+        public string SOL;
+        public string USDC;
+        public string DUMMY;
     }
 }
 namespace GameShopData

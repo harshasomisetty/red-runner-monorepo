@@ -1,3 +1,4 @@
+using RedRunner.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ public class InventoryManager : MonoBehaviour
     public TextMeshProUGUI BoosterName;
     public TextMeshProUGUI Description;
     public Image boosterImage;
-    public Button MarketPlace;
+    public Button MintButton;
 
     public List<InventoryData.Root> m_data;
 
@@ -245,6 +246,7 @@ public class InventoryManager : MonoBehaviour
             boosterImage.sprite = spriteDictionary[m_data[0].data[dataindex].item.name];
             boosterImage.SetNativeSize();
         }
+        MintButton.gameObject.SetActive(false);
         DetailPanel.SetActive(true);
     }
 
