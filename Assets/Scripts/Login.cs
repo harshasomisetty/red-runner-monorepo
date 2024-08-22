@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using RedRunner.UI;
 using TMPro;
 using UnityEngine;
@@ -14,7 +13,6 @@ public class Login : MonoBehaviour
     public TextMeshProUGUI PopUpMessage;
     public GameObject LoginPanel;
     public Button OkButton;
-    public GameObject ApiLoader;
     public TextMeshProUGUI SignUpSuccessButtonText;
 
 
@@ -26,9 +24,9 @@ public class Login : MonoBehaviour
         });
     }
 
-    bool CheckInputField(string checkstring)
+    bool CheckInputField(string checkString)
     {
-        if (!string.IsNullOrEmpty(checkstring) && !string.IsNullOrWhiteSpace(checkstring))
+        if (!string.IsNullOrEmpty(checkString) && !string.IsNullOrWhiteSpace(checkString))
         {
             return true;
         }
@@ -40,7 +38,7 @@ public class Login : MonoBehaviour
     public void UserLogInFirebase()
     {
         if (CheckInputField(email.text) && CheckInputField(Password.text) &&
-            email.text.Contains(".com", System.StringComparison.OrdinalIgnoreCase) &&
+            email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
             Password.text.Length >= 6 && email.text.Length >= 6)
         {
             ToggleDataLoadingWindow(true);
@@ -109,7 +107,8 @@ public class Login : MonoBehaviour
     public void ToggleDataLoadingWindow(bool State)
     {
         LoginPanel.SetActive(!State);
-        ApiLoader.SetActive(State);
+        
+        GlobalCanvasManager.Instance.ShowHideSpinner(State);
     }
 
     void SwitchOkSignUpButtonToLogin()
