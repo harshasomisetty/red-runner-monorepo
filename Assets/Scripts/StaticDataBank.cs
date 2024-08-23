@@ -1,4 +1,6 @@
 
+using System.Text.RegularExpressions;
+
 public static class StaticDataBank 
 {
     #region BackEnd Keys
@@ -45,4 +47,22 @@ public static class StaticDataBank
     public static string walletAddress = "";
 
     #endregion
+
+
+
+    public static string RemoveWordFromString(string m_string)
+    {
+        //string originalString = _name;
+        //string wordToRemove = word;
+        //string modifiedString = originalString.Replace(wordToRemove, "").Trim();
+        //return modifiedString;
+        string[] namesToRemove = new string[] { "Skin", "Speed Boosters", "Double Jumps" };
+
+        foreach (string _name in namesToRemove)
+        {
+            m_string = Regex.Replace(m_string, @"\b" + Regex.Escape(_name) + @"\b", "", RegexOptions.IgnoreCase).Trim();
+        }
+
+        return m_string;
+    }
 }

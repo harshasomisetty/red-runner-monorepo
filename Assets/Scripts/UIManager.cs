@@ -56,7 +56,7 @@ public class UIManager : MonoBehaviour
         }
     }
     [Header("Feature Screen Buttons")]
-    public UnityEngine.UI.Button[] FeatureScreenButtons;
+    public Button[] FeatureScreenButtons;
     public Sprite NormalFeatureButtonSprite;
     public Sprite HighlightedFeatureButtonSprite;
     int CurrentSelectedFeatureButton = -1;
@@ -89,13 +89,21 @@ public class UIManager : MonoBehaviour
             for (int j = 0; j < FeatureScreenButtons.Length; j++)
             {
                 if (NormalFeatureButtonSprite != null)
+                {
                     FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
+                    FeatureScreenButtons[j].GetComponent<Image>().SetNativeSize();
+                    FeatureScreenButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
+                }
                 else
+                {
                     FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
+
+                }
             }
 
             FeatureScreenButtons[i].GetComponent<Image>().sprite = HighlightedFeatureButtonSprite;
-
+            FeatureScreenButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(215 * 1.2f, 163 * 1.2f);
+            FeatureScreenButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
             CloseAllFeatureWindows();
 
             if (LoadInventoryFromOtherFeature)
@@ -170,7 +178,7 @@ public class UIManager : MonoBehaviour
     #region ShopVerticals
     public GameObject ShopHeaderBar;
     [Header("ShopCategoryButtons")]
-    public UnityEngine.UI.Button[] ShopCategoryButtons;
+    public Button[] ShopCategoryButtons;
     public Sprite NormalShopCategoryButtonSprite;
     public Sprite HighlightedShopCategoryButtonSprite;
     int CurrentSelectedShopVertical = 1;
@@ -188,11 +196,20 @@ public class UIManager : MonoBehaviour
             for (int j = 0; j < ShopCategoryButtons.Length; j++)
             {
                 if (NormalShopCategoryButtonSprite != null)
+                {
                     ShopCategoryButtons[j].GetComponent<Image>().sprite = NormalShopCategoryButtonSprite;
+                    ShopCategoryButtons[j].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.3f, 97 / 1.3f);
+                    ShopCategoryButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
+                }
                 else
+                {
                     ShopCategoryButtons[j].GetComponent<Image>().sprite = null;
+                }
             }
             ShopCategoryButtons[i].GetComponent<Image>().sprite = HighlightedShopCategoryButtonSprite;
+            ShopCategoryButtons[i].GetComponent<Image>().SetNativeSize();
+            ShopCategoryButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
+
             CloseAllShopVerticals();
             LaunchShopVertical(i);
         }
@@ -212,7 +229,7 @@ public class UIManager : MonoBehaviour
     #region InventoryVerticals
     public GameObject InventoryHeaderBar;
     [Header("Inventory Category Windows")]
-    public UnityEngine.UI.Button[] InventoryCategoryButtons;
+    public Button[] InventoryCategoryButtons;
     public Sprite NormalInventoryCategoryButtonSprite;
     public Sprite HighlightedInventoryCategoryButtonSprite;
     int CurrentSelectedInventoryVertical = 1;
@@ -261,11 +278,20 @@ public class UIManager : MonoBehaviour
             for (int j = 0; j < InventoryCategoryButtons.Length; j++)
             {
                 if (NormalInventoryCategoryButtonSprite != null)
+                {
                     InventoryCategoryButtons[j].GetComponent<Image>().sprite = NormalInventoryCategoryButtonSprite;
+                    InventoryCategoryButtons[j].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.3f, 97 / 1.3f);
+                    InventoryCategoryButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
+                }
                 else
+                {
                     InventoryCategoryButtons[j].GetComponent<Image>().sprite = null;
+
+                }
             }
             InventoryCategoryButtons[i].GetComponent<Image>().sprite = HighlightedInventoryCategoryButtonSprite;
+            InventoryCategoryButtons[i].GetComponent<Image>().SetNativeSize();
+            InventoryCategoryButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
             CloseAllInventoryVerticals();
             LaunchInventoryVertical(i);
         }
