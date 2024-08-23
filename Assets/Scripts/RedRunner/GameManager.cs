@@ -177,16 +177,7 @@ namespace RedRunner
                 OnScoreChanged(m_Score, m_HighScore, m_LastScore);
             }
             Debug.Log("Score Submit" + m_Score);
-            if (StaticDataBank.playerlocalid != "")
-            {
-                int myscore = ExtractInteger(m_Score.ToLength());
-                API_Manager.instance.Score_Submit(myscore, StaticDataBank.playerlocalid, (success, message) => {
-                    if (success)
-                    {
-                        Debug.Log("Score Submited");
-                    }
-                });
-            }
+            CallToServerOnGameEnd(m_Score);
             yield return new WaitForSecondsRealtime(1.5f);
 
             EndGame();
@@ -435,6 +426,19 @@ namespace RedRunner
         public void Share(string url)
         {
             Application.OpenURL(string.Format(url, m_ShareText, m_ShareUrl));
+        }
+        public void CallToServerOnGameEnd(float m_Score)
+        {
+            if (StaticDataBank.playerlocalid != "")
+            {
+                int myscore = ExtractInteger(m_Score.ToLength());
+                API_Manager.instance.Score_Submit(myscore, StaticDataBank.playerlocalid, (success, message) => {
+                    if (success)
+                    {
+                        Debug.Log("Score Submited");
+                    }
+                });
+            }
         }
 
         [System.Serializable]
