@@ -29,6 +29,8 @@ namespace RedRunner
 
         private static GameManager m_Singleton;
 
+        private int CoinsCollectedForPushing = 0;
+
         public static GameManager Singleton
         {
             get
@@ -66,12 +68,16 @@ namespace RedRunner
         public bool IsJumpBoosterActive = false;
         public UnityEngine.UI.Button JumpBoosterButton;
         public TextMeshProUGUI JumpBoosterCountText;
+        int JumpBoostersStartValue = 0;
+        bool FoundJumpBoosters = false;
 
         [Header("Speed Booster")]
         public int NumberOfSpeedBoosters = 0;
         public bool IsSpeedBoosterActive = false;
         public UnityEngine.UI.Button SpeedBoosterButton;
         public TextMeshProUGUI SpeedBoosterCountText;
+        int SpeedBoostersStartValue = 0;
+        bool FoundSpeedBoosters = false;
 
 
 
@@ -192,6 +198,21 @@ namespace RedRunner
             EndGame();
             var endScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.END_SCREEN);
             GameTemplateUIManager.Singleton.OpenScreen(endScreen);
+            SendTokensToServer();
+            if (FoundJumpBoosters)
+            {
+                if (JumpBoostersStartValue > NumberOfJumpBoosters)
+                {
+                    GlobalFeaturesManager.Instance.UpdateJumpBoosterValue(NumberOfJumpBoosters);
+                }    
+            }
+            if (FoundSpeedBoosters)
+            {
+                if (SpeedBoostersStartValue > NumberOfSpeedBoosters)
+                {
+                    GlobalFeaturesManager.Instance.UpdateSpeedBoosterValue(NumberOfSpeedBoosters);
+                }
+            }
         }
         public static int ExtractInteger(string s)
         {
@@ -319,19 +340,18 @@ namespace RedRunner
         //BOOSTER METHODS//
         void FetchBoosters()
         {
-            bool FoundSpeedBoosters = false;
             if (PlayerPrefs.GetInt("SpeedBoostersEquipped") != 0)
             {
                 FoundSpeedBoosters = true;
             }
-            bool FoundJumpBoosters = false;
             if (PlayerPrefs.GetInt("JumpBoostersEquipped") != 0)
             {
                 FoundJumpBoosters = true;
             }
             if (FoundSpeedBoosters)
             {
-                NumberOfSpeedBoosters = PlayerPrefs.GetInt("SpeedBoostersEquipped");
+                NumberOfSpeedBoosters = GlobalFeaturesManager.Instance.GetSpeedBoosterUses();
+                SpeedBoostersStartValue = NumberOfSpeedBoosters;
                 UpdateSpeedBoosterCount();
             }
             else
@@ -340,7 +360,8 @@ namespace RedRunner
             }
             if (FoundJumpBoosters)
             {
-                NumberOfJumpBoosters = PlayerPrefs.GetInt("JumpBoostersEquipped"); ;
+                NumberOfJumpBoosters = GlobalFeaturesManager.Instance.GetJumpBoosterUses();
+                JumpBoostersStartValue = NumberOfJumpBoosters;
                 UpdateJumpBoosterCount();
             }
             else
@@ -435,6 +456,16 @@ namespace RedRunner
         public void Share(string url)
         {
             Application.OpenURL(string.Format(url, m_ShareText, m_ShareUrl));
+        }
+
+        public void IncrementCollectibleTokens()
+        {
+            CoinsCollectedForPushing++;
+        }
+
+        public void SendTokensToServer()
+        {
+            GlobalFeaturesManager.Instance.SetTokensToPushQty(CoinsCollectedForPushing);
         }
 
         [System.Serializable]

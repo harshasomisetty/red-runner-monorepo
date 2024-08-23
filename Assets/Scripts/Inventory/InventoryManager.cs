@@ -260,6 +260,16 @@ public class InventoryManager : MonoBehaviour
         Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
         return sprite;
     }
+    public string getItemIdOfSpeedBooster(DataIndex _data)
+    {
+        string SpeedBoosterItemID = m_data[_data.pageNumber].data[_data.boosterindex].item.itemId;
+        return SpeedBoosterItemID;
+    }
+    public string getAssetIdOfSpeedBooster(DataIndex _data)
+    {
+        string SpeedBoosterAssetID = m_data[_data.pageNumber].data[_data.boosterindex].item.id;
+        return SpeedBoosterAssetID;
+    }
     public string getvalueofdoublejumbbooster(DataIndex _data)
     {
         return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
@@ -268,6 +278,17 @@ public class InventoryManager : MonoBehaviour
     {
         Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
         return sprite;
+    }
+
+    public string getItemIdOfJumpBooster(DataIndex _data)
+    {
+        string JumpBoosterItemID = m_data[_data.pageNumber].data[_data.boosterindex].item.itemId;
+        return JumpBoosterItemID;
+    }
+    public string getAssetIdOfJumpBooster(DataIndex _data)
+    {
+        string JumpBoosterAssetID = m_data[_data.pageNumber].data[_data.boosterindex].item.id;
+        return JumpBoosterAssetID;
     }
     public Sprite getspriteofskinbooster(DataIndex _data)
     {
@@ -278,4 +299,5 @@ public class InventoryManager : MonoBehaviour
     {
         return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
     }
+
 }

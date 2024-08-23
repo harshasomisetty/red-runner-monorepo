@@ -209,9 +209,12 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedSpeedBoosterAsset = SelectIndex;
             CurrentSpeedBoosterHolder.sprite = sprite;
+            string ItemID = InventoryManager.Instance.getItemIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
+            string AssetID = InventoryManager.Instance.getAssetIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
             //CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentSpeedBoosterHolderText.text = "x" + boostervalue;
             EquipSpeedBooster(boostervalue);
+            GlobalFeaturesManager.Instance.SelectSpeedBoosterNft(ItemID , AssetID, boostervalue);
         }
     }
     public void SelectJumpBoosterAsset(int SelectIndex, Sprite sprite, int boostervalue)
@@ -225,9 +228,13 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedJumpBoosterAsset = SelectIndex;
             CurrentJumpBoosterHolder.sprite = sprite;
+            string ItemID = InventoryManager.Instance.getItemIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
+            string AssetID = InventoryManager.Instance.getAssetIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
             //CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentJumpBoosterHolderText.text = "x" + boostervalue;
             EquipJumpBooster(boostervalue);
+            Debug.Log("ITEM ID IZZ " + ItemID);
+            GlobalFeaturesManager.Instance.SelectJumpBoosterNft(ItemID, AssetID, boostervalue);
         }
     }
     public void SelectSkinAsset(int SelectIndex, Sprite sprite, string skinid)
@@ -271,5 +278,6 @@ public class InGameEquipmentWindow : MonoBehaviour
         PlayerPrefs.SetInt("SpeedBoostersEquipped", 0);
         PlayerPrefs.SetInt("JumpBoostersEquipped", 0);
         PlayerPrefs.SetString("SkinEquipped", "Default");
+        GlobalFeaturesManager.Instance.ClearEquippedItemDetails();
     }
 }
