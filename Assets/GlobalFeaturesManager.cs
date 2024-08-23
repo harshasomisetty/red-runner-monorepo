@@ -19,11 +19,12 @@ public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>
     public void SetTokensToPushQty(int _NumberOfTokensToPush)
     {
         NumberOfTokensToPush = _NumberOfTokensToPush;
+        Debug.Log("Number Of Tokens Being Pushed To Server Are " + _NumberOfTokensToPush);
         PushTokens();
     }
     void PushEarnedTokensToServer(int _NumberOfTokens)
     {
-        API_Manager.instance.PushTokens(_NumberOfTokens, (success, message) =>
+        API_Manager.Instance.PushTokens(_NumberOfTokens, (success, message) =>
         {
             if (success)
             {
@@ -47,40 +48,87 @@ public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>
     }
     #endregion
     #region InventoryUpdateFeature
-    public void SetItemIdsForUpdate (string ItemID, string AssetID, int UseLeftValue)
-    {
-        ItemIdToUpdate = ItemID;
-        AssetIdToPush = AssetID;
-        ItemValueToUpdate = UseLeftValue;
-        PushUpdatedItemToInventory();
-    }
     void UpdateInventoryItemToServer(string _ItemID, string _AssetID, int _UseLeftValue)
     {
-        API_Manager.instance.UpdateInventoryItem(_ItemID, _AssetID, _UseLeftValue, (success, message) =>
+        API_Manager.Instance.UpdateInventoryItem(_ItemID, _AssetID, _UseLeftValue, (success, message) =>
         {
             if (success)
             {
-                Debug.Log(_ItemID + "With Id Is Updated");
+                Debug.Log(_AssetID + "With Id Is Updated");
                 Debug.Log("Success In Updating Item:" + message);
-                ItemIdToUpdate = "";
-                AssetIdToPush = "";
-                ItemValueToUpdate = -1;
-                Debug.Log("Resetting Local Values In Item Update - Success");
             }
             else
             {
 
-                Debug.Log("Failure To Push Tokens :" + message);
-                ItemIdToUpdate = "";
-                AssetIdToPush = "";
-                ItemValueToUpdate = -1;
-                Debug.Log("Resetting Local Tokens Value - Failure");
+                Debug.Log("Failure To Update Item :" + message);
             }
         });
     }
-    void PushUpdatedItemToInventory()
+    #endregion
+
+    #region InGameAssetConsumption
+    //SpeedBoosters
+    [SerializeField]
+    string SelectedSpeedBoosterItemID;
+    [SerializeField]
+    string SelectedSpeedBoosterAssetID;
+    [SerializeField]
+    int SelectedSpeedBoosterUsesLeftValue;
+
+    //JumpBoosters
+    [SerializeField]
+    string SelectedJumpBoosterItemID;
+    [SerializeField]
+    string SelectedJumpBoosterAssetID;
+    [SerializeField]
+    int SelectedJumpBoosterUsesLeftValue;
+
+    public void SelectJumpBoosterNft(string ItemID, string AssetID, int UsesLeft)
     {
-        UpdateInventoryItemToServer(ItemIdToUpdate, AssetIdToPush, ItemValueToUpdate);
+        SelectedJumpBoosterItemID = ItemID;
+        SelectedJumpBoosterAssetID = AssetID;
+        SelectedJumpBoosterUsesLeftValue = UsesLeft;
     }
+
+    public int GetJumpBoosterUses()
+    {
+        return SelectedJumpBoosterUsesLeftValue;
+    }
+    public void UpdateJumpBoosterValue(int NewValue)
+    {
+        SelectedJumpBoosterUsesLeftValue = NewValue;
+        UpdateInventoryItemToServer(SelectedJumpBoosterItemID, SelectedJumpBoosterAssetID, NewValue);
+    }
+
+
+
+    public void SelectSpeedBoosterNft(string ItemID, string AssetID, int UsesLeft)
+    {
+        SelectedSpeedBoosterItemID = ItemID;
+        SelectedSpeedBoosterAssetID = AssetID;
+        SelectedSpeedBoosterUsesLeftValue = UsesLeft;
+    }
+    public int GetSpeedBoosterUses()
+    {
+        return SelectedSpeedBoosterUsesLeftValue;
+    }
+    public void UpdateSpeedBoosterValue(int NewValue)
+    {
+        SelectedSpeedBoosterUsesLeftValue = NewValue;
+        UpdateInventoryItemToServer(SelectedSpeedBoosterItemID, SelectedSpeedBoosterAssetID, NewValue);
+    }
+
+    public void ClearEquippedItemDetails()
+    {
+        SelectedSpeedBoosterItemID = "";
+        SelectedSpeedBoosterAssetID = "";
+        SelectedSpeedBoosterUsesLeftValue = 0;
+
+        SelectedJumpBoosterItemID = "";
+        SelectedJumpBoosterAssetID = "";
+        SelectedJumpBoosterUsesLeftValue = 0;
+    }
+
+
     #endregion
 }

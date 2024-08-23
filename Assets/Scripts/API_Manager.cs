@@ -5,9 +5,8 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
-using UnityEditor.VersionControl;
 
-public class API_Manager : MonoBehaviour
+public class API_Manager : SingletonBase<API_Manager>
 {
     public delegate void SignInCallback(bool success, string message);
     public delegate void ScoreSubmit (bool success, string message);
@@ -21,11 +20,10 @@ public class API_Manager : MonoBehaviour
     SignInCallback GoogleAuth = null;
 
 
-    public static API_Manager instance;
-    private void Awake()
+    //public static API_Manager.Instance;
+    protected override void Awake()
     {
-        DontDestroyOnLoad(this);
-        instance = this;
+        base.Awake();
     }
     #region JsCallingMethod
     public void SignInWithGoogle(SignInCallback signIn)
@@ -456,16 +454,16 @@ public class API_Manager : MonoBehaviour
     #endregion
 
     #region Inventory
-    public void GetInvectory(GetInventory getInventory,int pageNumber)
+    public void GetInvectory(GetInventory getInventory,int pageNumber, string _fetchType = "UniqueAsset,Currency")
     {
-        StartCoroutine(Get_Inventory(getInventory, pageNumber));
+        StartCoroutine(Get_Inventory(getInventory, pageNumber, _fetchType));
     }
-    private IEnumerator Get_Inventory(GetInventory getInventory,int page_Number)
+    private IEnumerator Get_Inventory(GetInventory getInventory, int page_Number, string _type)
     {
         var userData = new
         {
             pageNumber = page_Number,
-            types = "UniqueAsset,Currency",
+            types = _type,
             forSale = false
         };
 
@@ -564,26 +562,16 @@ public class API_Manager : MonoBehaviour
         {
             quantity = _NumberOfTokens
         };
-
         string userDatajson = JsonConvert.SerializeObject(userData);
-
         string url = StaticDataBank.TokensPushingLink + StaticDataBank.playerlocalid;
-
         UnityWebRequest request = new UnityWebRequest(url, "POST");
-
         byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
-
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-
         request.downloadHandler = new DownloadHandlerBuffer();
-
         request.SetRequestHeader("Content-Type", "application/json");
-
         request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
-
         Debug.Log("Link for tokens pushing is " + url);
         yield return request.SendWebRequest();
-
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             TokenPushingResponseFunction(false, request.error);
@@ -598,10 +586,10 @@ public class API_Manager : MonoBehaviour
     }
     #endregion
 
-    #region InventoryUpdate 
+    #region InventoryUpdate
     public void UpdateInventoryItem(string ItemID, string AssetID, int UsesLeftValue, InventoryUpdateDelg InventoryUpdateResponseFunction)
     {
-        StartCoroutine(UpdateInventoryItemRoutine(ItemID, AssetID , UsesLeftValue, InventoryUpdateResponseFunction));
+        StartCoroutine(UpdateInventoryItemRoutine(ItemID, AssetID, UsesLeftValue, InventoryUpdateResponseFunction));
     }
     private IEnumerator UpdateInventoryItemRoutine(string _ItemID, string _AssetID, int _UsesLeftValue, InventoryUpdateDelg _InventoryUpdateResponseFunction)
     {
@@ -611,27 +599,16 @@ public class API_Manager : MonoBehaviour
             assetId = _AssetID,
             usesLeft = _UsesLeftValue
         };
-
         string userDatajson = JsonConvert.SerializeObject(userData);
-
         string url = StaticDataBank.InventoryUpdateLink + StaticDataBank.playerlocalid;
-
         UnityWebRequest request = new UnityWebRequest(url, "POST");
-
         byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
-
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-
         request.downloadHandler = new DownloadHandlerBuffer();
-
         request.SetRequestHeader("Content-Type", "application/json");
-
         request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
-
         Debug.Log("Link for inventory update is " + url);
-
         yield return request.SendWebRequest();
-
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             _InventoryUpdateResponseFunction(false, request.error);

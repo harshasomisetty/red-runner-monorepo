@@ -1,16 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Experimental.XR.Interaction;
 
 public class MenuManager : MonoBehaviour
 {
     [Header("Help Window")]
     public GameObject HelpWindow;
+
     [Header("Profile Attributes Placeholders")]
     public TextMeshProUGUI PlayerName_Placeholder;
     public TextMeshProUGUI WalletID_Placeholder;
+
     bool GameLaunched = false;
     private void Awake()
     {
@@ -67,4 +66,5 @@ public class MenuManager : MonoBehaviour
     {
         //m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
     }
+    
 }

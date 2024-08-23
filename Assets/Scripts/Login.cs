@@ -42,7 +42,7 @@ public class Login : MonoBehaviour
             Password.text.Length >= 6 && email.text.Length >= 6)
         {
             ToggleDataLoadingWindow(true);
-            API_Manager.instance.SignInUserWithFirebase(email.text, Password.text, OnSignInCompleted);
+            API_Manager.Instance.SignInUserWithFirebase(email.text, Password.text, OnSignInCompleted);
         }
         else
         {
@@ -57,7 +57,7 @@ public class Login : MonoBehaviour
             Password.text.Length >= 6 && email.text.Length >= 6)
         {
             ToggleDataLoadingWindow(true);
-            API_Manager.instance.SignUpUserWithFirebase(email.text, Password.text, OnSignUpCompleted);
+            API_Manager.Instance.SignUpUserWithFirebase(email.text, Password.text, OnSignUpCompleted);
         }
         else
         {
@@ -67,7 +67,7 @@ public class Login : MonoBehaviour
     public void SignInWithGoogle()
     {
         ToggleDataLoadingWindow(true);
-        API_Manager.instance.SignInWithGoogle(OnSignInCompleted);
+        API_Manager.Instance.SignInWithGoogle(OnSignInCompleted);
     }
     void OnSignUpCompleted(bool success, string message)
     {
@@ -88,6 +88,8 @@ public class Login : MonoBehaviour
         ToggleDataLoadingWindow(false);
         if (success)
         {
+            SocketController.Instance.ConnectSocketWithUserId(StaticDataBank.playerlocalid);
+
             Debug.Log("Sign In Success: " + message);
             Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
         }
@@ -120,93 +122,4 @@ public class Login : MonoBehaviour
             UserLogInFirebase(); 
         });
     }
-
-
-    //public TextAsset jsonFile;
-    //public GameShopData.GameShopData.GameShopAssets mynewshop;
-    //[ContextMenu("makedata")]
-    //public void makedata()
-    //{
-    //    string json = @"{
-    //      ""GameShopAssets"": {
-    //        ""SpeedBoosters"": [
-    //          {
-    //            ""Attributes"": [
-    //              {
-    //                ""TraitType"": ""Speed"",
-    //                ""Value"": ""Fast""
-    //              },
-    //              {
-    //                ""TraitType"": ""Duration"",
-    //                ""Value"": ""30s""
-    //              }
-    //            ],
-    //            ""CollectionId"": ""sb001"",
-    //            ""Description"": ""Increases speed for 30 seconds"",
-    //            ""ImageUrl"": ""http://example.com/speed_booster.png"",
-    //            ""Name"": ""Speed Booster"",
-    //            ""BoosterType"": ""Temporary"",
-    //            ""BoosterMultiplier"": 2,
-    //            ""Price"": [
-    //              {
-    //                ""CurrencyId"": ""USD"",
-    //                ""price"": ""1.99""
-    //              }
-    //            ]
-    //          }
-    //        ],
-    //        ""DoubleJumpBoosters"": [
-    //          {
-    //            ""Attributes"": [
-    //              {
-    //                ""TraitType"": ""Jump"",
-    //                ""Value"": ""Double""
-    //              }
-    //            ],
-    //            ""CollectionId"": ""dj001"",
-    //            ""Description"": ""Allows double jump for 1 minute"",
-    //            ""ImageUrl"": ""http://example.com/double_jump.png"",
-    //            ""Name"": ""Double Jump Booster"",
-    //            ""BoosterType"": ""Temporary"",
-    //            ""BoosterMultiplier"": 1,
-    //            ""Price"": [
-    //              {
-    //                ""CurrencyId"": ""USD"",
-    //                ""price"": ""2.99""
-    //              }
-    //            ]
-    //          }
-    //        ],
-    //        ""Skins"": [
-    //          {
-    //            ""Attributes"": [
-    //              {
-    //                ""TraitType"": ""Color"",
-    //                ""Value"": ""Red""
-    //              }
-    //            ],
-    //            ""CollectionId"": ""sk001"",
-    //            ""Description"": ""A vibrant red skin"",
-    //            ""ImageUrl"": ""http://example.com/red_skin.png"",
-    //            ""Name"": ""Red Skin"",
-    //            ""SkinType"": ""Color"",
-    //            ""Price"": [
-    //              {
-    //                ""CurrencyId"": ""USD"",
-    //                ""price"": ""0.99""
-    //              }
-    //            ]
-    //          }
-    //        ]
-    //      }
-    //    }";
-    //    string jsonstr = jsonFile.text;
-    //    Debug.Log("Json data : " + jsonstr);
-    //    string userDatajson = JsonConvert.SerializeObject(mynewshop);
-    //    Debug.Log(" my Json data : " + userDatajson);
-    //    mynewshop = JsonConvert.DeserializeObject<GameShopData.GameShopData.GameShopAssets>(jsonstr);
-    //    Debug.Log("Get New Shop Data");
-    //    Debug.Log(mynewshop.SpeedBoosters[0].Name);
-    //    Debug.Log(mynewshop.SpeedBoosters[0].Description);
-    //}
 }

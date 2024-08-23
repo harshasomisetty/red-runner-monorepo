@@ -14,6 +14,7 @@ public class InGameEquipmentWindow : MonoBehaviour
     public Image CurrentSpeedBoosterHolder;
     public Image CurrentJumpBoosterHolder;
     public Image CurrentSkinHolder;
+    public Sprite DefaultHolderSprite;
 
     [Header("Number of booster Text Field")]
     public TextMeshProUGUI CurrentSpeedBoosterHolderText;
@@ -153,7 +154,7 @@ public class InGameEquipmentWindow : MonoBehaviour
                     string boostervalue = InventoryManager.Instance.getvalueofspeedbooster(InventoryManager.Instance.SpeedBoosterIndex[i]);
                     temp.GetComponent<BoosterInGame>().PopulateBooster(sprite, boostervalue);
                     int index = i;
-                    Debug.Log(" index is : " + index);
+                    //Debug.Log(" index is : " + index);
                     temp.GetComponent<Button>().onClick.AddListener(delegate {
 
                         SelectSpeedBoosterAsset(index, sprite, int.Parse(boostervalue));
@@ -168,7 +169,7 @@ public class InGameEquipmentWindow : MonoBehaviour
                     string boostervalue = InventoryManager.Instance.getvalueofdoublejumbbooster(InventoryManager.Instance.DoubleJumpIndex[i]);
                     temp.GetComponent<BoosterInGame>().PopulateBooster(sprite, boostervalue);
                     int index = i;
-                    Debug.Log(" index is : " + index);
+                    //Debug.Log(" index is : " + index);
                     temp.GetComponent<Button>().onClick.AddListener(delegate {
 
                         SelectJumpBoosterAsset(index, sprite, int.Parse(boostervalue));
@@ -180,11 +181,12 @@ public class InGameEquipmentWindow : MonoBehaviour
                 for (int i = 0; i < InventoryManager.Instance.SkinsIndex.Count; i++)
                 {
                     GameObject temp = Instantiate(NFT_Selector_Unit_Skins, EquipmentBar) as GameObject;
+                    temp.transform.GetChild(0).GetChild(0).GetComponent<RectTransform>().localPosition = new Vector3(0f, -44, 0f);
                     Sprite sprite = InventoryManager.Instance.getspriteofskinbooster(InventoryManager.Instance.SkinsIndex[i]);
                     string skinID = InventoryManager.Instance.getskinamebyindex(InventoryManager.Instance.SkinsIndex[i]);
                     temp.GetComponent<BoosterInGame>().PopulateBooster(sprite, "");
                     int index = i;
-                    Debug.Log(" index is : " + index);
+                    //Debug.Log(" index is : " + index);
                     temp.GetComponent<Button>().onClick.AddListener(delegate {
 
                         SelectSkinAsset(index, sprite, skinID);
@@ -200,7 +202,7 @@ public class InGameEquipmentWindow : MonoBehaviour
     }
     public void SelectSpeedBoosterAsset(int SelectIndex, Sprite sprite, int boostervalue)
     {
-        Debug.Log("SelectSpeedBoosterAsset : " + SelectIndex);
+        //Debug.Log("SelectSpeedBoosterAsset : " + SelectIndex);
         if (SelectIndex == CurrentSelectedSpeedBoosterAsset)
         {
             return;
@@ -209,14 +211,19 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedSpeedBoosterAsset = SelectIndex;
             CurrentSpeedBoosterHolder.sprite = sprite;
+            string ItemID = InventoryManager.Instance.getItemIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
+            string AssetID = InventoryManager.Instance.getAssetIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
+
             //CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentSpeedBoosterHolderText.text = "x" + boostervalue;
             EquipSpeedBooster(boostervalue);
+            GlobalFeaturesManager.Instance.SelectSpeedBoosterNft(ItemID, AssetID, boostervalue);
+
         }
     }
     public void SelectJumpBoosterAsset(int SelectIndex, Sprite sprite, int boostervalue)
     {
-        Debug.Log("SelectJumpBoosterAsset : " + SelectIndex);
+        //Debug.Log("SelectJumpBoosterAsset : " + SelectIndex);
         if (SelectIndex == CurrentSelectedJumpBoosterAsset)
         {
             return;
@@ -225,14 +232,17 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedJumpBoosterAsset = SelectIndex;
             CurrentJumpBoosterHolder.sprite = sprite;
+            string ItemID = InventoryManager.Instance.getItemIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
+            string AssetID = InventoryManager.Instance.getAssetIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
             //CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentJumpBoosterHolderText.text = "x" + boostervalue;
             EquipJumpBooster(boostervalue);
+            GlobalFeaturesManager.Instance.SelectJumpBoosterNft(ItemID, AssetID, boostervalue);
         }
     }
     public void SelectSkinAsset(int SelectIndex, Sprite sprite, string skinid)
     {
-        Debug.Log("Selectskin asset : " + SelectIndex + "Skin id : " + skinid);
+        //Debug.Log("Selectskin asset : " + SelectIndex + "Skin id : " + skinid);
         if (SelectIndex == CurrentSelectedSkinAsset)
         {
             return;
@@ -247,11 +257,13 @@ public class InGameEquipmentWindow : MonoBehaviour
     }
     void ClearPlaceHolders()
     {
-        CurrentSpeedBoosterHolder.sprite = null;
+        CurrentSpeedBoosterHolder.sprite = DefaultHolderSprite;
+        CurrentSpeedBoosterHolderText.text = "x0";
         //CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
-        CurrentJumpBoosterHolder.sprite = null;
+        CurrentJumpBoosterHolder.sprite = DefaultHolderSprite;
+        CurrentJumpBoosterHolderText.text = "x0";
         //CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
-        CurrentSkinHolder.sprite = null;
+        CurrentSkinHolder.sprite = DefaultHolderSprite;
         //CurrentSkinHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
     }
     public void EquipSpeedBooster(int BoosterValue = 0)
@@ -271,5 +283,6 @@ public class InGameEquipmentWindow : MonoBehaviour
         PlayerPrefs.SetInt("SpeedBoostersEquipped", 0);
         PlayerPrefs.SetInt("JumpBoostersEquipped", 0);
         PlayerPrefs.SetString("SkinEquipped", "Default");
+        GlobalFeaturesManager.Instance.ClearEquippedItemDetails();
     }
 }
