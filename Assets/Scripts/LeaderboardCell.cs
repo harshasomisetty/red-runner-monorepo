@@ -22,11 +22,12 @@ public class LeaderboardCell : MonoBehaviour
             userGift.sprite = getgift[ranknum];
             userGift.enabled = false;
             score.text = getscore+" m";
+            userGift.SetNativeSize();
         }
         else
         {
             userRank.enabled = false;
-            rank.text = ranknum + "";
+            rank.text = (ranknum + 1) + "";
             userName.text = name;
             userGift.enabled = false;
             score.text = getscore + " m";

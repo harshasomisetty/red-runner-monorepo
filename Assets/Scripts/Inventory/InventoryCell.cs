@@ -9,24 +9,26 @@ public class InventoryCell : MonoBehaviour
     public TextMeshProUGUI Name;
     public Button ShowPanelButton;
     public int DataIndex;
+    public int pageNumber;
 
 
-    public void SetValues(int dataIndex,string assetname, Sprite _boosterImage)
+    public void SetValues(DataIndex dataIndex,string assetname, Sprite _boosterImage)
     {
         Name.text = assetname;
-        if (_boosterImage == null)
-        {
-            BoosterImage.enabled = false;
-        }
+        //if (_boosterImage == null)
+        //{
+        //    BoosterImage.enabled = false;
+        //}
         BoosterImage.sprite = _boosterImage;
-        DataIndex = dataIndex;
+        DataIndex = dataIndex.boosterindex;
+        pageNumber = dataIndex.pageNumber;
         ShowPanelButton.onClick.RemoveAllListeners();
         ShowPanelButton.onClick.AddListener(delegate {
-            GetDataFromMangertoDisplay(dataIndex);
+            GetDataFromMangertoDisplay(DataIndex, pageNumber);
         });
     }
-    public void GetDataFromMangertoDisplay(int index)
+    public void GetDataFromMangertoDisplay(int index,int _pageNumber)
     {
-        InventoryManager.Instance.ShowDetailsPanel(index);
+        InventoryManager.Instance.ShowDetailsPanel(index, _pageNumber);
     }
 }

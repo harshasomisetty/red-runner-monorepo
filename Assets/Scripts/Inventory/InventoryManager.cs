@@ -20,7 +20,7 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance;
 
 
-    public GameObject inventoryCellBosster, inventoryCellSkin;
+    public GameObject inventoryCellBosster, inventoryCellCurrency;
     public Transform speedContainer;
     public Transform doubleJumpContainer;
     public Transform skinsContainer;
@@ -129,7 +129,7 @@ public class InventoryManager : MonoBehaviour
             //CODE HERE//
         }
     }
-    private InventoryCell GetCell(int index,Transform cellContainer,GameObject inventoryCell)
+    private InventoryCell GetCell(int index,Transform cellContainer,GameObject _inventoryCell)
     {
         if (index < cellContainer.childCount)
         {
@@ -137,7 +137,7 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            return Instantiate(inventoryCell, cellContainer).GetComponent<InventoryCell>();
+            return Instantiate(_inventoryCell, cellContainer).GetComponent<InventoryCell>();
         }
     }
     IEnumerator GetInventory_Data(InventoryData.Root data, int pageNumber)
@@ -168,21 +168,21 @@ public class InventoryManager : MonoBehaviour
                 {
                     _data.boosterindex = i;
                     SkinsIndex.Add(_data);
-                    cell = GetCell(SkinsIndex.Count - 1, skinsContainer, inventoryCellSkin);
+                    cell = GetCell(SkinsIndex.Count - 1, skinsContainer, inventoryCellBosster);
                 }
             }
             else if (data.data[i].type.Contains("Currency"))
             {
                 _data.boosterindex = i;
                 Currencies.Add(_data);
-                cell = GetCell(Currencies.Count - 1, currencyContainer, inventoryCellBosster);
+                cell = GetCell(Currencies.Count - 1, currencyContainer, inventoryCellCurrency);
             }
 
             string dataSetName = data.data[i].item.name + "";
             cell.name = dataSetName;
             cells.Add(cell);
             cell.gameObject.SetActive(true);
-            yield return StartCoroutine(GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, i));
+            yield return StartCoroutine(GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, _data));
         }
         //SUCCESS SCENARIOS//
         if (!_sequenceCall)
@@ -198,7 +198,7 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    IEnumerator GetInventoryItemImage(string url, string datasetname, InventoryCell cell, int index)
+    IEnumerator GetInventoryItemImage(string url, string datasetname, InventoryCell cell, DataIndex index)
     {
         bool istartchecking = false;
 
@@ -223,7 +223,7 @@ public class InventoryManager : MonoBehaviour
                     {
                         spriteDictionary.Add(datasetname, m_sprite);
                     }
-                    cell.SetValues(index, datasetname, m_sprite);
+                    cell.SetValues(index, StaticDataBank.RemoveWordFromString(datasetname), m_sprite);
                 }
                 else
                 {
@@ -236,14 +236,15 @@ public class InventoryManager : MonoBehaviour
     }
 
 
-    public void ShowDetailsPanel(int dataindex)
+    public void ShowDetailsPanel(int dataindex, int pageNumber)
     {
-        Description.text = m_data[0].data[dataindex].item.description;
-        BoosterName.text = m_data[0].data[dataindex].item.name;
-        Debug.Log(m_data[0].data[dataindex].item.status);
-        if (spriteDictionary.ContainsKey(m_data[0].data[dataindex].item.name))
+        Description.text = m_data[pageNumber].data[dataindex].item.description;
+        //BoosterName.text = m_data[pageNumber].data[dataindex].item.name;
+        BoosterName.text = StaticDataBank.RemoveWordFromString(m_data[pageNumber].data[dataindex].item.name);
+        Debug.Log(m_data[pageNumber].data[dataindex].item.status);
+        if (spriteDictionary.ContainsKey(m_data[pageNumber].data[dataindex].item.name))
         {
-            boosterImage.sprite = spriteDictionary[m_data[0].data[dataindex].item.name];
+            boosterImage.sprite = spriteDictionary[m_data[pageNumber].data[dataindex].item.name];
             boosterImage.SetNativeSize();
         }
         MintButton.gameObject.SetActive(false);

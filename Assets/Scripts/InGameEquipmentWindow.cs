@@ -73,15 +73,23 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         ClearAllHighlightedGameEquipmentOptionButtons();
         GameEquipmentOptionButtons[i].image.sprite = GameEquipmentOptionHighlighterSprite;
+                GameEquipmentOptionButtons[i].image.SetNativeSize();
+        GameEquipmentOptionButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
     }
     void ClearAllHighlightedGameEquipmentOptionButtons()
     {
         for (int i = 0; i < GameEquipmentOptionButtons.Length; i++)
         {
             if (GameEquipmentOptionNormalSprite == null)
+            {
                 GameEquipmentOptionButtons[i].image.sprite = null;
+            }
             else
+            {
+                GameEquipmentOptionButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.3f, 97 / 1.3f);
                 GameEquipmentOptionButtons[i].image.sprite = GameEquipmentOptionNormalSprite;
+                GameEquipmentOptionButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
+            }
         }
     }
     void ClearEquipmentBar()
@@ -201,7 +209,7 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedSpeedBoosterAsset = SelectIndex;
             CurrentSpeedBoosterHolder.sprite = sprite;
-            CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
+            //CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentSpeedBoosterHolderText.text = "x" + boostervalue;
             EquipSpeedBooster(boostervalue);
         }
@@ -217,7 +225,7 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedJumpBoosterAsset = SelectIndex;
             CurrentJumpBoosterHolder.sprite = sprite;
-            CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
+            //CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentJumpBoosterHolderText.text = "x" + boostervalue;
             EquipJumpBooster(boostervalue);
         }
@@ -233,18 +241,18 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedSkinAsset = SelectIndex;
             CurrentSkinHolder.sprite = sprite;
-            CurrentSkinHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
+            //CurrentSkinHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             EquipSkin(skinid);
         }
     }
     void ClearPlaceHolders()
     {
         CurrentSpeedBoosterHolder.sprite = null;
-        CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
+        //CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
         CurrentJumpBoosterHolder.sprite = null;
-        CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
+        //CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
         CurrentSkinHolder.sprite = null;
-        CurrentSkinHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
+        //CurrentSkinHolder.GetComponent<CanvasGroup>().alpha = 0.0f;
     }
     public void EquipSpeedBooster(int BoosterValue = 0)
     {
