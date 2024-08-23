@@ -33,7 +33,8 @@ public static class StaticDataBank
     public static readonly string Get_ShopData = BackendBaseUrl + "shop/getShopData?userId=";
     public static readonly string Get_Inventory = BackendBaseUrl + "gs/getInventory?userId=";
     public static readonly string Mint = BackendBaseUrl + "gs/mintAsset?userId=";
-
+    public static readonly string TokensPushingLink = BackendBaseUrl + "gs/claimCoins?userId=";
+    public static readonly string InventoryUpdateLink = BackendBaseUrl + "gs/updateNft?userId=";
     #endregion
 
     #region Static Profile Data

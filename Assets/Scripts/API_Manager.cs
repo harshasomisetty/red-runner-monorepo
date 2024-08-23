@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
+using UnityEditor.VersionControl;
 
 public class API_Manager : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class API_Manager : MonoBehaviour
     public delegate void GetInventory(bool success, InventoryData.Root data);
     public delegate void MintingNft(bool success, string message);
     public delegate void TokenPushingDelg(bool success, string message);
+    public delegate void InventoryUpdateDelg(bool success, string message);
     SignInCallback GoogleAuth = null;
 
 
@@ -549,10 +551,100 @@ public class API_Manager : MonoBehaviour
             ismint(true, jsonResponse);
         }
     }
-
     #endregion
 
- 
+    #region TokenPushing
+    public void PushTokens(int NumberOfTokens, TokenPushingDelg TokenPushingResponseFunction)
+    {
+        StartCoroutine(PushTokensRoutine(NumberOfTokens, TokenPushingResponseFunction));
+    }
+    private IEnumerator PushTokensRoutine(int _NumberOfTokens, TokenPushingDelg TokenPushingResponseFunction)
+    {
+        var userData = new
+        {
+            quantity = _NumberOfTokens
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.TokensPushingLink + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        Debug.Log("Link for tokens pushing is " + url);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            TokenPushingResponseFunction(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            TokenPushingResponseFunction(true, jsonResponse);
+        }
+    }
+    #endregion
+
+    #region InventoryUpdate 
+    public void UpdateInventoryItem(string ItemID, string AssetID, int UsesLeftValue, InventoryUpdateDelg InventoryUpdateResponseFunction)
+    {
+        StartCoroutine(UpdateInventoryItemRoutine(ItemID, AssetID , UsesLeftValue, InventoryUpdateResponseFunction));
+    }
+    private IEnumerator UpdateInventoryItemRoutine(string _ItemID, string _AssetID, int _UsesLeftValue, InventoryUpdateDelg _InventoryUpdateResponseFunction)
+    {
+        var userData = new
+        {
+            itemId = _ItemID,
+            assetId = _AssetID,
+            usesLeft = _UsesLeftValue
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.InventoryUpdateLink + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        Debug.Log("Link for inventory update is " + url);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            _InventoryUpdateResponseFunction(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            _InventoryUpdateResponseFunction(true, jsonResponse);
+        }
+    }
+    #endregion
 
     #region Generic API Caller
     //you can add more two or more prams for callback to make more generic like this
@@ -595,5 +687,4 @@ public class API_Manager : MonoBehaviour
     }
 
     #endregion
-
 }
