@@ -255,7 +255,7 @@ public class UIManager : MonoBehaviour
         LoadingScreen.SetActive(false);
         InventoryHeaderBar.SetActive(true);
         LaunchFeatureWindow(1);
-        OnClickInventoryVerticalButton(0);
+        OnClickInventoryVerticalButton(1);
         FeatureScreenBackButton.SetActive(true);
     }
     public void SignalInventoryFailure()

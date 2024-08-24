@@ -14,8 +14,8 @@ public interface SocketEventListener
 public class SocketController : SingletonBase<SocketController>
 {
     private SocketManager _manager;
-    // private const string SOCKET_URL = "https://gameshift.clvtechnologies.com";
-    private const string SOCKET_URL = "http://127.0.0.1:3000";
+    private const string SOCKET_URL = "https://gameshift.clvtechnologies.com";
+    //private const string SOCKET_URL = "http://127.0.0.1:3000";
     private List<SocketEventListener> _listeners = new List<SocketEventListener>();
     
     protected override void Awake()
@@ -44,7 +44,6 @@ public class SocketController : SingletonBase<SocketController>
     void Start()
     {
         // Create and setup SocketOptions
-        ConnectSocketWithUserId("123");
     }
     
     public void ConnectSocketWithUserId(string userId)

@@ -1,4 +1,3 @@
-using RedRunner.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +18,7 @@ public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
 
+    public TextMeshProUGUI SolValue;
 
     public GameObject inventoryCellBosster, inventoryCellCurrency;
     public Transform speedContainer;
@@ -45,12 +45,13 @@ public class InventoryManager : MonoBehaviour
     int current_page = 1;
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
 
-    private void Awake()
+    void Awake()
     {
         if(Instance == null)
         {
             Instance = this;
         }
+        GetSolValue();
     }
 
     public void FetchInventoryData(bool SequenceCall)
@@ -58,13 +59,9 @@ public class InventoryManager : MonoBehaviour
         ClearDataToUpdate();
         CheckInventoryDataForMultiplePages(SequenceCall);
     }
-    //public void OnResetInventory()
-    //{
-        
-    //}
     public void ClearDataToUpdate()
     {
-        //dataFetchCompleted = false;
+        dataFetchCompleted = false;
         current_page = 1;
         foreach (InventoryCell curcell in cells)
         {
@@ -80,18 +77,17 @@ public class InventoryManager : MonoBehaviour
         cells.Clear();
         m_data.Clear();
     }
-    //bool dataFetchCompleted = false;
+    bool dataFetchCompleted = false;
     bool _sequenceCall = false;
     public void CheckInventoryDataForMultiplePages(bool SequenceCall)
     {
         _sequenceCall = SequenceCall;
         if (m_data.Count == 0 ||m_data[0].meta.totalPages >= current_page)
         {
-            API_Manager.instance.GetInvectory(Get_InventoryData, current_page++);
+            API_Manager.Instance.GetInvectory(Get_InventoryData, current_page++);
         }
         else
         {
-            //dataFetchCompleted = true;
             StartCoroutine(senddatatopopulate());
         }
     }
@@ -99,6 +95,10 @@ public class InventoryManager : MonoBehaviour
     {
         for (int i = 0; i < m_data.Count; i++)
         {
+            if (i == m_data.Count - 1)
+            {
+                dataFetchCompleted = true;
+            }
             yield return StartCoroutine(GetInventory_Data(m_data[i], i));
         }
     }
@@ -143,7 +143,6 @@ public class InventoryManager : MonoBehaviour
     IEnumerator GetInventory_Data(InventoryData.Root data, int pageNumber)
     {
         Debug.Log("Inventory Data Success");
-        bool success = false;
         for (int i = 0; i < data.data.Count; i++)
         {
             InventoryCell cell = null;
@@ -173,6 +172,10 @@ public class InventoryManager : MonoBehaviour
             }
             else if (data.data[i].type.Contains("Currency"))
             {
+                if (data.data[i].item.id.Contains("SOL"))
+                {
+                    SetSolValue(data.data[i].quantity);
+                }
                 _data.boosterindex = i;
                 Currencies.Add(_data);
                 cell = GetCell(Currencies.Count - 1, currencyContainer, inventoryCellCurrency);
@@ -184,17 +187,20 @@ public class InventoryManager : MonoBehaviour
             cell.gameObject.SetActive(true);
             yield return StartCoroutine(GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, _data));
         }
-        //SUCCESS SCENARIOS//
-        if (!_sequenceCall)
-            UIManager.Instance.LaunchInventory();
-        else
+        if (dataFetchCompleted)
         {
-            UIManager.Instance.SetGameEquipmentStatusText("");
-            UIManager.Instance.ToggleGameEquipmentStatus(false);
-            InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
-            UIManager.Instance.ToggleGameEquipmentFeatures(true);
-            UIManager.Instance.GameEquipmentBackButton.SetActive(true);
-            Debug.Log("Sequence Success");
+            //SUCCESS SCENARIOS//
+            if (!_sequenceCall)
+                UIManager.Instance.LaunchInventory();
+            else
+            {
+                UIManager.Instance.SetGameEquipmentStatusText("");
+                UIManager.Instance.ToggleGameEquipmentStatus(false);
+                InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
+                UIManager.Instance.ToggleGameEquipmentFeatures(true);
+                UIManager.Instance.GameEquipmentBackButton.SetActive(true);
+                Debug.Log("Sequence Success");
+            }
         }
     }
 
@@ -209,7 +215,7 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            API_Manager.instance.DownloadImage(url, (success, sprite) =>
+            API_Manager.Instance.DownloadImage(url, (success, sprite) =>
             {
                 istartchecking = true;
                 if (success)
@@ -260,6 +266,16 @@ public class InventoryManager : MonoBehaviour
         Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
         return sprite;
     }
+    public string getItemIdOfSpeedBooster(DataIndex _data)
+    {
+        string SpeedBoosterItemID = m_data[_data.pageNumber].data[_data.boosterindex].item.itemId;
+        return SpeedBoosterItemID;
+    }
+    public string getAssetIdOfSpeedBooster(DataIndex _data)
+    {
+        string SpeedBoosterAssetID = m_data[_data.pageNumber].data[_data.boosterindex].item.id;
+        return SpeedBoosterAssetID;
+    }
     public string getvalueofdoublejumbbooster(DataIndex _data)
     {
         return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
@@ -269,6 +285,16 @@ public class InventoryManager : MonoBehaviour
         Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
         return sprite;
     }
+    public string getItemIdOfJumpBooster(DataIndex _data)
+    {
+        string JumpBoosterItemID = m_data[_data.pageNumber].data[_data.boosterindex].item.itemId;
+        return JumpBoosterItemID;
+    }
+    public string getAssetIdOfJumpBooster(DataIndex _data)
+    {
+        string JumpBoosterAssetID = m_data[_data.pageNumber].data[_data.boosterindex].item.id;
+        return JumpBoosterAssetID;
+    }
     public Sprite getspriteofskinbooster(DataIndex _data)
     {
         Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
@@ -277,5 +303,27 @@ public class InventoryManager : MonoBehaviour
     public string getskinamebyindex(DataIndex _data)
     {
         return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
+    }
+    public void SetSolValue(string solValue)
+    {
+        Debug.Log("Currency Quantity : " + solValue);
+        SolValue.text = "" + solValue;
+    }
+    public void GetSolValue()
+    {
+        API_Manager.Instance.GetInvectory((success, _data) =>
+        {
+            if (success)
+            {
+                for (int i = 0; i < _data.data.Count; i++)
+                {
+                    Debug.Log(i + "index ");
+                    if (_data.data[i].item.id == "SOL")
+                    {
+                        SetSolValue(_data.data[i].quantity);
+                    }
+                }
+            }
+        }, 1, "Currency");
     }
 }

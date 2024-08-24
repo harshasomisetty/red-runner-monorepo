@@ -17,9 +17,12 @@ public class UIDataConatainer
 public class ShopManager : MonoBehaviour
 {
     public static ShopManager Instance;
-    private void Awake()
+    void Awake()
     {
-        Instance = this;
+        if(Instance == null)
+        {
+            Instance = this;
+        }
     }
 
     [Header("Detail Panel UI")]
@@ -40,7 +43,7 @@ public class ShopManager : MonoBehaviour
 
     //private void OnEnable()
     //{
-    //    API_Manager.instance.GetShopData(GetAllShopData);
+    //    API_Manager.Instance.GetShopData(GetAllShopData);
     //}
     void GetAllShopData(bool sucess, GameShop response)
     {
@@ -59,7 +62,7 @@ public class ShopManager : MonoBehaviour
     //Sprite DownloadImage(string imageUrl)
     //{
     //    Sprite get_sprite = null;
-    //    API_Manager.instance.DownloadImage(imageUrl, (success, m_sprite) => {
+    //    API_Manager.Instance.DownloadImage(imageUrl, (success, m_sprite) => {
     //        if (success)
     //        {
     //            m_sprite = get_sprite;
@@ -97,7 +100,7 @@ public class ShopManager : MonoBehaviour
     IEnumerator DownloadImage(string imageUrl,string imageName,UIDataConatainer data)
     {
         bool istartchecking = false;
-        API_Manager.instance.DownloadImage(imageUrl, (success, m_sprite) => {
+        API_Manager.Instance.DownloadImage(imageUrl, (success, m_sprite) => {
             istartchecking = true;
             if (success)
             {
@@ -234,7 +237,8 @@ public class ShopManager : MonoBehaviour
         if (spriteDictionary.ContainsKey(booster.name))
             boosterImage.sprite = spriteDictionary[booster.name];
         boosterImage.SetNativeSize();
-        BoosterName.text = StaticDataBank.RemoveWordFromString(booster.name);
+        //BoosterName.text = StaticDataBank.RemoveWordFromString(booster.name);
+        BoosterName.text = booster.name;
         Description.text = booster.description;
         attribute.text = booster.attributes[0].traitType + ":" + booster.attributes[0].value;
         Minting(mintid);
@@ -255,7 +259,7 @@ public class ShopManager : MonoBehaviour
         UIManager.Instance.SetMintingStatusText("Minting Asset Please Wait");
         UIManager.Instance.ToggleMintingDialog(true);
         UIManager.Instance.ToggleMintingPanelCloseButton(false, false);
-        API_Manager.instance.MintNft(itemName, (success, message) =>
+        API_Manager.Instance.MintNft(itemName, (success, message) =>
         {
             Blocker.SetActive(false);
             if (success)
@@ -279,6 +283,6 @@ public class ShopManager : MonoBehaviour
 
     public void FetchShopData()
     {
-        API_Manager.instance.GetShopData(GetAllShopData);
+        API_Manager.Instance.GetShopData(GetAllShopData);
     }
 }

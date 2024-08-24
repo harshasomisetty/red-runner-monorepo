@@ -24,6 +24,7 @@ namespace RedRunner.UI
                 var ingameScreen = GameTemplateUIManager.Singleton.GetUIScreen(UIScreenInfo.IN_GAME_SCREEN);
                 GameTemplateUIManager.Singleton.OpenScreen(ingameScreen);
                 GameManager.Singleton.StartGame();
+                Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
             HomeButton.SetButtonAction(() =>
             {
