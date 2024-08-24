@@ -9,6 +9,7 @@ public class MenuManager : MonoBehaviour
     [Header("Profile Attributes Placeholders")]
     public TextMeshProUGUI PlayerName_Placeholder;
     public TextMeshProUGUI WalletID_Placeholder;
+    public TextMeshProUGUI SolValue;
 
     bool GameLaunched = false;
     private void Awake()
@@ -65,6 +66,29 @@ public class MenuManager : MonoBehaviour
     public void ChangeSkin(int skinIndex)
     {
         //m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
+    }
+    
+    public void SetSolValue(string solValue)
+    {
+        Debug.Log("Currency Quantity : " + solValue);
+        SolValue.text = "" + solValue;
+    }
+    public void GetSolValue()
+    {
+        API_Manager.Instance.GetInvectory((success, _data) =>
+        {
+            if (success)
+            {
+                for (int i = 0; i < _data.data.Count; i++)
+                {
+                    Debug.Log(i + "index ");
+                    if (_data.data[i].item.id == "SOL")
+                    {
+                        SetSolValue(_data.data[i].quantity);
+                    }
+                }
+            }
+        }, 1, "Currency");
     }
     
 }
