@@ -6,6 +6,7 @@ public class GlobalCanvasManager : SingletonBase<GlobalCanvasManager>
 {
      [SerializeField] 
      private SockerPrompterUIHandler socketPrompter;
+     public SockerPrompterUIHandler SocketPrompter => socketPrompter;
      
      [SerializeField] 
      private LoadingPanelUIHandler loadingPanel;

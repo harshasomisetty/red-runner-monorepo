@@ -495,14 +495,14 @@ public class API_Manager : SingletonBase<API_Manager>
 
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            ismint(false, request.error);
+            ismint?.Invoke(false, request.error);
             Debug.Log(request.error);
         }
         else
         {
             string jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
-            ismint(true, jsonResponse);
+            ismint?.Invoke(true, jsonResponse);
         }
     }
     #endregion
