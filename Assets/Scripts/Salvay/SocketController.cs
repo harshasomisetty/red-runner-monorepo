@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Best.SocketIO;
 using Best.SocketIO.Events;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 
@@ -69,7 +70,18 @@ public class SocketController : SingletonBase<SocketController>
     private void OnPayoutReceived()
     {
         Debug.Log(_manager.Socket.CurrentPacket.Payload);
-        BroadcastToAllListeners("Payout Received");
+        BroadcastToAllListeners("Payout Received " + GetAmountStringFromPayload(_manager.Socket.CurrentPacket.Payload) + " SOL");
+    }
+
+    private float GetAmountStringFromPayload(string jsonString)
+    {
+        JArray jsonArray = JArray.Parse(jsonString);
+
+        // Access the second element, which is the JSON object containing the amount
+        JObject jsonObject = (JObject)jsonArray[1];
+
+        // Get the value of the "amount" key
+        return (jsonObject["amount"] ?? 0f).Value<float>();
     }
 
     private void OnAssetMinted()

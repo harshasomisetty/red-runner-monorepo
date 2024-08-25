@@ -215,12 +215,13 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            API_Manager.Instance.DownloadImage(url, (success, sprite) =>
+            GlobalFeaturesManager.Instance.ImageCache.DownloadImage(url, (sprite) =>
             {
                 istartchecking = true;
-                if (success)
+                if (sprite != null)
                 {
-                    Sprite m_sprite = sprite;
+                    Sprite m_sprite = Sprite.Create(sprite, new Rect(0, 0, sprite.width, sprite.height), new Vector2(0.5f, 0.5f));
+                    
                     if (spriteDictionary.ContainsKey(datasetname))
                     {
                         spriteDictionary[datasetname] = m_sprite;
@@ -248,6 +249,7 @@ public class InventoryManager : MonoBehaviour
         //BoosterName.text = m_data[pageNumber].data[dataindex].item.name;
         BoosterName.text = StaticDataBank.RemoveWordFromString(m_data[pageNumber].data[dataindex].item.name);
         Debug.Log(m_data[pageNumber].data[dataindex].item.status);
+        
         if (spriteDictionary.ContainsKey(m_data[pageNumber].data[dataindex].item.name))
         {
             boosterImage.sprite = spriteDictionary[m_data[pageNumber].data[dataindex].item.name];

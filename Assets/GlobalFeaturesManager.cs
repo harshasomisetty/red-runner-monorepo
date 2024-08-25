@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using RedRunner.TerrainGeneration;
 using UnityEditor.VersionControl;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>
 {
+    [SerializeField] private ImageCache imageCache;
+    public ImageCache ImageCache => imageCache;
+     
     #region TokensPushingFeature
     [SerializeField]
     int NumberOfTokensToPush = 0;

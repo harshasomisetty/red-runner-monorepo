@@ -100,20 +100,25 @@ public class ShopManager : MonoBehaviour
     IEnumerator DownloadImage(string imageUrl,string imageName,UIDataConatainer data)
     {
         bool istartchecking = false;
-        API_Manager.Instance.DownloadImage(imageUrl, (success, m_sprite) => {
+        GlobalFeaturesManager.Instance.ImageCache.DownloadImage(imageUrl, (m_sprite) => {
+            
             istartchecking = true;
-            if (success)
+            
+            if (m_sprite != null)
             {
+                Sprite tempSprite = Sprite.Create(m_sprite, new Rect(0, 0, m_sprite.width, m_sprite.height), new Vector2(0.5f, 0.5f));
+                
                 if (spriteDictionary.ContainsKey(imageName))
                 {
-                    spriteDictionary[imageName] = m_sprite;
+                    spriteDictionary[imageName] = tempSprite;
                 }
                 else
                 {
-                    spriteDictionary.Add(imageName, m_sprite);
+                    spriteDictionary.Add(imageName, tempSprite);
                 }
                 data.boosterNameText.text = StaticDataBank.RemoveWordFromString(imageName);
-                data.boosterImage.sprite = m_sprite;
+                data.boosterImage.sprite = tempSprite;
+                
                 if(imageName.Contains("Skin"))
                     data.boosterImage.SetNativeSize();
             }
@@ -122,6 +127,7 @@ public class ShopManager : MonoBehaviour
                 Debug.Log("Failed to fetch image");
             }
         });
+        
         yield return new WaitUntil(() => istartchecking);
     }
     
