@@ -35,7 +35,7 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
         Animating
     }
 
-    public PopupState popupState = PopupState.Hidden; // Tracks the current state of the popup
+    private PopupState popupState = PopupState.Hidden; // Tracks the current state of the popup
 
     void Start()
     {
@@ -67,11 +67,12 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
                 Invoke(nameof(HidePopup), TIME_TO_SHOW_FOR);
             
             // Slide in to the initial position
-            popupTransform.DOAnchorPos(m_ShowingPosition, SlideDuration).SetEase(Ease.OutCubic).OnComplete(() =>
+            var tween = popupTransform.DOAnchorPos(m_ShowingPosition, SlideDuration).SetEase(Ease.OutCubic).OnComplete(() =>
             {
                 // Update the state to Visible after the animation completes
                 popupState = PopupState.Visible;
-
+                m_hideTween?.Kill(false);
+                
                 // Wait for the stay duration and then slide back out
                 m_hideTween = DOVirtual.DelayedCall(StayDuration, () =>
                 {
@@ -89,13 +90,15 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
             popupState = PopupState.Animating;
 
             // Slide out to the hidden position
-            popupTransform.DOAnchorPos(m_HiddenPosition, SlideDuration).SetEase(Ease.InCubic).OnComplete(() =>
+            var tween = popupTransform.DOAnchorPos(m_HiddenPosition, SlideDuration).SetEase(Ease.InCubic).OnComplete(() =>
             {
                 // Update the state to Hidden after the animation completes
                 popupState = PopupState.Hidden;
                 panelBackgroundImage.gameObject.SetActive(false);
             });
             
+            CancelInvoke(nameof(HidePopup));
+            m_hideTween?.Kill(false);
             m_hideTween = null;
         }
     }

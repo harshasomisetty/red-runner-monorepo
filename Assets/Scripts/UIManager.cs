@@ -22,9 +22,7 @@ public class UIManager : MonoBehaviour
     [Header("Features Screen")]
     public GameObject FeatureScreenBackButton;
     public GameObject FeaturesScreen;
-    public GameObject LoadingScreen;
     public GameObject FailureScreen;
-    public TextMeshProUGUI LoadingScreenText;
     public TextMeshProUGUI FailureScreenText;
     public void ToggleFeaturesScreen(bool State)
     {
@@ -32,8 +30,7 @@ public class UIManager : MonoBehaviour
         ToggleMainScreen(!State);
         if (State)
         {
-            LoadingScreen.SetActive(true);
-            LoadingScreenText.text = "Loading Shop Data!";
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!", false);
             ShopManager.Instance.FetchShopData();
         }
         else
@@ -113,8 +110,7 @@ public class UIManager : MonoBehaviour
             }
             else if (LoadShopFromOtherFeature)
             {
-                LoadingScreen.SetActive(true);
-                LoadingScreenText.text = "Loading Shop Data!";
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!", false);
                 ShopManager.Instance.FetchShopData();
                 LaunchFeatureWindow(i);
             }
@@ -147,8 +143,7 @@ public class UIManager : MonoBehaviour
     }
     public void SelectDefaultFeatureWindowOption()
     {
-        LoadingScreen.SetActive(false);
-        LoadingScreenText.text = "";
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
         OnClickFeatureButton(0);
         OnClickShopVerticalButton(0);
         for (int i = 0; i < FeatureScreenButtons.Length; i++)
@@ -169,8 +164,7 @@ public class UIManager : MonoBehaviour
                 FailureScreenText.text = "Failed To Load Inventory Data!";
                 break;
         }
-        LoadingScreenText.text = "";
-        LoadingScreen.SetActive(false);
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
         FailureScreen.SetActive(true);
         FeatureScreenBackButton.SetActive(true);
     }
@@ -240,19 +234,13 @@ public class UIManager : MonoBehaviour
     {
         if (State)
         {
-            LoadingScreenText.text = "Loading Inventory Data!";
-            LoadingScreen.SetActive(true);
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!",false);
             InventoryManager.Instance.FetchInventoryData(false);
         }
-        //else
-        //{
-        //    InventoryManager.Instance.OnResetInventory();
-        //}
     }
     public void LaunchInventory()
     {
-        LoadingScreenText.text = "";
-        LoadingScreen.SetActive(false);
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
         InventoryHeaderBar.SetActive(true);
         LaunchFeatureWindow(1);
         OnClickInventoryVerticalButton(1);
@@ -260,8 +248,7 @@ public class UIManager : MonoBehaviour
     }
     public void SignalInventoryFailure()
     {
-        LoadingScreenText.text = "";
-        LoadingScreen.SetActive(false);
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
         FailureScreenText.text = "Failed To Load Inventory Data!";
         FailureScreen.SetActive(true);
         FeatureScreenBackButton.SetActive(true);
@@ -311,23 +298,14 @@ public class UIManager : MonoBehaviour
     #region GameEquipmentWindow
 
     [Header("Game Equipment")]
-    public GameObject GameEquipmentStatus;
-    public TextMeshProUGUI GameEquipmentStatusText;
     public GameObject GameEquipmentFeatures;
     public GameObject GameEquipmentBackButton;
-
-    public void ToggleGameEquipmentStatus(bool State)
-    {
-        GameEquipmentStatus.SetActive(State);
-    }
-    public void SetGameEquipmentStatusText(string Msg)
-    {
-        GameEquipmentStatusText.text = Msg;
-    }
+    
     public void ToggleGameEquipmentFeatures(bool State)
     {
         GameEquipmentFeatures.SetActive(State);
     }
+    
     #endregion
     #region Minting
     [Header ("Minting")]

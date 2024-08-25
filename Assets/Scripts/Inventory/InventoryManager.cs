@@ -119,10 +119,7 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
-                UIManager.Instance.ToggleGameEquipmentStatus(false);
-                UIManager.Instance.SetGameEquipmentStatusText("Assets Failed To Load");
                 PlayerPrefs.SetInt("OfflineMode", 1);
-                UIManager.Instance.ToggleGameEquipmentStatus(true);
                 UIManager.Instance.GameEquipmentBackButton.SetActive(true);
                 Debug.Log("Sequence Failure");
             }
@@ -194,11 +191,11 @@ public class InventoryManager : MonoBehaviour
                 UIManager.Instance.LaunchInventory();
             else
             {
-                UIManager.Instance.SetGameEquipmentStatusText("");
-                UIManager.Instance.ToggleGameEquipmentStatus(false);
                 InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
                 UIManager.Instance.ToggleGameEquipmentFeatures(true);
                 UIManager.Instance.GameEquipmentBackButton.SetActive(true);
+                GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+                
                 Debug.Log("Sequence Success");
             }
         }

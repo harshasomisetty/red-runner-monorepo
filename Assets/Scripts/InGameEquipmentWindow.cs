@@ -119,9 +119,8 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         if (State)
         {
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...", false);
             UIManager.Instance.GameEquipmentBackButton.SetActive(false);
-            UIManager.Instance.SetGameEquipmentStatusText("Loading Assets Please Wait!");
-            UIManager.Instance.ToggleGameEquipmentStatus(true);
             InventoryManager.Instance.FetchInventoryData(true);
         }
         else
@@ -131,8 +130,6 @@ public class InGameEquipmentWindow : MonoBehaviour
             CurrentSelectedSkinAsset = -1;
             PlayerPrefs.SetInt("SpeedBoostersEquipped", 0);
             PlayerPrefs.SetInt("JumpBoostersEquipped", 0);
-            UIManager.Instance.SetGameEquipmentStatusText("");
-            UIManager.Instance.ToggleGameEquipmentStatus(false);
             UIManager.Instance.ToggleGameEquipmentFeatures(false);
             ClearPlaceHolders();
             SetDefaultValues();
