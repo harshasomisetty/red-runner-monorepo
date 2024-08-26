@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
+using UnityEngine.Serialization;
 
 public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
 {
@@ -18,14 +19,14 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
     private Vector2 m_InitialPosition;
     private Vector2 m_HiddenPosition;
 
-    public enum PopupState
+    public enum AnimatedUIState
     {
         Hidden,
         Visible,
         Animating
     }
 
-    public PopupState popupState = PopupState.Hidden; // Tracks the current state of the popup
+    public AnimatedUIState animatedUIState = AnimatedUIState.Hidden; // Tracks the current state of the popup
 
     void Start()
     {
@@ -39,23 +40,23 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
         popupTransform.anchoredPosition = m_HiddenPosition;
 
         // Ensure the state is set to Hidden initially
-        popupState = PopupState.Hidden;
+        animatedUIState = AnimatedUIState.Hidden;
     }
 
     public void ShowPopup(string text)
     {
-        if (popupState == PopupState.Hidden)
+        if (animatedUIState == AnimatedUIState.Hidden)
         {
             // Set the text of the popup
             contentText.text = text;
             // Update the state to Animating
-            popupState = PopupState.Animating;
+            animatedUIState = AnimatedUIState.Animating;
             
             // Slide in to the initial position
             popupTransform.DOAnchorPos(m_InitialPosition, SlideDuration).SetEase(Ease.OutCubic).OnComplete(() =>
             {
                 // Update the state to Visible after the animation completes
-                popupState = PopupState.Visible;
+                animatedUIState = AnimatedUIState.Visible;
 
                 // Wait for the stay duration and then slide back out
                 DOVirtual.DelayedCall(StayDuration, () =>
@@ -68,16 +69,16 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
 
     public void HidePopup()
     {
-        if (popupState == PopupState.Visible)
+        if (animatedUIState == AnimatedUIState.Visible)
         {
             // Update the state to Animating
-            popupState = PopupState.Animating;
+            animatedUIState = AnimatedUIState.Animating;
 
             // Slide out to the hidden position
             popupTransform.DOAnchorPos(m_HiddenPosition, SlideDuration).SetEase(Ease.InCubic).OnComplete(() =>
             {
                 // Update the state to Hidden after the animation completes
-                popupState = PopupState.Hidden;
+                animatedUIState = AnimatedUIState.Hidden;
             });
         }
     }

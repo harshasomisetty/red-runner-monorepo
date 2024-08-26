@@ -507,6 +507,52 @@ public class API_Manager : SingletonBase<API_Manager>
     }
     #endregion
 
+    #region BuyingThings
+
+    public void BuyNft(string mintId,bool isSol, MintingNft ismint)
+    {
+        StartCoroutine(Buy_Nft(mintId,isSol, ismint));
+    }
+    private IEnumerator Buy_Nft(string mintId,bool isSol, MintingNft ismint)
+    {
+        var userData = new
+        {
+            itemId = mintId,
+            currencyId = isSol?"SOL":"USDC"
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.Buy + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            ismint?.Invoke(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            ismint?.Invoke(true, jsonResponse);
+        }
+    }
+    #endregion
+
     #region TokenPushing
     public void PushTokens(int NumberOfTokens, TokenPushingDelg TokenPushingResponseFunction)
     {

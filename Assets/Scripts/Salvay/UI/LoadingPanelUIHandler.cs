@@ -17,12 +17,12 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
     private TMP_Text contentText; // Reference to the UI element's RectTransform
     
     private const float SlideDuration = 0.5f; // Duration for the slide-in and slide-out animations
-    private const float StayDuration = 3.0f; // How long the popup stays before sliding back
+    // private const float StayDuration = 3.0f; // How long the popup stays before sliding back
     
     private Vector2 m_ShowingPosition;
     private Vector2 m_HiddenPosition;
     
-    private const float TIME_TO_SHOW_FOR = 10.0f;
+    private const float TIME_TO_SHOW_FOR = 60.0f;
 
     private bool m_IsTimeBased = true;
     private Tween m_hideTween = null;
@@ -74,10 +74,10 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
                 m_hideTween?.Kill(false);
                 
                 // Wait for the stay duration and then slide back out
-                m_hideTween = DOVirtual.DelayedCall(StayDuration, () =>
-                {
-                    HidePopup();
-                });
+                // m_hideTween = DOVirtual.DelayedCall(StayDuration, () =>
+                // {
+                //     HidePopup();
+                // });
             });
         }
     }
@@ -105,7 +105,9 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
 
     public void OnSocketMessageReceived(string messageHeader)
     {
-        HidePopup();
+        //only auto hide this popup for asset mints not payouts//
+        if(messageHeader.Contains("Asset Minted"))
+            HidePopup();
     }
 
     public void RemoveListener()

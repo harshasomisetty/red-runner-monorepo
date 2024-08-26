@@ -31,21 +31,26 @@ public class ImageCache : MonoBehaviour
 
     public void DownloadImage(string imageUrl, Action<Texture2D> onComplete)
     {
-        if (urlToPathMap.ContainsKey(imageUrl))
+        if (Application.platform != RuntimePlatform.WebGLPlayer)
         {
-            string localPath = urlToPathMap[imageUrl];
-            if (File.Exists(localPath))
+            if (urlToPathMap.ContainsKey(imageUrl))
             {
-                StartCoroutine(LoadImageFromLocal(localPath, onComplete));
-                return;
-            }
-            else
-            {
-                urlToPathMap.Remove(imageUrl);
-            }
+                string localPath = urlToPathMap[imageUrl];
+                if (File.Exists(localPath))
+                {
+                    StartCoroutine(LoadImageFromLocal(localPath, onComplete));
+                    return;
+                }
+                else
+                {
+                    urlToPathMap.Remove(imageUrl);
+                }
+            }    
         }
-
-        StartCoroutine(DownloadImageCoroutine(imageUrl, onComplete));
+        else
+        {
+            StartCoroutine(DownloadImageCoroutine(imageUrl, onComplete));
+        }
     }
 
     private IEnumerator DownloadImageCoroutine(string imageUrl, Action<Texture2D> onComplete)
@@ -77,7 +82,12 @@ public class ImageCache : MonoBehaviour
 
     private IEnumerator LoadImageFromLocal(string localPath, Action<Texture2D> onComplete)
     {
+        // In WebGL, we just use the path directly without file://
+#if UNITY_WEBGL && !UNITY_EDITOR
+    string url = localPath;
+#else
         string url = "file://" + localPath;
+#endif
 
         using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
         {
@@ -95,6 +105,7 @@ public class ImageCache : MonoBehaviour
             }
         }
     }
+
 
     private void LoadCache()
     {

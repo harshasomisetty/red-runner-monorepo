@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,6 +41,8 @@ public class ShopManager : MonoBehaviour
 
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
     public GameShop _gameShop;
+
+    private string _selectedMintId;
 
     //private void OnEnable()
     //{
@@ -236,48 +239,72 @@ public class ShopManager : MonoBehaviour
         BoosterName.text = StaticDataBank.RemoveWordFromString(skin.name);
         Description.text = skin.description;
         attribute.text = skin.attributes[0].traitType + ":" + skin.attributes[0].value;
-        Minting(skin.attributes[0].value);
+        _selectedMintId = skin.attributes[0].value; 
     }
     public void ShowDetailPanel(GameShop.Booster booster, string mintid)
     {
         if (spriteDictionary.ContainsKey(booster.name))
             boosterImage.sprite = spriteDictionary[booster.name];
+        
         boosterImage.SetNativeSize();
+        
         //BoosterName.text = StaticDataBank.RemoveWordFromString(booster.name);
         BoosterName.text = booster.name;
         Description.text = booster.description;
         attribute.text = booster.attributes[0].traitType + ":" + booster.attributes[0].value;
-        Minting(mintid);
+        _selectedMintId = mintid;
     }
+
+    public void DetailsBuyButtonPressed()
+    {
+        Minting(_selectedMintId);
+    }
+
     public void Minting(string MintID)
     {
-        MintButton.gameObject.SetActive(true);
-        MintButton.onClick.RemoveAllListeners();
-        MintButton.onClick.AddListener(delegate
-        {
-            MintNFT(MintID);
-        });
+        PopupData newPopupData = new PopupData();
+        newPopupData.showSecondButton = true;
+        newPopupData.titleString = "Buy Asset";
+        newPopupData.contentString = "Are you sure you want to buy this ?";
+        newPopupData.firstButtonString = "SOL";
+        newPopupData.secondButtonString = "USD";
+        newPopupData.firstButtonCallBack = () => MintNFT(MintID,true);
+        newPopupData.secondButtonCallBack = () => MintNFT(MintID,false);
+        
+        GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(newPopupData);
+        
     }
-    public void MintNFT(string itemName)
+    public void MintNFT(string itemName,bool withSol)
     {
-        Blocker.SetActive(true);
         DetailPanel.SetActive(false);
-        UIManager.Instance.SetMintingStatusText("Minting Asset Please Wait");
-        UIManager.Instance.ToggleMintingDialog(true);
-        UIManager.Instance.ToggleMintingPanelCloseButton(false, false);
-        API_Manager.Instance.MintNft(itemName, (success, message) =>
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing",true);
+        
+        API_Manager.Instance.BuyNft(itemName,withSol, (success, message) =>
         {
-            Blocker.SetActive(false);
             if (success)
             {
-                UIManager.Instance.SetMintingStatusText("Minting Asset Successful!");
-                UIManager.Instance.ToggleMintingPanelCloseButton(true,false);
-                Debug.Log("NFT  : " + message);
+                JObject jsonObject = JObject.Parse(message);
+
+                // Extract the checkoutUrl value
+                string checkoutUrl = jsonObject["checkoutUrl"]?.ToString();
+                Utils.OpenURLInNewTab(checkoutUrl);
+                // Output the URL
+                Debug.Log("Checkout URL: " + checkoutUrl);
             }
             else
             {
-                UIManager.Instance.SetMintingStatusText("Minting Asset Failure!");
-                UIManager.Instance.ToggleMintingPanelCloseButton(true,true);
+                GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+                
+                GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
+                {
+                    titleString = "Error",
+                    contentString = message,
+                    firstButtonString = "OK",
+                    firstButtonCallBack = () =>
+                    {
+                        GlobalCanvasManager.Instance.PopUIHandler.HidePopup();
+                    }
+                });
             } 
         });
     }

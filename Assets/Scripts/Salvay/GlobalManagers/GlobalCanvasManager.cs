@@ -11,4 +11,7 @@ public class GlobalCanvasManager : SingletonBase<GlobalCanvasManager>
      [SerializeField] 
      private LoadingPanelUIHandler loadingPanel;
      public LoadingPanelUIHandler LoadingPanel => loadingPanel;
+
+     [SerializeField] private GenericPopUIHandler popUIHandler;
+     public GenericPopUIHandler PopUIHandler => popUIHandler;
 }

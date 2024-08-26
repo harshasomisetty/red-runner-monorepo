@@ -1,10 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
-using RedRunner.TerrainGeneration;
-using UnityEditor.VersionControl;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>
 {
