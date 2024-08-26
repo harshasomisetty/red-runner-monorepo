@@ -30,6 +30,7 @@ namespace RedRunner.UI
             {
                 //GameManager.Singleton.Reset();
                 //GameManager.Singleton.Init();
+                Time.timeScale = 1f;
                 Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
         }

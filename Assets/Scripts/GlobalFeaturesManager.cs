@@ -1,7 +1,17 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>
 {
+    [SerializeField] private ImageCache imageCache;
+    public ImageCache ImageCache => imageCache;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        DOTween.Init(true, true, LogBehaviour.ErrorsOnly).SetCapacity(200, 10);
+    }
+
     #region TokensPushingFeature
     [SerializeField]
     int NumberOfTokensToPush = 0;
@@ -127,4 +137,5 @@ public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>
 
 
     #endregion
+
 }

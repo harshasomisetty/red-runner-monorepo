@@ -17,6 +17,8 @@ namespace RedRunner
 {
     public sealed class GameManager : MonoBehaviour
     {
+        private const float ScoreForSkinUnlock = 20;
+        private const string PrefsKeySkinUnlock = "SkinUnlock";
         public delegate void AudioEnabledHandler(bool active);
 
         public delegate void ScoreHandler(float newScore, float highScore, float lastScore);
@@ -238,7 +240,29 @@ namespace RedRunner
                     if (OnScoreChanged != null)
                     {
                         OnScoreChanged(m_Score, m_HighScore, m_LastScore);
+                        CheckSkinUnlock(m_Score);
                     }
+                }
+            }
+        }
+
+        private void CheckSkinUnlock(float score)
+        {
+            if(!PlayerPrefs.HasKey(PrefsKeySkinUnlock))
+            {
+                if (score.ToScore() >= ScoreForSkinUnlock)
+                {
+                    PlayerPrefs.SetInt(PrefsKeySkinUnlock,1);
+                    
+                    API_Manager.Instance.MintNft("wrestlerSkin", (success, message) =>
+                    {
+                        if (success)
+                        {
+                            Debug.Log("Skin Unlocked");
+                            
+                            GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Wrestler Skin Unlocked");
+                        }
+                    });
                 }
             }
         }

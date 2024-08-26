@@ -106,11 +106,14 @@ public class Login : MonoBehaviour
         PopUpMessage.text = message;
     }
 
-    public void ToggleDataLoadingWindow(bool State)
+    public void ToggleDataLoadingWindow(bool state)
     {
-        LoginPanel.SetActive(!State);
+        LoginPanel.SetActive(!state);
         
-        GlobalCanvasManager.Instance.ShowHideSpinner(State);
+        if(state)
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Logging In...", false);
+        else
+            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
     }
 
     void SwitchOkSignUpButtonToLogin()

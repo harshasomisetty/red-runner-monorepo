@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Best.SocketIO;
 using Best.SocketIO.Events;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 
@@ -15,13 +16,8 @@ public class SocketController : SingletonBase<SocketController>
 {
     private SocketManager _manager;
     private const string SOCKET_URL = "https://gameshift.clvtechnologies.com";
-    //private const string SOCKET_URL = "http://127.0.0.1:3000";
+    // private const string SOCKET_URL = "http://127.0.0.1:3000";
     private List<SocketEventListener> _listeners = new List<SocketEventListener>();
-    
-    protected override void Awake()
-    {
-        base.Awake();
-    }
     
     public void AddListener(SocketEventListener listener)
     {
@@ -41,10 +37,6 @@ public class SocketController : SingletonBase<SocketController>
     }
 
     // Unity Start event
-    void Start()
-    {
-        // Create and setup SocketOptions
-    }
     
     public void ConnectSocketWithUserId(string userId)
     {
@@ -67,6 +59,7 @@ public class SocketController : SingletonBase<SocketController>
         
         // Set subscriptions
         _manager.Socket.On<ConnectResponse>(SocketIOEventTypes.Connect, OnConnected);
+        
         _manager.Socket.On("assetMinted",OnAssetMinted);
         _manager.Socket.On("payoutReceived",OnPayoutReceived);
         
@@ -76,12 +69,25 @@ public class SocketController : SingletonBase<SocketController>
 
     private void OnPayoutReceived()
     {
-        BroadcastToAllListeners("payoutReceived");
+        Debug.Log(_manager.Socket.CurrentPacket.Payload);
+        BroadcastToAllListeners("Payout Received " + GetAmountStringFromPayload(_manager.Socket.CurrentPacket.Payload) + " SOL");
+    }
+
+    private float GetAmountStringFromPayload(string jsonString)
+    {
+        JArray jsonArray = JArray.Parse(jsonString);
+
+        // Access the second element, which is the JSON object containing the amount
+        JObject jsonObject = (JObject)jsonArray[1];
+
+        // Get the value of the "amount" key
+        return (jsonObject["amount"] ?? 0f).Value<float>();
     }
 
     private void OnAssetMinted()
     {
-        BroadcastToAllListeners("assetMinted");
+        Debug.Log(_manager.Socket.CurrentPacket.Payload);
+        BroadcastToAllListeners("Asset Minted");
     }
 
     // Connected event handler implementation

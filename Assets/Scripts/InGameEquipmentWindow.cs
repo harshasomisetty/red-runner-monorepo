@@ -74,7 +74,8 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         ClearAllHighlightedGameEquipmentOptionButtons();
         GameEquipmentOptionButtons[i].image.sprite = GameEquipmentOptionHighlighterSprite;
-                GameEquipmentOptionButtons[i].image.SetNativeSize();
+        GameEquipmentOptionButtons[i].image.SetNativeSize();
+        GameEquipmentOptionButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.02f, 97 / 1.02f);
         GameEquipmentOptionButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
     }
     void ClearAllHighlightedGameEquipmentOptionButtons()
@@ -87,8 +88,9 @@ public class InGameEquipmentWindow : MonoBehaviour
             }
             else
             {
-                GameEquipmentOptionButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.3f, 97 / 1.3f);
                 GameEquipmentOptionButtons[i].image.sprite = GameEquipmentOptionNormalSprite;
+                //GameEquipmentOptionButtons[i].image.SetNativeSize();
+                GameEquipmentOptionButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.2f, 97 / 1.2f);
                 GameEquipmentOptionButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
             }
         }
@@ -119,9 +121,8 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         if (State)
         {
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...", false);
             UIManager.Instance.GameEquipmentBackButton.SetActive(false);
-            UIManager.Instance.SetGameEquipmentStatusText("Loading Assets Please Wait!");
-            UIManager.Instance.ToggleGameEquipmentStatus(true);
             InventoryManager.Instance.FetchInventoryData(true);
         }
         else
@@ -131,8 +132,6 @@ public class InGameEquipmentWindow : MonoBehaviour
             CurrentSelectedSkinAsset = -1;
             PlayerPrefs.SetInt("SpeedBoostersEquipped", 0);
             PlayerPrefs.SetInt("JumpBoostersEquipped", 0);
-            UIManager.Instance.SetGameEquipmentStatusText("");
-            UIManager.Instance.ToggleGameEquipmentStatus(false);
             UIManager.Instance.ToggleGameEquipmentFeatures(false);
             ClearPlaceHolders();
             SetDefaultValues();
