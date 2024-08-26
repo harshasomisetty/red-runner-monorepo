@@ -17,6 +17,7 @@ public class API_Manager : SingletonBase<API_Manager>
     public delegate void MintingNft(bool success, string message);
     public delegate void TokenPushingDelg(bool success, string message);
     public delegate void InventoryUpdateDelg(bool success, string message);
+    public delegate void BuyItemCall(bool success, string message);
     SignInCallback GoogleAuth = null;
 
 
@@ -622,6 +623,50 @@ public class API_Manager : SingletonBase<API_Manager>
         }
     }
     #endregion
+
+
+    #region BuyItem
+
+    public void BuyItem(string ItemID, string CurrencyType, BuyItemCall _buyItemCall)
+    {
+        StartCoroutine(BuyItemRoutine(ItemID, CurrencyType, _buyItemCall));
+    }
+    private IEnumerator BuyItemRoutine(string ItemID, string CurrencyType, BuyItemCall buyItemCall)
+    {
+        var userData = new
+        {
+            itemId = ItemID,
+            currencyId = CurrencyType
+        };
+        string userDatajson = JsonConvert.SerializeObject(userData);
+        string url = StaticDataBank.BuyItem + StaticDataBank.playerlocalid;
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+        Debug.Log("Link for inventory update is " + url);
+        yield return request.SendWebRequest();
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            buyItemCall(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            JObject resoponse = JObject.Parse(request.downloadHandler.text);
+
+            string checkoutUrl = resoponse["checkoutUrl"].ToString();
+
+            Debug.Log("Opening URL : " + checkoutUrl);
+
+            buyItemCall(true, checkoutUrl);
+        }
+    }
+
+    #endregion
+
 
     #region Generic API Caller
     //you can add more two or more prams for callback to make more generic like this

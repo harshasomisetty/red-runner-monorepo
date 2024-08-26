@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using RedRunner.TerrainGeneration;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>

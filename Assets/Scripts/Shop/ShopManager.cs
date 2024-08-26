@@ -249,24 +249,25 @@ public class ShopManager : MonoBehaviour
         MintButton.onClick.RemoveAllListeners();
         MintButton.onClick.AddListener(delegate
         {
-            MintNFT(MintID);
+            MintNFT(MintID, "SOL");
         });
     }
-    public void MintNFT(string itemName)
+    public void MintNFT(string itemName,string CurrencyTyp)
     {
         Blocker.SetActive(true);
         DetailPanel.SetActive(false);
-        UIManager.Instance.SetMintingStatusText("Minting Asset Please Wait");
+        UIManager.Instance.SetMintingStatusText("Processing Please Wait");
         UIManager.Instance.ToggleMintingDialog(true);
         UIManager.Instance.ToggleMintingPanelCloseButton(false, false);
-        API_Manager.Instance.MintNft(itemName, (success, message) =>
+        API_Manager.Instance.BuyItem(itemName, CurrencyTyp, (success, message) =>
         {
             Blocker.SetActive(false);
             if (success)
             {
-                UIManager.Instance.SetMintingStatusText("Minting Asset Successful!");
+                UIManager.Instance.SetMintingStatusText("Please Check Link To Purchase Your Item");
                 UIManager.Instance.ToggleMintingPanelCloseButton(true,false);
                 Debug.Log("NFT  : " + message);
+                Application.OpenURL(message);
             }
             else
             {

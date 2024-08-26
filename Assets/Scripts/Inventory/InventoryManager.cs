@@ -317,7 +317,7 @@ public class InventoryManager : MonoBehaviour
             {
                 for (int i = 0; i < _data.data.Count; i++)
                 {
-                    Debug.Log(i + "index ");
+                    //Debug.Log(i + "index ");
                     if (_data.data[i].item.id == "SOL")
                     {
                         SetSolValue(_data.data[i].quantity);
