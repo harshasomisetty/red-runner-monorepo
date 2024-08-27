@@ -17,6 +17,8 @@ namespace RedRunner
 {
     public sealed class GameManager : MonoBehaviour
     {
+        private const float ScoreForSkinUnlock = 20;
+        private const string PrefsKeySkinUnlock = "SkinUnlock";
         public delegate void AudioEnabledHandler(bool active);
 
         public delegate void ScoreHandler(float newScore, float highScore, float lastScore);
@@ -29,8 +31,6 @@ namespace RedRunner
 
         private static GameManager m_Singleton;
 
-        private int CoinsCollectedForPushing = 0;
-
         public static GameManager Singleton
         {
             get
@@ -38,7 +38,7 @@ namespace RedRunner
                 return m_Singleton;
             }
         }
-
+        private int CoinsCollectedForPushing = 0;
         [SerializeField]
         private Character m_MainCharacter;
         [SerializeField]
@@ -63,14 +63,13 @@ namespace RedRunner
         public Property<int> m_Coin = new Property<int>(0);
 
         //Jump Boosters//
-        [Header ("Jump Booster")]
+        [Header("Jump Booster")]
         public int NumberOfJumpBoosters = 0;
         public bool IsJumpBoosterActive = false;
         public UnityEngine.UI.Button JumpBoosterButton;
         public TextMeshProUGUI JumpBoosterCountText;
         int JumpBoostersStartValue = 0;
         bool FoundJumpBoosters = false;
-
         [Header("Speed Booster")]
         public int NumberOfSpeedBoosters = 0;
         public bool IsSpeedBoosterActive = false;
@@ -183,28 +182,17 @@ namespace RedRunner
                 OnScoreChanged(m_Score, m_HighScore, m_LastScore);
             }
             Debug.Log("Score Submit" + m_Score);
-            if (StaticDataBank.playerlocalid != "")
-            {
-                int myscore = ExtractInteger(m_Score.ToLength());
-                API_Manager.instance.Score_Submit(myscore, StaticDataBank.playerlocalid, (success, message) => {
-                    if (success)
-                    {
-                        Debug.Log("Score Submited");
-                    }
-                });
-            }
+            CallToServerOnGameEnd(m_Score);
             yield return new WaitForSecondsRealtime(1.5f);
 
             EndGame();
-            var endScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.END_SCREEN);
-            GameTemplateUIManager.Singleton.OpenScreen(endScreen);
             SendTokensToServer();
             if (FoundJumpBoosters)
             {
                 if (JumpBoostersStartValue > NumberOfJumpBoosters)
                 {
                     GlobalFeaturesManager.Instance.UpdateJumpBoosterValue(NumberOfJumpBoosters);
-                }    
+                }
             }
             if (FoundSpeedBoosters)
             {
@@ -213,6 +201,8 @@ namespace RedRunner
                     GlobalFeaturesManager.Instance.UpdateSpeedBoosterValue(NumberOfSpeedBoosters);
                 }
             }
+            var endScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.END_SCREEN);
+            GameTemplateUIManager.Singleton.OpenScreen(endScreen);
         }
         public static int ExtractInteger(string s)
         {
@@ -250,7 +240,29 @@ namespace RedRunner
                     if (OnScoreChanged != null)
                     {
                         OnScoreChanged(m_Score, m_HighScore, m_LastScore);
+                        CheckSkinUnlock(m_Score);
                     }
+                }
+            }
+        }
+
+        private void CheckSkinUnlock(float score)
+        {
+            if(!PlayerPrefs.HasKey(PrefsKeySkinUnlock))
+            {
+                if (score.ToScore() >= ScoreForSkinUnlock)
+                {
+                    PlayerPrefs.SetInt(PrefsKeySkinUnlock,1);
+                    
+                    API_Manager.Instance.MintNft("wrestlerSkin", (success, message) =>
+                    {
+                        if (success)
+                        {
+                            Debug.Log("Skin Unlocked");
+                            
+                            GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Wrestler Skin Unlocked");
+                        }
+                    });
                 }
             }
         }
@@ -457,15 +469,25 @@ namespace RedRunner
         {
             Application.OpenURL(string.Format(url, m_ShareText, m_ShareUrl));
         }
-
-        public void IncrementCollectibleTokens()
+        public void CallToServerOnGameEnd(float m_Score)
         {
-            CoinsCollectedForPushing++;
+            int myscore = ExtractInteger(m_Score.ToLength());
+            API_Manager.Instance.Score_Submit(myscore, StaticDataBank.playerlocalid, (success, message) => {
+                if (success)
+                {
+                    Debug.Log("Score Submited");
+                }
+            });
         }
 
         public void SendTokensToServer()
         {
             GlobalFeaturesManager.Instance.SetTokensToPushQty(CoinsCollectedForPushing);
+        }
+
+        public void IncrementCollectibleTokens()
+        {
+            CoinsCollectedForPushing++;
         }
 
         [System.Serializable]

@@ -66,8 +66,8 @@ namespace RedRunner.Collectables
 		public override void Collect ()
 		{
             GameManager.Singleton.m_Coin.Value++;
-			GameManager.Singleton.IncrementCollectibleTokens();
-			m_Animator.SetTrigger (COLLECT_TRIGGER);
+            GameManager.Singleton.IncrementCollectibleTokens();
+            m_Animator.SetTrigger (COLLECT_TRIGGER);
 			m_ParticleSystem.Play ();
 			m_SpriteRenderer.enabled = false;
 			m_Collider2D.enabled = false;

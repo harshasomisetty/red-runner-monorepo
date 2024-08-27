@@ -46,7 +46,24 @@ namespace RedRunner.Utilities
 			}
 			return ( value / unit.magnitude ).ToString ( unit.format ) + " " + unit.symbol;
 		}
-
+		
+		public static int ToScore ( this float value )
+		{
+			value *= modifier;
+			if ( Mathf.Approximately ( value, 0f ) )
+			{
+				return 0;
+			}
+			Unit unit = lengthUnits [ 0 ];
+			for ( int i = 0; i < lengthUnits.Length; i++ )
+			{
+				if ( value > lengthUnits [ i ].magnitude )
+				{
+					unit = lengthUnits [ i ];
+				}
+			}
+			return (int)(value / unit.magnitude);
+		}
 	}
 
 }

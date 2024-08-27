@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,9 +18,12 @@ public class UIDataConatainer
 public class ShopManager : MonoBehaviour
 {
     public static ShopManager Instance;
-    private void Awake()
+    void Awake()
     {
-        Instance = this;
+        if(Instance == null)
+        {
+            Instance = this;
+        }
     }
 
     [Header("Detail Panel UI")]
@@ -38,9 +42,11 @@ public class ShopManager : MonoBehaviour
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
     public GameShop _gameShop;
 
+    private string _selectedMintId;
+
     //private void OnEnable()
     //{
-    //    API_Manager.instance.GetShopData(GetAllShopData);
+    //    API_Manager.Instance.GetShopData(GetAllShopData);
     //}
     void GetAllShopData(bool sucess, GameShop response)
     {
@@ -59,7 +65,7 @@ public class ShopManager : MonoBehaviour
     //Sprite DownloadImage(string imageUrl)
     //{
     //    Sprite get_sprite = null;
-    //    API_Manager.instance.DownloadImage(imageUrl, (success, m_sprite) => {
+    //    API_Manager.Instance.DownloadImage(imageUrl, (success, m_sprite) => {
     //        if (success)
     //        {
     //            m_sprite = get_sprite;
@@ -97,20 +103,25 @@ public class ShopManager : MonoBehaviour
     IEnumerator DownloadImage(string imageUrl,string imageName,UIDataConatainer data)
     {
         bool istartchecking = false;
-        API_Manager.instance.DownloadImage(imageUrl, (success, m_sprite) => {
+        GlobalFeaturesManager.Instance.ImageCache.DownloadImage(imageUrl, (m_sprite) => {
+            
             istartchecking = true;
-            if (success)
+            
+            if (m_sprite != null)
             {
+                Sprite tempSprite = Sprite.Create(m_sprite, new Rect(0, 0, m_sprite.width, m_sprite.height), new Vector2(0.5f, 0.5f));
+                
                 if (spriteDictionary.ContainsKey(imageName))
                 {
-                    spriteDictionary[imageName] = m_sprite;
+                    spriteDictionary[imageName] = tempSprite;
                 }
                 else
                 {
-                    spriteDictionary.Add(imageName, m_sprite);
+                    spriteDictionary.Add(imageName, tempSprite);
                 }
                 data.boosterNameText.text = StaticDataBank.RemoveWordFromString(imageName);
-                data.boosterImage.sprite = m_sprite;
+                data.boosterImage.sprite = tempSprite;
+                
                 if(imageName.Contains("Skin"))
                     data.boosterImage.SetNativeSize();
             }
@@ -119,6 +130,7 @@ public class ShopManager : MonoBehaviour
                 Debug.Log("Failed to fetch image");
             }
         });
+        
         yield return new WaitUntil(() => istartchecking);
     }
     
@@ -227,47 +239,71 @@ public class ShopManager : MonoBehaviour
         BoosterName.text = StaticDataBank.RemoveWordFromString(skin.name);
         Description.text = skin.description;
         attribute.text = skin.attributes[0].traitType + ":" + skin.attributes[0].value;
-        Minting(skin.attributes[0].value);
+        _selectedMintId = skin.attributes[0].value;
+        MintButton.gameObject.SetActive(true);
     }
     public void ShowDetailPanel(GameShop.Booster booster, string mintid)
     {
         if (spriteDictionary.ContainsKey(booster.name))
             boosterImage.sprite = spriteDictionary[booster.name];
+        
         boosterImage.SetNativeSize();
-        BoosterName.text = StaticDataBank.RemoveWordFromString(booster.name);
+        
+        //BoosterName.text = StaticDataBank.RemoveWordFromString(booster.name);
+        BoosterName.text = booster.name;
         Description.text = booster.description;
         attribute.text = booster.attributes[0].traitType + ":" + booster.attributes[0].value;
-        Minting(mintid);
+        _selectedMintId = mintid;
+        MintButton.gameObject.SetActive(true);
     }
+
+    public void DetailsBuyButtonPressed()
+    {
+        Minting(_selectedMintId);
+    }
+
     public void Minting(string MintID)
     {
-        MintButton.gameObject.SetActive(true);
-        MintButton.onClick.RemoveAllListeners();
-        MintButton.onClick.AddListener(delegate
-        {
-            MintNFT(MintID);
-        });
+        PopupData newPopupData = new PopupData();
+        newPopupData.showSecondButton = true;
+        newPopupData.titleString = "Buy Asset";
+        newPopupData.contentString = "Are you sure you want to buy this ?";
+        newPopupData.firstButtonString = "SOL";
+        newPopupData.secondButtonString = "USD";
+        newPopupData.firstButtonCallBack = () => MintNFT(MintID,true);
+        newPopupData.secondButtonCallBack = () => MintNFT(MintID,false);
+        
+        GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(newPopupData);
+        
     }
-    public void MintNFT(string itemName)
+    public void MintNFT(string itemName,bool withSol)
     {
-        Blocker.SetActive(true);
         DetailPanel.SetActive(false);
-        UIManager.Instance.SetMintingStatusText("Minting Asset Please Wait");
-        UIManager.Instance.ToggleMintingDialog(true);
-        UIManager.Instance.ToggleMintingPanelCloseButton(false, false);
-        API_Manager.instance.MintNft(itemName, (success, message) =>
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing...",true);
+        
+        API_Manager.Instance.BuyNft(itemName,withSol, (success, message) =>
         {
-            Blocker.SetActive(false);
             if (success)
             {
-                UIManager.Instance.SetMintingStatusText("Minting Asset Successful!");
-                UIManager.Instance.ToggleMintingPanelCloseButton(true,false);
-                Debug.Log("NFT  : " + message);
+                Utils.OpenURLInNewTab(message);
+                // Output the URL
+                Debug.Log("Checkout URL: " + message);
             }
             else
             {
-                UIManager.Instance.SetMintingStatusText("Minting Asset Failure!");
-                UIManager.Instance.ToggleMintingPanelCloseButton(true,true);
+                Debug.Log(message);
+                GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+                
+                GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
+                {
+                    titleString = "Error",
+                    contentString = message,
+                    firstButtonString = "OK",
+                    firstButtonCallBack = () =>
+                    {
+                        GlobalCanvasManager.Instance.PopUIHandler.HidePopup();
+                    }
+                });
             } 
         });
     }
@@ -279,6 +315,6 @@ public class ShopManager : MonoBehaviour
 
     public void FetchShopData()
     {
-        API_Manager.instance.GetShopData(GetAllShopData);
+        API_Manager.Instance.GetShopData(GetAllShopData);
     }
 }

@@ -1,16 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Experimental.XR.Interaction;
 
 public class MenuManager : MonoBehaviour
 {
     [Header("Help Window")]
     public GameObject HelpWindow;
+
     [Header("Profile Attributes Placeholders")]
     public TextMeshProUGUI PlayerName_Placeholder;
     public TextMeshProUGUI WalletID_Placeholder;
+    public TextMeshProUGUI SolValue;
+
     bool GameLaunched = false;
     private void Awake()
     {
@@ -53,9 +53,10 @@ public class MenuManager : MonoBehaviour
 #if UNITY_WEBGL
         CopyText();
 #else
-            GUIUtility.systemCopyBuffer = WalletAddress.text;
+            GUIUtility.systemCopyBuffer = ""+StaticDataBank.walletAddress;
             Debug.Log("Copy wallet Address");
 #endif
+        GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Wallet Adress copyied");
     }
     [System.Obsolete]
     public void CopyText()
@@ -67,4 +68,28 @@ public class MenuManager : MonoBehaviour
     {
         //m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
     }
+    
+    public void SetSolValue(string solValue)
+    {
+        Debug.Log("Currency Quantity : " + solValue);
+        SolValue.text = "" + solValue;
+    }
+    public void GetSolValue()
+    {
+        API_Manager.Instance.GetInvectory((success, _data) =>
+        {
+            if (success)
+            {
+                for (int i = 0; i < _data.data.Count; i++)
+                {
+                    Debug.Log(i + "index ");
+                    if (_data.data[i].item.id == "SOL")
+                    {
+                        SetSolValue(_data.data[i].quantity);
+                    }
+                }
+            }
+        }, 1, "Currency");
+    }
+    
 }
