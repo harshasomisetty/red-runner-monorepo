@@ -5,9 +5,8 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
-using UnityEditor.VersionControl;
 
-public class API_Manager : MonoBehaviour
+public class API_Manager : SingletonBase<API_Manager>
 {
     public delegate void SignInCallback(bool success, string message);
     public delegate void ScoreSubmit (bool success, string message);
@@ -18,14 +17,14 @@ public class API_Manager : MonoBehaviour
     public delegate void MintingNft(bool success, string message);
     public delegate void TokenPushingDelg(bool success, string message);
     public delegate void InventoryUpdateDelg(bool success, string message);
+    public delegate void BuyItemCall(bool success, string message);
     SignInCallback GoogleAuth = null;
 
 
-    public static API_Manager instance;
-    private void Awake()
+    //public static API_Manager.Instance;
+    protected override void Awake()
     {
-        DontDestroyOnLoad(this);
-        instance = this;
+        base.Awake();
     }
     #region JsCallingMethod
     public void SignInWithGoogle(SignInCallback signIn)
@@ -410,62 +409,18 @@ public class API_Manager : MonoBehaviour
     }
 
     #endregion
-
-    #region Download Images
-
-    public void DownloadImage(string URL,GetImage sprite)
-    {
-        StartCoroutine(Download_Image(URL, sprite));
-    }
-
-    IEnumerator Download_Image(string url,GetImage spritecallback)
-    {
-        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
-        {
-            // Send the request and wait for the download to complete
-            yield return request.SendWebRequest();
-
-            // Check for errors
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-            {
-                spritecallback(false,null);
-                Debug.Log("Error downloading image: " + request.error);
-            }
-            else
-            {
-                // Get the downloaded texture
-                Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-
-                // Convert the texture to a sprite and assign it to the Image component
-                if (texture != null)
-                {
-                    Debug.Log("Texture creating");
-                    // Create a sprite from the downloaded texture
-                    Sprite sprite = Sprite.Create(
-                        texture,
-                        new Rect(0, 0, texture.width, texture.height),
-                        new Vector2(0.5f, 0.5f));
-
-                    // Set the sprite to the Image component
-                    spritecallback(true, sprite);
-                }
-            }
-        }
-    }
-
-    #endregion
-
+    
     #region Inventory
-    public void GetInvectory(GetInventory getInventory,int pageNumber)
+    public void GetInvectory(GetInventory getInventory,int pageNumber, string _fetchType = "UniqueAsset,Currency")
     {
-        StartCoroutine(Get_Inventory(getInventory, pageNumber));
+        StartCoroutine(Get_Inventory(getInventory, pageNumber, _fetchType));
     }
-    private IEnumerator Get_Inventory(GetInventory getInventory,int page_Number)
+    private IEnumerator Get_Inventory(GetInventory getInventory, int page_Number, string _type)
     {
         var userData = new
         {
             pageNumber = page_Number,
-            types = "UniqueAsset,Currency",
+            types = _type,
             forSale = false
         };
 
@@ -541,14 +496,65 @@ public class API_Manager : MonoBehaviour
 
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            ismint(false, request.error);
+            ismint?.Invoke(false, request.error);
             Debug.Log(request.error);
         }
         else
         {
             string jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
-            ismint(true, jsonResponse);
+            ismint?.Invoke(true, jsonResponse);
+        }
+    }
+    #endregion
+
+    #region BuyingThings
+
+    public void BuyNft(string mintId,bool isSol, MintingNft ismint)
+    {
+        StartCoroutine(Buy_Nft(mintId,isSol, ismint));
+    }
+    private IEnumerator Buy_Nft(string mintId, bool isSol, MintingNft ismint)
+    {
+        var userData = new
+        {
+            itemId = mintId,
+            currencyId = isSol?"SOL":"USDC"
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.Buy + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            ismint?.Invoke(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            JObject jsonObject = JObject.Parse(jsonResponse);
+
+            // Extract the checkoutUrl value
+            string checkoutUrl = jsonObject["checkoutUrl"]?.ToString();
+            Debug.Log(checkoutUrl);
+            ismint?.Invoke(true, checkoutUrl);
         }
     }
     #endregion
@@ -564,26 +570,16 @@ public class API_Manager : MonoBehaviour
         {
             quantity = _NumberOfTokens
         };
-
         string userDatajson = JsonConvert.SerializeObject(userData);
-
         string url = StaticDataBank.TokensPushingLink + StaticDataBank.playerlocalid;
-
         UnityWebRequest request = new UnityWebRequest(url, "POST");
-
         byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
-
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-
         request.downloadHandler = new DownloadHandlerBuffer();
-
         request.SetRequestHeader("Content-Type", "application/json");
-
         request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
-
         Debug.Log("Link for tokens pushing is " + url);
         yield return request.SendWebRequest();
-
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             TokenPushingResponseFunction(false, request.error);
@@ -598,10 +594,10 @@ public class API_Manager : MonoBehaviour
     }
     #endregion
 
-    #region InventoryUpdate 
+    #region InventoryUpdate
     public void UpdateInventoryItem(string ItemID, string AssetID, int UsesLeftValue, InventoryUpdateDelg InventoryUpdateResponseFunction)
     {
-        StartCoroutine(UpdateInventoryItemRoutine(ItemID, AssetID , UsesLeftValue, InventoryUpdateResponseFunction));
+        StartCoroutine(UpdateInventoryItemRoutine(ItemID, AssetID, UsesLeftValue, InventoryUpdateResponseFunction));
     }
     private IEnumerator UpdateInventoryItemRoutine(string _ItemID, string _AssetID, int _UsesLeftValue, InventoryUpdateDelg _InventoryUpdateResponseFunction)
     {
@@ -611,27 +607,16 @@ public class API_Manager : MonoBehaviour
             assetId = _AssetID,
             usesLeft = _UsesLeftValue
         };
-
         string userDatajson = JsonConvert.SerializeObject(userData);
-
         string url = StaticDataBank.InventoryUpdateLink + StaticDataBank.playerlocalid;
-
         UnityWebRequest request = new UnityWebRequest(url, "POST");
-
         byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
-
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-
         request.downloadHandler = new DownloadHandlerBuffer();
-
         request.SetRequestHeader("Content-Type", "application/json");
-
         request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
-
         Debug.Log("Link for inventory update is " + url);
-
         yield return request.SendWebRequest();
-
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             _InventoryUpdateResponseFunction(false, request.error);
@@ -645,6 +630,50 @@ public class API_Manager : MonoBehaviour
         }
     }
     #endregion
+
+
+    #region BuyItem
+
+    public void BuyItem(string ItemID, string CurrencyType, BuyItemCall _buyItemCall)
+    {
+        StartCoroutine(BuyItemRoutine(ItemID, CurrencyType, _buyItemCall));
+    }
+    private IEnumerator BuyItemRoutine(string ItemID, string CurrencyType, BuyItemCall buyItemCall)
+    {
+        var userData = new
+        {
+            itemId = ItemID,
+            currencyId = CurrencyType
+        };
+        string userDatajson = JsonConvert.SerializeObject(userData);
+        string url = StaticDataBank.BuyItem + StaticDataBank.playerlocalid;
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+        Debug.Log("Link for inventory update is " + url);
+        yield return request.SendWebRequest();
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            buyItemCall(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            JObject resoponse = JObject.Parse(request.downloadHandler.text);
+
+            string checkoutUrl = resoponse["checkoutUrl"].ToString();
+
+            Debug.Log("Opening URL : " + checkoutUrl);
+
+            buyItemCall(true, checkoutUrl);
+        }
+    }
+
+    #endregion
+
 
     #region Generic API Caller
     //you can add more two or more prams for callback to make more generic like this

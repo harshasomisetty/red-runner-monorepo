@@ -72,7 +72,7 @@ public class LeaderboardManager : MonoBehaviour
         }
         if (State)
         {
-            API_Manager.instance.Leadboard_GetAll(GetAllScores);
+            API_Manager.Instance.Leadboard_GetAll(GetAllScores);
         }
         UIManager.Instance.ToggleMainScreen(!State);
     }
