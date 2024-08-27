@@ -8,7 +8,10 @@ public static class Utils
     {
         if (Application.platform == RuntimePlatform.WebGLPlayer)
         {
-            Application.ExternalCall("window.open", url, "_blank");
+            string title = "Game Shift Purchasing"; // The title of the new window
+
+            // Call the JavaScript function from Unity
+            Application.ExternalCall("OpenPopupWindow", url, title);
         }
         else
         {
