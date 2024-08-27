@@ -1,14 +1,27 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Best.SocketIO;
 using Best.SocketIO.Events;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
+public enum SocketEventsType
+{
+    paymentInitiated,
+    paymentFailed,
+    paymentComplete,
+    payoutInitiated,
+    payoutFailed,
+    payoutComplete,
+    assetMintInitiated,
+    assetMintFailed,
+    assetMintComplete
+}
 
 public interface SocketEventListener
 {
-    public void OnSocketMessageReceived(string messageHeader);
+    public void OnSocketMessageReceived(SocketEventsType messageHeader,string payLoad = null);
     public void RemoveListener();
 }
 
@@ -28,11 +41,11 @@ public class SocketController : SingletonBase<SocketController>
     {
         _listeners.Remove(listener);
     }
-    private void BroadcastToAllListeners(string message)
+    private void BroadcastToAllListeners(SocketEventsType eventsType, string payload =  null)
     {
         foreach (var listener in _listeners)
         {
-            listener?.OnSocketMessageReceived(message);
+            listener?.OnSocketMessageReceived(eventsType,payload);
         }
     }
 
@@ -60,17 +73,47 @@ public class SocketController : SingletonBase<SocketController>
         // Set subscriptions
         _manager.Socket.On<ConnectResponse>(SocketIOEventTypes.Connect, OnConnected);
         
-        _manager.Socket.On("assetMinted",OnAssetMinted);
-        _manager.Socket.On("payoutReceived",OnPayoutReceived);
+        _manager.Socket.On(SocketIOEventTypes.Event,OnSocketEvent);
         
         // Start connecting to the server
         _manager.Open();
     }
 
-    private void OnPayoutReceived()
+    private void OnSocketEvent()
     {
-        Debug.Log(_manager.Socket.CurrentPacket.Payload);
-        BroadcastToAllListeners("Payout Received " + GetAmountStringFromPayload(_manager.Socket.CurrentPacket.Payload) + " SOL");
+        SocketEventsType currentType = (SocketEventsType) Enum.Parse(typeof(SocketEventsType), _manager.Socket.CurrentPacket.EventName); 
+        switch (currentType)
+        {
+            case SocketEventsType.paymentInitiated:
+                BroadcastToAllListeners(SocketEventsType.paymentInitiated);
+                break;
+            case SocketEventsType.paymentFailed:
+                BroadcastToAllListeners(SocketEventsType.paymentFailed);
+                break;
+            case SocketEventsType.paymentComplete:
+                BroadcastToAllListeners(SocketEventsType.paymentComplete);
+                break;
+            case SocketEventsType.payoutInitiated:
+                BroadcastToAllListeners(SocketEventsType.payoutInitiated);
+                break;
+            case SocketEventsType.payoutFailed:
+                BroadcastToAllListeners(SocketEventsType.payoutFailed);
+                break;
+            case SocketEventsType.payoutComplete:
+                BroadcastToAllListeners(SocketEventsType.payoutComplete,GetAmountStringFromPayload(_manager.Socket.CurrentPacket.Payload).ToString(CultureInfo.InvariantCulture));
+                break;
+            case SocketEventsType.assetMintInitiated:
+                BroadcastToAllListeners(SocketEventsType.assetMintInitiated);
+                break;
+            case SocketEventsType.assetMintFailed:
+                BroadcastToAllListeners(SocketEventsType.assetMintFailed);
+                break;
+            case SocketEventsType.assetMintComplete:
+                BroadcastToAllListeners(SocketEventsType.assetMintComplete,GetItemIdStringFromPayload(_manager.Socket.CurrentPacket.Payload));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private float GetAmountStringFromPayload(string jsonString)
@@ -83,13 +126,18 @@ public class SocketController : SingletonBase<SocketController>
         // Get the value of the "amount" key
         return (jsonObject["amount"] ?? 0f).Value<float>();
     }
-
-    private void OnAssetMinted()
+    
+    private string GetItemIdStringFromPayload(string jsonString)
     {
-        Debug.Log(_manager.Socket.CurrentPacket.Payload);
-        BroadcastToAllListeners("Asset Minted");
-    }
+        JArray jsonArray = JArray.Parse(jsonString);
 
+        // Access the second element, which is the JSON object containing the amount
+        JObject jsonObject = (JObject)jsonArray[1];
+
+        // Get the value of the "amount" key
+        return (jsonObject["itemId"] ?? 0f).Value<string>();
+    }
+    
     // Connected event handler implementation
     void OnConnected(ConnectResponse resp)
     {

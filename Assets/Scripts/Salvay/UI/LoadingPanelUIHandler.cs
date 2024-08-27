@@ -103,10 +103,9 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
         }
     }
 
-    public void OnSocketMessageReceived(string messageHeader)
+    public void OnSocketMessageReceived(SocketEventsType messageType, string payLoad = null)
     {
-        //only auto hide this popup for asset mints not payouts//
-        if(messageHeader.Contains("Asset Minted"))
+        if(messageType == SocketEventsType.paymentComplete)
             HidePopup();
     }
 
