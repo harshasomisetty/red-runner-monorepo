@@ -45,7 +45,12 @@ public class ImageCache : MonoBehaviour
                 {
                     urlToPathMap.Remove(imageUrl);
                 }
-            }    
+            }
+            else
+            {
+                Debug.Log("Download Image from backend");
+                StartCoroutine(DownloadImageCoroutine(imageUrl, onComplete));
+            }
         }
         else 
         {

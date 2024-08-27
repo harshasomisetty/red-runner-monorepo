@@ -29,6 +29,9 @@ public class GenericPopUIHandler : MonoBehaviour
     private Vector2 m_InitialPosition;
     private Vector2 m_HiddenPosition;
 
+    [SerializeField]
+    private GameObject SpecialKillButton;
+
     public enum AnimatedUIState
     {
         Hidden,
@@ -65,6 +68,8 @@ public class GenericPopUIHandler : MonoBehaviour
             HidePopup();
         }
     }
+
+
     
     private void SetupPopup(PopupData _data)
     {
@@ -78,6 +83,7 @@ public class GenericPopUIHandler : MonoBehaviour
     
     public void ShowPopup(PopupData _data)
     {
+        ToggleSpecialKillButton(false);
         if (animatedUIState == AnimatedUIState.Hidden)
         {
             panelParent.SetActive(true);
@@ -115,5 +121,10 @@ public class GenericPopUIHandler : MonoBehaviour
                 panelParent.SetActive(false);
             });
         }
+    }
+
+    public void ToggleSpecialKillButton (bool State)
+    {
+        SpecialKillButton.SetActive(State);
     }
 }

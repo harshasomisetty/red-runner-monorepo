@@ -272,8 +272,8 @@ public class ShopManager : MonoBehaviour
         newPopupData.secondButtonString = "USD";
         newPopupData.firstButtonCallBack = () => MintNFT(MintID,true);
         newPopupData.secondButtonCallBack = () => MintNFT(MintID,false);
-        
         GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(newPopupData);
+        GlobalCanvasManager.Instance.PopUIHandler.ToggleSpecialKillButton(true);
         
     }
     public void MintNFT(string itemName,bool withSol)
