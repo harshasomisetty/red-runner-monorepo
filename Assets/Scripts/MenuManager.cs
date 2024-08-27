@@ -56,7 +56,7 @@ public class MenuManager : MonoBehaviour
             GUIUtility.systemCopyBuffer = ""+StaticDataBank.walletAddress;
             Debug.Log("Copy wallet Address");
 #endif
-        GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Wallet Adress copyied");
+        GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Wallet Address copied");
     }
     [System.Obsolete]
     public void CopyText()
