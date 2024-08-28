@@ -307,7 +307,14 @@ namespace RedRunner.Characters
             m_Skeleton.OnActiveChanged += Skeleton_OnActiveChanged;
             GameManager.OnReset += GameManager_OnReset;
         }
-
+        bool IsAnyKeyHeld()
+        {
+            // Check if any of the specified keys are being held down
+            return Input.GetKey(KeyCode.D) ||
+                   Input.GetKey(KeyCode.RightArrow) ||
+                   Input.GetKey(KeyCode.A) ||
+                   Input.GetKey(KeyCode.LeftArrow);
+        }
         void Update ()
 		{
 			if ( !GameManager.Singleton.gameStarted || !GameManager.Singleton.gameRunning )
@@ -320,8 +327,19 @@ namespace RedRunner.Characters
 				Die ();
 			}
 
-			// Speed
-			m_Speed = new Vector2 ( Mathf.Abs ( m_Rigidbody2D.velocity.x ), Mathf.Abs ( m_Rigidbody2D.velocity.y ) );
+            if (IsAnyKeyHeld() && CrossPlatformInputManager.GetButtonDown("SpeedBooster"))
+            {
+                //Consume speed booster
+				GameManager.Singleton.ConsumeSpeedBooster ();
+            }
+            if (CrossPlatformInputManager.GetButtonDown("DoubleJump"))
+            {
+                //Consume Jump Booster
+				GameManager.Singleton.ConsumeJumpBooster ();
+            }
+
+            // Speed
+            m_Speed = new Vector2 ( Mathf.Abs ( m_Rigidbody2D.velocity.x ), Mathf.Abs ( m_Rigidbody2D.velocity.y ) );
             float horizontalInput = CrossPlatformInputManager.GetAxis("Horizontal");
 
 			//ORIGINAL CODE

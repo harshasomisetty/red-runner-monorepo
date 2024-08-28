@@ -12,6 +12,7 @@ using RedRunner.TerrainGeneration;
 using RedRunner.Utilities;
 using TMPro;
 using System.Text.RegularExpressions;
+using RedRunner.UI;
 
 namespace RedRunner
 {
@@ -66,14 +67,14 @@ namespace RedRunner
         [Header("Jump Booster")]
         public int NumberOfJumpBoosters = 0;
         public bool IsJumpBoosterActive = false;
-        public UnityEngine.UI.Button JumpBoosterButton;
+        public UIButton JumpBoosterButton;
         public TextMeshProUGUI JumpBoosterCountText;
         int JumpBoostersStartValue = 0;
         bool FoundJumpBoosters = false;
         [Header("Speed Booster")]
         public int NumberOfSpeedBoosters = 0;
         public bool IsSpeedBoosterActive = false;
-        public UnityEngine.UI.Button SpeedBoosterButton;
+        public UIButton SpeedBoosterButton;
         public TextMeshProUGUI SpeedBoosterCountText;
         int SpeedBoostersStartValue = 0;
         bool FoundSpeedBoosters = false;
@@ -149,7 +150,7 @@ namespace RedRunner
             {
                 m_HighScore = 0f;
             }
-            string SkinEquipped = PlayerPrefs.GetString("SkinEquipped");
+            string SkinEquipped = PlayerPrefs.GetString("SkinEquipped", "Default");
             ChangeSkinWithIndex(SkinEquipped);
         }
 

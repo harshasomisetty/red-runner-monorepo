@@ -12,7 +12,7 @@ public class Login : MonoBehaviour
     public GameObject PopUpScreen;
     public TextMeshProUGUI PopUpMessage;
     public GameObject LoginPanel;
-    public Button OkButton;
+    public UIButton OkButton;
     public TextMeshProUGUI SignUpSuccessButtonText;
 
 
@@ -124,5 +124,9 @@ public class Login : MonoBehaviour
             PopUpScreen.SetActive(false);
             UserLogInFirebase(); 
         });
+    }
+    public void SalvayLink()
+    {
+        Utils.OpenURLInNewTab("https://salvay.io");
     }
 }

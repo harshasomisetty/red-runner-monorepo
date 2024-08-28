@@ -48,6 +48,11 @@ public static class StaticDataBank
     public static string jwttoken = "";
     public static string walletAddress = "";
 
+
+    public static string SpeedBoosterCollectionID = "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14";
+    public static string DoubleJumpCollectionID = "0b9d2116-b3a2-4452-affb-03282313ab77";
+    public static string SkinCollectionID = "36399a18-941c-4c18-bb0d-8cc2aaaa8b06";
+
     #endregion
 
 

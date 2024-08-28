@@ -43,6 +43,7 @@ public class InventoryManager : MonoBehaviour
     public List<InventoryData.Root> m_data;
 
     int current_page = 1;
+
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
 
     void Awake()
@@ -53,11 +54,35 @@ public class InventoryManager : MonoBehaviour
         }
         GetSolValue();
     }
+    public void CheckSuccesScreen(bool sequancecall)
+    {
+        if (dataFetchCompleted)
+        {
+            //SUCCESS SCENARIOS//
+            if (!sequancecall)
+                UIManager.Instance.LaunchInventory();
+            else
+            {
+                InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
+                UIManager.Instance.ToggleGameEquipmentFeatures(true);
+                UIManager.Instance.GameEquipmentBackButton.SetActive(true);
+                GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
 
+                Debug.Log("Sequence Success");
+            }
+        }
+    }
     public void FetchInventoryData(bool SequenceCall)
     {
-        ClearDataToUpdate();
-        CheckInventoryDataForMultiplePages(SequenceCall);
+        if (!dataFetchCompleted || SequenceCall)
+        {
+            ClearDataToUpdate();
+            CheckInventoryDataForMultiplePages(SequenceCall);
+        }
+        else
+        {
+            CheckSuccesScreen(SequenceCall);
+        }
     }
     public void ClearDataToUpdate()
     {
@@ -88,10 +113,10 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            StartCoroutine(senddatatopopulate());
+            StartCoroutine(PopulateDataSequence());
         }
     }
-    IEnumerator senddatatopopulate()
+    IEnumerator PopulateDataSequence()
     {
         for (int i = 0; i < m_data.Count; i++)
         {
@@ -148,19 +173,19 @@ public class InventoryManager : MonoBehaviour
             _data.pageNumber = pageNumber;
             if (data.data[i].type.Contains("UniqueAsset"))
             {
-                if (data.data[i].item.collection.id == "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14")
+                if (data.data[i].item.collection.id == StaticDataBank.SpeedBoosterCollectionID)
                 {
                     _data.boosterindex = i;
                     SpeedBoosterIndex.Add(_data);
                     cell = GetCell(SpeedBoosterIndex.Count - 1, speedContainer, inventoryCellBosster);
                 }
-                else if (data.data[i].item.collection.id == "0b9d2116-b3a2-4452-affb-03282313ab77")
+                else if (data.data[i].item.collection.id == StaticDataBank.DoubleJumpCollectionID)
                 {
                     _data.boosterindex = i;
                     DoubleJumpIndex.Add(_data);
                     cell = GetCell(DoubleJumpIndex.Count - 1, doubleJumpContainer, inventoryCellBosster);
                 }
-                else if (data.data[i].item.collection.id == "36399a18-941c-4c18-bb0d-8cc2aaaa8b06")
+                else if (data.data[i].item.collection.id == StaticDataBank.SkinCollectionID)
                 {
                     _data.boosterindex = i;
                     SkinsIndex.Add(_data);
@@ -184,21 +209,7 @@ public class InventoryManager : MonoBehaviour
             cell.gameObject.SetActive(true);
             yield return StartCoroutine(GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, _data));
         }
-        if (dataFetchCompleted)
-        {
-            //SUCCESS SCENARIOS//
-            if (!_sequenceCall)
-                UIManager.Instance.LaunchInventory();
-            else
-            {
-                InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
-                UIManager.Instance.ToggleGameEquipmentFeatures(true);
-                UIManager.Instance.GameEquipmentBackButton.SetActive(true);
-                GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-                
-                Debug.Log("Sequence Success");
-            }
-        }
+        CheckSuccesScreen(_sequenceCall);
     }
 
     IEnumerator GetInventoryItemImage(string url, string datasetname, InventoryCell cell, DataIndex index)
@@ -305,7 +316,6 @@ public class InventoryManager : MonoBehaviour
     }
     public void SetSolValue(string solValue)
     {
-        Debug.Log("Currency Quantity : " + solValue);
         SolValue.text = "" + solValue;
     }
     public void GetSolValue()
@@ -316,7 +326,6 @@ public class InventoryManager : MonoBehaviour
             {
                 for (int i = 0; i < _data.data.Count; i++)
                 {
-                    //Debug.Log(i + "index ");
                     if (_data.data[i].item.id == "SOL")
                     {
                         SetSolValue(_data.data[i].quantity);

@@ -21,7 +21,6 @@ public class API_Manager : SingletonBase<API_Manager>
     SignInCallback GoogleAuth = null;
 
 
-    //public static API_Manager.Instance;
     protected override void Awake()
     {
         base.Awake();
@@ -395,13 +394,13 @@ public class API_Manager : SingletonBase<API_Manager>
 
             if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
             {
-                Debug.LogError(www.error);
+                Debug.Log(www.error);
                 Call(false, null);
             }
             else
             {
                 string jsonResponse = www.downloadHandler.text;
-                Debug.Log(jsonResponse);
+                //Debug.Log(jsonResponse);
                 GameShop gameShop = JsonUtility.FromJson<GameShop>(jsonResponse);
                 Call(true, gameShop);
             }
