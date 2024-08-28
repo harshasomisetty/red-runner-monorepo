@@ -78,10 +78,10 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
             });
         }
     }
-
-    public void OnSocketMessageReceived(string messageHeader)
+    
+    public void OnSocketMessageReceived(SocketEventsType eventType, string payLoad = null)
     {
-        ShowPopup(messageHeader);
+        ShowPopup(string.Format(eventType.GetStringForType(), payLoad));
     }
 
     public void RemoveListener()
