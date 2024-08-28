@@ -149,7 +149,7 @@ namespace RedRunner
             {
                 m_HighScore = 0f;
             }
-            string SkinEquipped = PlayerPrefs.GetString("SkinEquipped");
+            string SkinEquipped = PlayerPrefs.GetString("SkinEquipped", "Default");
             ChangeSkinWithIndex(SkinEquipped);
         }
 

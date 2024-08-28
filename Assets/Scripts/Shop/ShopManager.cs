@@ -44,22 +44,30 @@ public class ShopManager : MonoBehaviour
 
     private string _selectedMintId;
 
-    //private void OnEnable()
-    //{
-    //    API_Manager.Instance.GetShopData(GetAllShopData);
-    //}
+    void HidePopUp()
+    {
+        UIManager.Instance.SelectDefaultFeatureWindowOption();
+    }
     void GetAllShopData(bool sucess, GameShop response)
     {
         if (sucess)
         {
-            _gameShop = response; 
-            Debug.Log("Game Shop Data Fetch");
+            if ((_gameShop!=null)&& _gameShop.boosters.speed_boosters.speed_booster_6.price.SOL == response.boosters.speed_boosters.speed_booster_6.price.SOL &&
+                _gameShop.boosters.double_jump_boosters.double_jump_3.price.SOL == response.boosters.double_jump_boosters.double_jump_3.price.SOL &&
+                _gameShop.skins.alienSkin.price.SOL == response.skins.alienSkin.price.SOL)
+            {
+                UIManager.Instance.SelectDefaultFeatureWindowOption();
+                return;
+            }
+            _gameShop = response;
+            StaticDataBank.SpeedBoosterCollectionID = _gameShop.boosters.speed_boosters.speed_booster_3.collectionId;
+            StaticDataBank.DoubleJumpCollectionID = _gameShop.boosters.double_jump_boosters.double_jump_3.collectionId;
+            StaticDataBank.SkinCollectionID = _gameShop.skins.alienSkin.collectionId;
             StartCoroutine(PopulateData());
         }
         else
         {
             UIManager.Instance.ActivateFailureScreen("Shop");
-            Debug.Log("Data failed");
         }
     }
     //Sprite DownloadImage(string imageUrl)
@@ -281,6 +289,7 @@ public class ShopManager : MonoBehaviour
         DetailPanel.SetActive(false);
         GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing...",true);
         
+        Debug.Log("Item Name : " + itemName);
         API_Manager.Instance.BuyNft(itemName,withSol, (success, message) =>
         {
             if (success)

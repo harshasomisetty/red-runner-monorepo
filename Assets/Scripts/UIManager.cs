@@ -140,7 +140,6 @@ public class UIManager : MonoBehaviour
         for (int i = 0; i < FeatureScreenWindows.Length; i++)
         {
             FeatureScreenWindows[i].SetActive(false);
-
         }
     }
     void LaunchFeatureWindow(int i)

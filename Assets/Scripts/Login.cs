@@ -12,7 +12,7 @@ public class Login : MonoBehaviour
     public GameObject PopUpScreen;
     public TextMeshProUGUI PopUpMessage;
     public GameObject LoginPanel;
-    public Button OkButton;
+    public UIButton OkButton;
     public TextMeshProUGUI SignUpSuccessButtonText;
 
 

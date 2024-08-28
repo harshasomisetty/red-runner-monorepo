@@ -210,13 +210,13 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedSpeedBoosterAsset = SelectIndex;
             CurrentSpeedBoosterHolder.sprite = sprite;
-            string ItemID = InventoryManager.Instance.getItemIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
-            string AssetID = InventoryManager.Instance.getAssetIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
+            string _ItemID = InventoryManager.Instance.getItemIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
+            string _AssetID = InventoryManager.Instance.getAssetIdOfSpeedBooster(InventoryManager.Instance.SpeedBoosterIndex[SelectIndex]);
 
             //CurrentSpeedBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentSpeedBoosterHolderText.text = "x" + boostervalue;
             EquipSpeedBooster(boostervalue);
-            GlobalFeaturesManager.Instance.SelectSpeedBoosterNft(ItemID, AssetID, boostervalue);
+            GlobalFeaturesManager.Instance.SelectSpeedBoosterNft(_ItemID, _AssetID, boostervalue);
 
         }
     }
@@ -231,12 +231,12 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedJumpBoosterAsset = SelectIndex;
             CurrentJumpBoosterHolder.sprite = sprite;
-            string ItemID = InventoryManager.Instance.getItemIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
-            string AssetID = InventoryManager.Instance.getAssetIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
+            string _ItemID = InventoryManager.Instance.getItemIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
+            string _AssetID = InventoryManager.Instance.getAssetIdOfJumpBooster(InventoryManager.Instance.DoubleJumpIndex[SelectIndex]);
             //CurrentJumpBoosterHolder.GetComponent<CanvasGroup>().alpha = 1.0f;
             CurrentJumpBoosterHolderText.text = "x" + boostervalue;
             EquipJumpBooster(boostervalue);
-            GlobalFeaturesManager.Instance.SelectJumpBoosterNft(ItemID, AssetID, boostervalue);
+            GlobalFeaturesManager.Instance.SelectJumpBoosterNft(_ItemID, _AssetID, boostervalue);
         }
     }
     public void SelectSkinAsset(int SelectIndex, Sprite sprite, string skinid)

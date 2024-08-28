@@ -128,6 +128,9 @@ namespace RedRunner
                 case "zombieSkin":
                     skinIndex = 12;
                     break;
+				case "Default":
+                    skinIndex = 0;
+                    break;
             }
             m_Body.GetComponent<SpriteRenderer>().sprite = character.Skins[skinIndex].Body;
             m_LeftEye.GetComponent<SpriteRenderer>().sprite = character.Skins[skinIndex].Eye;
