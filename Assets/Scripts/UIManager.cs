@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using RedRunner.UI;
 
 
 public class UIManager : MonoBehaviour
@@ -54,7 +55,7 @@ public class UIManager : MonoBehaviour
         }
     }
     [Header("Feature Screen Buttons")]
-    public Button[] FeatureScreenButtons;
+    public UIButton[] FeatureScreenButtons;
     public Sprite NormalFeatureButtonSprite;
     public Sprite HighlightedFeatureButtonSprite;
     int CurrentSelectedFeatureButton = -1;
@@ -230,7 +231,7 @@ public class UIManager : MonoBehaviour
     #region InventoryVerticals
     public GameObject InventoryHeaderBar;
     [Header("Inventory Category Windows")]
-    public Button[] InventoryCategoryButtons;
+    public UIButton[] InventoryCategoryButtons;
     public Sprite NormalInventoryCategoryButtonSprite;
     public Sprite HighlightedInventoryCategoryButtonSprite;
     int CurrentSelectedInventoryVertical = 1;

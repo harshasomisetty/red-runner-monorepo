@@ -137,5 +137,5 @@ public class GlobalFeaturesManager : SingletonBase<GlobalFeaturesManager>
 
 
     #endregion
-
+    
 }

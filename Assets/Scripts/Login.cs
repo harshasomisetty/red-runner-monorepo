@@ -125,4 +125,8 @@ public class Login : MonoBehaviour
             UserLogInFirebase(); 
         });
     }
+    public void SalvayLink()
+    {
+        Utils.OpenURLInNewTab("https://salvay.io");
+    }
 }

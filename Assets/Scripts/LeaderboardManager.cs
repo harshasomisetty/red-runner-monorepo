@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class LeaderboardManager : MonoBehaviour
 {
+    public LeaderboardCell UserPositionCell;
     public Transform cellContainer;
     public GameObject LeaderBoardCell;
     public Sprite[] Medals, Gifts;
@@ -40,11 +41,22 @@ public class LeaderboardManager : MonoBehaviour
             cells.Clear();
             for (int i = 0; i < data.Count; i++)
             {
-                LeaderboardCell cell = GetCell(i);
-                cell.name = i.ToString();
-                cell.SetValues(i, Medals, data[i].name, data[i].score, Gifts);
-                cells.Add(cell);
-                cell.gameObject.SetActive(true);
+                if (StaticDataBank.playerlocalid == data[i].userId)
+                {
+                    LeaderboardCell cell = UserPositionCell;
+                    cell.name = i.ToString();
+                    cell.SetValues(i, Medals, data[i].name, data[i].score, Gifts);
+                    cells.Add(cell);
+                    cell.gameObject.SetActive(true);
+                }
+                else
+                {
+                    LeaderboardCell cell = GetCell(i);
+                    cell.name = i.ToString();
+                    cell.SetValues(i, Medals, data[i].name, data[i].score, Gifts);
+                    cells.Add(cell);
+                    cell.gameObject.SetActive(true);
+                }
             }
             ToggleLeaderBoardFailurePrompt(false);
         }

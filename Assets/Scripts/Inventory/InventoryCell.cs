@@ -1,3 +1,4 @@
+using RedRunner.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ public class InventoryCell : MonoBehaviour
 
     public Image BoosterImage;
     public TextMeshProUGUI Name;
-    public Button ShowPanelButton;
+    public UIButton ShowPanelButton;
     public int DataIndex;
     public int pageNumber;
 

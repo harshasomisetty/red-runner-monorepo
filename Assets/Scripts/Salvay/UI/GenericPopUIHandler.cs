@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using RedRunner.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,7 +23,7 @@ public class GenericPopUIHandler : MonoBehaviour
     private TMP_Text contentText,titleText,firstButtonText,secondButtonText; // Reference to the UI element's RectTransform
     
     [SerializeField]
-    private Button firstButton,secondButton; // Reference to the UI element's RectTransform
+    private UIButton firstButton,secondButton; // Reference to the UI element's RectTransform
     
     private const float SlideDuration = 0.5f; // Duration for the slide-in and slide-out animations
     // private const float StayDuration = 3.0f; // How long the popup stays before sliding back
