@@ -39,6 +39,7 @@ public class LeaderboardManager : MonoBehaviour
                 return;
             }
             cells.Clear();
+            UserPositionCell.gameObject.SetActive(false);
             for (int i = 0; i < data.Count; i++)
             {
                 if (StaticDataBank.playerlocalid == data[i].userId)

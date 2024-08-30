@@ -48,13 +48,11 @@ public class ImageCache : MonoBehaviour
             }
             else
             {
-                Debug.Log("Download Image from backend");
                 StartCoroutine(DownloadImageCoroutine(imageUrl, onComplete));
             }
         }
         else 
         {
-            Debug.Log("Download Image from backend");
             StartCoroutine(DownloadImageCoroutine(imageUrl, onComplete));
             
         }
@@ -72,7 +70,12 @@ public class ImageCache : MonoBehaviour
                 string fileName = Guid.NewGuid().ToString() + ".png";
                 string localPath = Path.Combine(cacheDirectory, fileName);
 
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+                SaveImage(localPath, texture);
+#else
                 File.WriteAllBytes(localPath, texture.EncodeToPNG());
+#endif
 
                 urlToPathMap[imageUrl] = localPath;
                 SaveCache();
@@ -91,10 +94,13 @@ public class ImageCache : MonoBehaviour
     {
         // In WebGL, we just use the path directly without file://
 #if UNITY_WEBGL && !UNITY_EDITOR
-    string url = localPath;
+        //string url = localPath;
+        yield return new WaitForSecondsRealtime(1f);
+        Texture2D myTexture = LoadImageFromBase64(localPath);
+        onComplete?.Invoke(myTexture);
+
 #else
         string url = "file://" + localPath;
-#endif
 
         using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
         {
@@ -111,6 +117,7 @@ public class ImageCache : MonoBehaviour
                 onComplete?.Invoke(null);
             }
         }
+#endif
     }
 
 
@@ -150,6 +157,46 @@ public class ImageCache : MonoBehaviour
         if (keysToRemove.Count > 0)
         {
             SaveCache();
+        }
+    }
+
+    public string ConvertImageToBase64(Texture2D texture)
+    {
+        byte[] imageData = texture.EncodeToPNG();
+        return Convert.ToBase64String(imageData);
+    }
+
+    // Load an image from Base64 string
+    public Texture2D LoadImageFromBase64(string base64Data)
+    {
+        byte[] imageData = Convert.FromBase64String(base64Data);
+        Texture2D texture = new Texture2D(2, 2);
+        texture.LoadImage(imageData);
+        return texture;
+    }
+    public void SaveImage(string key, Texture2D texture)
+    {
+        string base64Data = ConvertImageToBase64(texture);
+        Application.ExternalCall("SaveImageToIndexedDB", key, base64Data);
+    }
+    private Action<string> onImageLoaded;
+    public void LoadImage(string key)
+    {
+        onImageLoaded = OnImageLoaded;
+        Application.ExternalCall("LoadImageFromIndexedDB", key, onImageLoaded);
+    }
+
+    private void OnImageLoaded(string base64Data)
+    {
+        if (!string.IsNullOrEmpty(base64Data))
+        {
+            Texture2D texture = LoadImageFromBase64(base64Data);
+            // Now you can use this texture in your application, e.g., apply it to a UI element or a GameObject
+            Debug.Log("Image loaded successfully!");
+        }
+        else
+        {
+            Debug.Log("No image found for the given key.");
         }
     }
 }

@@ -9,7 +9,7 @@ public class SplashManager : MonoBehaviour
     public void StartTitle()
     {
         title.DOAnchorPos(Vector2.zero, 0.8f).SetDelay(0.4f).OnComplete(delegate {
-            LogInPanel.DOScale(1f, 1).SetEase(Ease.OutBounce);
+            LogInPanel.DOScale(1f, 0.7f).SetEase(Ease.Linear);
         });
         title.DOScale(new Vector3(0.4f, 0.4f, 0.4f), 0.8f).SetDelay(0.4f);
     }

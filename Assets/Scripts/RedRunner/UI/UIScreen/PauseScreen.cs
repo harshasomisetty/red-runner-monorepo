@@ -29,7 +29,8 @@ namespace RedRunner.UI
             {
                 //GameManager.Singleton.Reset();
                 //GameManager.Singleton.Init();
-                GameManager.Singleton.StartGame();
+                Time.timeScale = 1f;
+                GameManager.Singleton.ShowCursorOnEnd();
                 Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
         }

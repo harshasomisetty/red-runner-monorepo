@@ -24,13 +24,15 @@ namespace RedRunner.UI
                 var ingameScreen = GameTemplateUIManager.Singleton.GetUIScreen(UIScreenInfo.IN_GAME_SCREEN);
                 GameTemplateUIManager.Singleton.OpenScreen(ingameScreen);
                 GameManager.Singleton.StartGame();
+                GameManager.Singleton.ShowCursorOnEnd();
                 Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
-            HomeButton.SetButtonAction(() =>
+            HomeButton.SetButtonAction(() => 
             {
                 //GameManager.Singleton.Reset();
                 //GameManager.Singleton.Init();
                 Time.timeScale = 1f;
+                GameManager.Singleton.ShowCursorOnEnd(); 
                 Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
         }

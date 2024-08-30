@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using DG.Tweening;
+
 
 public class MenuManager : MonoBehaviour
 {
@@ -79,5 +81,28 @@ public class MenuManager : MonoBehaviour
     public void ChangeSkin(int skinIndex)
     {
         //m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
+    }
+
+    bool _withDrawOpen = false;
+    public RectTransform WithDrawPanel;
+
+    public void ToggleWithdrawPanel()
+    {
+        if(_withDrawOpen)
+        {
+            WithDrawPanel.DOScaleY(0f, 0.3f).OnComplete(delegate {
+                _withDrawOpen = false;
+            });
+        }
+        else
+        {
+            WithDrawPanel.DOScaleY(1f, 0.3f).OnComplete(delegate {
+                _withDrawOpen = true;
+            });
+        }
+    }
+    public void WithDrawCurrency()
+    {
+
     }
 }

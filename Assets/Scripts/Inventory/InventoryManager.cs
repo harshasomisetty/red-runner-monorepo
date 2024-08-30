@@ -52,7 +52,7 @@ public class InventoryManager : MonoBehaviour
         {
             Instance = this;
         }
-        GetSolValue();
+        InvokeRepeating(nameof(GetSolValue), 1f, 30f);
     }
     public void CheckSuccesScreen(bool sequancecall)
     {
@@ -320,6 +320,7 @@ public class InventoryManager : MonoBehaviour
     }
     public void GetSolValue()
     {
+        Debug.Log("Repeating");
         API_Manager.Instance.GetInvectory((success, _data) =>
         {
             if (success)
