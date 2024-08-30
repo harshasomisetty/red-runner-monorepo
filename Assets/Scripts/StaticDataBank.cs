@@ -36,6 +36,7 @@ public static class StaticDataBank
     public static readonly string Get_Inventory = BackendBaseUrl + "gs/getInventory?userId=";
     public static readonly string Mint = BackendBaseUrl + "gs/mintAsset?userId=";
     public static readonly string Buy = BackendBaseUrl + "gs/buyItem?userId=";
+    public static readonly string Withdraw = BackendBaseUrl + "gs/withdraw?userId=";
     public static readonly string TokensPushingLink = BackendBaseUrl + "gs/claimCoins?userId=";
     public static readonly string InventoryUpdateLink = BackendBaseUrl + "gs/updateNft?userId=";
     public static readonly string BuyItem = BackendBaseUrl + "gs/buyItem?userId=";

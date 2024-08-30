@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Best.SocketIO;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,6 +26,8 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
     private bool m_IsTimeBased = true;
     private Tween m_CurrentTween = null; // Track the current active tween
 
+    private List<SocketEventsType> m_EventsToCloseOn;
+
     public enum PopupState
     {
         Hidden,
@@ -45,10 +48,12 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
         popupState = PopupState.Hidden;
     }
 
-    public void ShowPopup(string text, bool _isTimeBased)
+    public void ShowPopup(string text, bool _isTimeBased,List<SocketEventsType> _events = null)
     {
         if (popupState == PopupState.Hidden || popupState == PopupState.Animating)
         {
+            m_EventsToCloseOn = _events;
+            
             m_CurrentTween?.Kill(); // Kill any ongoing tween
 
             panelBackgroundImage.gameObject.SetActive(true);
@@ -105,12 +110,12 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
 
     void SocketEventListener.OnSocketMessageReceived(SocketEventsType messageHeader, string payLoad)
     {
-        if (messageHeader== SocketEventsType.assetMintComplete)
-            HidePopup();
-    }
-
-    void SocketEventListener.RemoveListener()
-    {
-        throw new NotImplementedException();
+        if(m_EventsToCloseOn != null)
+        {
+            if (m_EventsToCloseOn.Contains(messageHeader))
+            {
+                HidePopup();
+            }
+        }
     }
 }

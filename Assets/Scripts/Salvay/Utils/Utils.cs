@@ -52,7 +52,7 @@ public static class Utils
                 return "{0} Minted";
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null);
+                return "Unknown Event";
         }
     }
 }

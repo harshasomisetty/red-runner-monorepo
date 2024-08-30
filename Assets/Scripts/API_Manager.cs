@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
@@ -506,6 +507,38 @@ public class API_Manager : SingletonBase<API_Manager>
         }
     }
     #endregion
+    public void WithdrawFunds(Action<bool,string> callback)
+    {
+        StartCoroutine(Withdraw_Funds(callback));
+    }
+    private IEnumerator Withdraw_Funds(Action<bool,string> callback)
+    {
+        string url = StaticDataBank.Withdraw + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            callback?.Invoke(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            JObject jsonObject = JObject.Parse(jsonResponse);
+
+            // Extract the checkoutUrl value
+            string checkoutUrl = jsonObject["data"]["url"]?.ToString();
+            Debug.Log(checkoutUrl);
+            callback?.Invoke(true, checkoutUrl);
+        }
+    }
 
     #region BuyingThings
 

@@ -74,6 +74,7 @@ public class SocketController : SingletonBase<SocketController>
         _manager.Socket.On<ConnectResponse>(SocketIOEventTypes.Connect, OnConnected);
         
         _manager.Socket.On(SocketIOEventTypes.Event,OnSocketEvent);
+        _manager.Socket.On(SocketIOEventTypes.Unknown,OnSocketEvent);
         
         // Start connecting to the server
         _manager.Open();

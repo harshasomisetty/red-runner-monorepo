@@ -27,7 +27,20 @@ public class MenuManager : MonoBehaviour
     public void ToggleHelpWindow(bool State)
     {
         HelpWindow.SetActive(State);
+        // TestWithdrawFunds();
     }
+
+    private void TestWithdrawFunds()
+    {
+        API_Manager.Instance.WithdrawFunds((isSuccess,response) =>
+        {
+            if (isSuccess)
+            {
+                Utils.OpenURLInNewTab(response);   
+            }
+        });
+    }
+
     string InsertAsteriskInMiddle(string input)
     {
         int length = input.Length;

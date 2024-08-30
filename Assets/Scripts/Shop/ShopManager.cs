@@ -278,16 +278,17 @@ public class ShopManager : MonoBehaviour
         newPopupData.contentString = "Are you sure you want to buy this ?";
         newPopupData.firstButtonString = "SOL";
         newPopupData.secondButtonString = "USD";
-        newPopupData.firstButtonCallBack = () => MintNFT(MintID,true);
-        newPopupData.secondButtonCallBack = () => MintNFT(MintID,false);
+        newPopupData.firstButtonCallBack = () => MintNft(MintID,true);
+        newPopupData.secondButtonCallBack = () => MintNft(MintID,false);
         GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(newPopupData);
         GlobalCanvasManager.Instance.PopUIHandler.ToggleSpecialKillButton(true);
         
     }
-    public void MintNFT(string itemName,bool withSol)
+    public void MintNft(string itemName,bool withSol)
     {
         DetailPanel.SetActive(false);
-        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing...",true);
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing Payment", true,
+    new List<SocketEventsType> { SocketEventsType.paymentComplete });
         
         Debug.Log("Item Name : " + itemName);
         API_Manager.Instance.BuyNft(itemName,withSol, (success, message) =>
@@ -308,10 +309,7 @@ public class ShopManager : MonoBehaviour
                     titleString = "Error",
                     contentString = message,
                     firstButtonString = "OK",
-                    firstButtonCallBack = () =>
-                    {
-                        GlobalCanvasManager.Instance.PopUIHandler.HidePopup();
-                    }
+                    firstButtonCallBack = null
                 });
             } 
         });
