@@ -309,7 +309,6 @@ namespace RedRunner
 
         public void StartGame()
         {
-            _cursorVisibilityHandler.UseCursorHideFeature = true;
             m_GameStarted = true;
             ResumeGame();
             ReactivateJumpBoosterIfAvailable();
@@ -317,21 +316,18 @@ namespace RedRunner
 
         public void StopGame()
         {
-            _cursorVisibilityHandler.UseCursorHideFeature = false;
             m_GameRunning = false;
             Time.timeScale = 0f;
         }
 
         public void ResumeGame()
         {
-            _cursorVisibilityHandler.UseCursorHideFeature = true;
             m_GameRunning = true;
             Time.timeScale = 1f;
         }
 
         public void EndGame()
         {
-            _cursorVisibilityHandler.UseCursorHideFeature = false;
             m_GameStarted = false;
             StopGame();
         }
@@ -495,10 +491,7 @@ namespace RedRunner
         {
             CoinsCollectedForPushing++;
         }
-        public void ShowCursorOnEnd()
-        {
-            _cursorVisibilityHandler.ShowCursor();
-        }
+        
 
         [System.Serializable]
         public class LoadEvent : UnityEvent

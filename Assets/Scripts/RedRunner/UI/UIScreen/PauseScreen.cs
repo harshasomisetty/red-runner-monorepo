@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace RedRunner.UI
@@ -30,7 +28,6 @@ namespace RedRunner.UI
                 //GameManager.Singleton.Reset();
                 //GameManager.Singleton.Init();
                 Time.timeScale = 1f;
-                GameManager.Singleton.ShowCursorOnEnd();
                 Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
         }
