@@ -2,36 +2,65 @@ using UnityEngine;
 
 public class CursorVisibilityHandler : MonoBehaviour
 {
+    private float lastMouseMoveTime;
+    public float cursorHideDelay = 2.0f; // Time in seconds after which the cursor should hide if there's no movement
     public float idleTime = 2.0f; // Time in seconds before the cursor hides
     private Vector3 lastMousePosition;
     private float timer = 0.0f;
 
+    private bool isCursorHidden;
+    public bool UseCursorHideFeature = true;
 
     void Start()
     {
+        // Initially, show the cursor
+        ShowCursor();
         lastMousePosition = Input.mousePosition;
-        Cursor.visible = true; // Initially show the cursor
+        lastMouseMoveTime = Time.time;
     }
 
     void Update()
     {
-        // Check if the mouse has moved
-        if (Input.mousePosition != lastMousePosition)
+        if (UseCursorHideFeature)
         {
-            Cursor.visible = true; // Show the cursor if the mouse moved
-            timer = 0.0f; // Reset the timer
-            lastMousePosition = Input.mousePosition; // Update the last known mouse position
-        }
-        else
-        {
-            // Increment the timer if the mouse hasn't moved
-            timer += Time.deltaTime;
-
-            // Hide the cursor if the idle time has passed
-            if (timer >= idleTime)
+            if (Input.mousePosition != lastMousePosition)
             {
-                Cursor.visible = false;
+                lastMouseMoveTime = Time.time;
+                ShowCursor();
+                timer = 0.0f;
+                lastMousePosition = Input.mousePosition;
+            }
+            else
+            {
+                timer += Time.deltaTime;
+                if (timer >= idleTime)
+                {
+                    if (!isCursorHidden)
+                    {
+                        HideCursor();
+                    }
+                }
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                HideCursor();
             }
         }
     }
+
+    public void ShowCursor()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        isCursorHidden = false;
+    }
+
+    public void HideCursor()
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        isCursorHidden = true;
+    }
 }
+
