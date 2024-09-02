@@ -87,25 +87,31 @@ public class UIManager : MonoBehaviour
 
             for (int j = 0; j < FeatureScreenButtons.Length; j++)
             {
-                if (NormalFeatureButtonSprite != null)
+                if(j==i)
                 {
-                    FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
-                    FeatureScreenButtons[j].GetComponent<Image>().SetNativeSize();
-                    FeatureScreenButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
-                    FeatureScreenButtons[j].GetComponent<Canvas>().overrideSorting = false;
+                    FeatureScreenButtons[i].GetComponent<Image>().sprite = HighlightedFeatureButtonSprite;
+                    FeatureScreenButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
+                    Canvas canvas = FeatureScreenButtons[i].GetComponent<Canvas>();
+                    canvas.overrideSorting = true;
+                    canvas.enabled = false; 
+                    canvas.enabled = true;
+                    FeatureScreenButtons[i].GetComponent<Image>().SetNativeSize();
                 }
-                else
+                else 
                 {
                     FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
-
+                    FeatureScreenButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
+                    Canvas canvas = FeatureScreenButtons[j].GetComponent<Canvas>();
+                    canvas.overrideSorting = true;
+                    canvas.enabled = false;  
+                    canvas.enabled = true;
+                    if (NormalFeatureButtonSprite != null)
+                        FeatureScreenButtons[j].GetComponent<Image>().SetNativeSize();
+                    Debug.Log("feature button name : " + FeatureScreenButtons[j].name);
                 }
             }
 
-            FeatureScreenButtons[i].GetComponent<Image>().sprite = HighlightedFeatureButtonSprite;
-            //FeatureScreenButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(215 * 1.1f, 163 * 1.1f);
-            FeatureScreenButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
-            FeatureScreenButtons[i].GetComponent<Canvas>().overrideSorting = true;
-            FeatureScreenButtons[i].GetComponent<Image>().SetNativeSize();
+            
 
             CloseAllFeatureWindows();
 
