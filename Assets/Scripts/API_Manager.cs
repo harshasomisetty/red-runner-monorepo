@@ -507,6 +507,8 @@ public class API_Manager : SingletonBase<API_Manager>
         }
     }
     #endregion
+
+    #region WithdrawFunds
     public void WithdrawFunds(Action<bool,string> callback)
     {
         StartCoroutine(Withdraw_Funds(callback));
@@ -539,6 +541,8 @@ public class API_Manager : SingletonBase<API_Manager>
             callback?.Invoke(true, checkoutUrl);
         }
     }
+
+    #endregion
 
     #region BuyingThings
 

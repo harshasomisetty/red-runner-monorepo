@@ -32,16 +32,6 @@ public class MenuManager : MonoBehaviour
         // TestWithdrawFunds();
     }
 
-    private void TestWithdrawFunds()
-    {
-        API_Manager.Instance.WithdrawFunds((isSuccess,response) =>
-        {
-            if (isSuccess)
-            {
-                Utils.OpenURLInNewTab(response);   
-            }
-        });
-    }
 
     string InsertAsteriskInMiddle(string input)
     {
@@ -103,6 +93,12 @@ public class MenuManager : MonoBehaviour
     }
     public void WithDrawCurrency()
     {
-
+        API_Manager.Instance.WithdrawFunds((isSuccess, response) =>
+        {
+            if (isSuccess)
+            {
+                Utils.OpenURLInNewTab(response);
+            }
+        });
     }
 }
