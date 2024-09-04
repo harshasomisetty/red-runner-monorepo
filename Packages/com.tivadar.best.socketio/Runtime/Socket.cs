@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Best.SocketIO
 {
@@ -296,6 +297,14 @@ namespace Best.SocketIO
         public void On(string eventName, Action callback)
         {
             this.TypedEventTable.Register(eventName, null, _ => callback());
+        }
+        
+        public void On(List<String> events, Action callback)
+        {
+            foreach (string eventName in events)
+            {
+                this.TypedEventTable.Register(eventName, null, _ => callback());
+            }
         }
 
         public void On<T>(string eventName, Action<T> callback)

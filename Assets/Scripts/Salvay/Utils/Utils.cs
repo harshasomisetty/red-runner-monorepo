@@ -22,37 +22,21 @@ public static class Utils
 
     public static string GetStringForType(this SocketEventsType eventType)
     {
-        switch (eventType)
+        return eventType switch
         {
-            case SocketEventsType.paymentInitiated:
-                return "Payment Initiated";
-                break;
-            case SocketEventsType.paymentFailed:
-                return "Payment Failed";
-                break;
-            case SocketEventsType.paymentComplete:
-                return "Payment Complete";
-                break;
-            case SocketEventsType.payoutInitiated:
-                return "Payout Initiated";
-                break;
-            case SocketEventsType.payoutFailed:
-                return "Payout Failed";
-                break;
-            case SocketEventsType.payoutComplete:
-                return "Payout Complete {0}$";
-                break;
-            case SocketEventsType.assetMintInitiated:
-                return "Asset Mint Initiated";
-                break;
-            case SocketEventsType.assetMintFailed:
-                return "Asset Mint Failed";
-                break;
-            case SocketEventsType.assetMintComplete:
-                return "{0} Minted";
-                break;
-            default:
-                return "Unknown Event";
-        }
+            SocketEventsType.paymentInitiated => "Payment Initiated",
+            SocketEventsType.paymentFailed => "Payment Failed",
+            SocketEventsType.paymentComplete => "Payment Complete",
+            SocketEventsType.payoutInitiated => "Payout Initiated",
+            SocketEventsType.payoutFailed => "Payout Failed",
+            SocketEventsType.payoutComplete => "Payout Complete {0}$",
+            SocketEventsType.assetMintInitiated => "Asset Mint Initiated",
+            SocketEventsType.assetMintFailed => "Asset Mint Failed",
+            SocketEventsType.assetMintComplete => "{0} Minted",
+            SocketEventsType.marketAssetListed => "Asset Listed",
+            SocketEventsType.marketAssetUnListed => "Asset Unlisted",
+            SocketEventsType.marketAssetBought => "Asset Bought",
+            _ => "Unknown Event"
+        };
     }
 }
