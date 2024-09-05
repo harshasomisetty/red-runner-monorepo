@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Best.SocketIO;
 using Best.SocketIO.Events;
 using Newtonsoft.Json.Linq;
@@ -16,7 +17,10 @@ public enum SocketEventsType
     payoutComplete,
     assetMintInitiated,
     assetMintFailed,
-    assetMintComplete
+    assetMintComplete,
+    marketAssetListed,
+    marketAssetUnListed,
+    marketAssetBought
 }
 
 public interface SocketEventListener
@@ -72,9 +76,8 @@ public class SocketController : SingletonBase<SocketController>
         
         // Set subscriptions
         _manager.Socket.On<ConnectResponse>(SocketIOEventTypes.Connect, OnConnected);
-        
-        _manager.Socket.On(SocketIOEventTypes.Event,OnSocketEvent);
-        _manager.Socket.On(SocketIOEventTypes.Unknown,OnSocketEvent);
+        List<string> allNames = Enum.GetNames(typeof(SocketEventsType)).ToList();
+        _manager.Socket.On(allNames,OnSocketEvent);
         
         // Start connecting to the server
         _manager.Open();
@@ -111,6 +114,11 @@ public class SocketController : SingletonBase<SocketController>
                 break;
             case SocketEventsType.assetMintComplete:
                 BroadcastToAllListeners(SocketEventsType.assetMintComplete,GetItemIdStringFromPayload(_manager.Socket.CurrentPacket.Payload));
+                break;
+            case SocketEventsType.marketAssetListed:
+            case SocketEventsType.marketAssetUnListed:
+            case SocketEventsType.marketAssetBought:
+                BroadcastToAllListeners(currentType);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
