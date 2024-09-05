@@ -10,6 +10,8 @@ public class Login : MonoBehaviour
     public TMP_InputField email;
     public TMP_InputField Password;
     public GameObject PopUpScreen;
+    public GameObject QRCodePanel;
+    public Image QRCodeImage;
     public TextMeshProUGUI PopUpMessage;
     public GameObject LoginPanel;
     public UIButton OkButton;
@@ -109,8 +111,8 @@ public class Login : MonoBehaviour
     public void ToggleDataLoadingWindow(bool state)
     {
         LoginPanel.SetActive(!state);
-        
-        if(state)
+
+        if (state)
             GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Logging In...", false);
         else
             GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
@@ -122,11 +124,22 @@ public class Login : MonoBehaviour
         OkButton.SetButtonAction(() =>
         {
             PopUpScreen.SetActive(false);
-            UserLogInFirebase(); 
+            UserLogInFirebase();
         });
     }
+
     public void SalvayLink()
     {
         Utils.OpenURLInNewTab("https://salvay.io");
+    }
+
+    public void OnQRCodeLoginButtonClicked()
+    {
+        QRCodePanel.SetActive(true);
+    }
+
+    public void QRPopupClose()
+    {
+        QRCodePanel.SetActive(false);
     }
 }
