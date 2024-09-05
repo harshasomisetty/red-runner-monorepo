@@ -32,6 +32,7 @@ public static class StaticDataBank
     //public static readonly string LogIn = BackendBaseUrl + "auth/login";
     public static readonly string LeaderBoard_Submit = BackendBaseUrl + "leaderboard/addEntry?userId=";
     public static readonly string Get_LeaderBoard = BackendBaseUrl + "leaderboard/getLeaderboard?userId=";
+    public static readonly string Get_LeaderBoard_Relative = BackendBaseUrl + "leaderboard/getRelativeRank?userId=";
     public static readonly string Get_ShopData = BackendBaseUrl + "shop/getShopData?userId=";
     public static readonly string Get_Inventory = BackendBaseUrl + "gs/getInventory?userId=";
     public static readonly string Mint = BackendBaseUrl + "gs/mintAsset?userId=";
@@ -60,10 +61,7 @@ public static class StaticDataBank
 
     public static string RemoveWordFromString(string m_string)
     {
-        //string originalString = _name;
-        //string wordToRemove = word;
-        //string modifiedString = originalString.Replace(wordToRemove, "").Trim();
-        //return modifiedString;
+        
         string[] namesToRemove = new string[] { "Skin", "Speed Boosters", "Double Jumps" };
 
         foreach (string _name in namesToRemove)

@@ -29,7 +29,6 @@ public class MenuManager : MonoBehaviour
     public void ToggleHelpWindow(bool State)
     {
         HelpWindow.SetActive(State);
-        // TestWithdrawFunds();
     }
 
 
