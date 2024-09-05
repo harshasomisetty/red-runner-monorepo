@@ -1,16 +1,23 @@
+using RedRunner.UI;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LeaderboardManager : MonoBehaviour
 {
+    [Header("Leaderboard Manager References")]
     public LeaderboardCell UserPositionCell;
     public Transform cellContainer;
     public GameObject LeaderBoardCell;
     public Sprite[] Medals, Gifts;
     public List<LeaderboardCell> cells;
 
-    [Header("Leaderboard Windows")]
+    [Header("Leaderboard UI Windows")]
     public GameObject LeaderboardWindow;
+    public Sprite NormalButtonSlice;
+    public Sprite HighlightButtonSlice;
+    public GameObject GlobalButton,RelativeButton;
 
     [Header("Leaderboard Scenario")]
     public GameObject LeaderBoardLoading;
@@ -46,7 +53,7 @@ public class LeaderboardManager : MonoBehaviour
                 {
                     LeaderboardCell cell = UserPositionCell;
                     cell.name = i.ToString();
-                    cell.SetValues(i, Medals, data[i].name, data[i].score, Gifts);
+                    cell.SetValues(i, Medals, "You", data[i].score, Gifts);
                     cells.Add(cell);
                     cell.gameObject.SetActive(true);
                 }
@@ -78,14 +85,14 @@ public class LeaderboardManager : MonoBehaviour
         LeaderboardWindow.SetActive(State);
         LeaderBoardLoading.SetActive(State);
         BackButton.SetActive(!State);
-        if (State == false)
+        if (State)
+        {
+            ToggleGlobleOrRelative(State);
+        }
+        else
         {
             ResetActiveCells(State);
             LeaderboardFailure.SetActive(State);
-        }
-        if (State)
-        {
-            API_Manager.Instance.Leadboard_GetAll(GetAllScores);
         }
         UIManager.Instance.ToggleMainScreen(!State);
     }
@@ -98,5 +105,31 @@ public class LeaderboardManager : MonoBehaviour
                 curcell.gameObject.SetActive(state);
             }
         }
+    }
+    public void ToggleGlobleOrRelative(bool isGloble)
+    {
+        ResetActiveCells(false);
+        LeaderboardWindow.SetActive(true);
+        LeaderBoardLoading.SetActive(true);
+        SetButtonState(GlobalButton, isGloble);
+        SetButtonState(RelativeButton, !isGloble);
+        
+        if (isGloble)
+        {
+            API_Manager.Instance.Leadboard_GetAll(GetAllScores);
+        }
+        else
+        {
+            API_Manager.Instance.Leadboard_GetRelativeScore(GetAllScores);
+        }
+    }
+    private void SetButtonState(GameObject button, bool isHighlighted)
+    {
+        button.GetComponent<Image>().sprite = isHighlighted ? HighlightButtonSlice : NormalButtonSlice;
+        button.GetComponentInChildren<TextMeshProUGUI>().fontSize = isHighlighted ? 40 : 30;
+        button.GetComponent<Image>().SetNativeSize();
+        button.GetComponent<Canvas>().overrideSorting = isHighlighted;
+        button.GetComponent<Canvas>().enabled = false;
+        button.GetComponent<Canvas>().enabled = true;
     }
 }

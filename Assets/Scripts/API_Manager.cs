@@ -307,11 +307,11 @@ public class API_Manager : SingletonBase<API_Manager>
     #endregion
 
     #region Leaderboard Api's
-    public void Score_Submit(int score, string localId, ScoreSubmit submit)
+    public void Score_Submit(int score, ScoreSubmit submit)
     {
-        StartCoroutine(Leadboard_SubmitScore(score, localId, submit));
+        StartCoroutine(Leadboard_SubmitScore(score, submit));
     }
-    private IEnumerator Leadboard_SubmitScore(int m_score, string localId, ScoreSubmit submit)
+    private IEnumerator Leadboard_SubmitScore(int m_score, ScoreSubmit submit)
     {
         var userData = new
         {
@@ -355,6 +355,34 @@ public class API_Manager : SingletonBase<API_Manager>
     private IEnumerator Leadboard_Get(LeaderBoardData data)
     {
         using (UnityWebRequest www = UnityWebRequest.Get(StaticDataBank.Get_LeaderBoard + StaticDataBank.playerlocalid))
+        {
+            www.SetRequestHeader("Content-Type", "application/json");
+
+            www.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+            {
+                data(false, null);
+                Debug.LogError(www.error);
+            }
+            else
+            {
+                string jsonResponse = www.downloadHandler.text;
+                Debug.Log(jsonResponse);
+                List<Leaderboard> leaderboarddata = JsonConvert.DeserializeObject<List<Leaderboard>>(jsonResponse);
+                data(true, leaderboarddata);
+            }
+        }
+    }
+    public void Leadboard_GetRelativeScore(LeaderBoardData data)
+    {
+        StartCoroutine(Leadboard_GetRelative(data));
+    }
+    private IEnumerator Leadboard_GetRelative(LeaderBoardData data)
+    {
+        using (UnityWebRequest www = UnityWebRequest.Get(StaticDataBank.Get_LeaderBoard_Relative + StaticDataBank.playerlocalid))
         {
             www.SetRequestHeader("Content-Type", "application/json");
 

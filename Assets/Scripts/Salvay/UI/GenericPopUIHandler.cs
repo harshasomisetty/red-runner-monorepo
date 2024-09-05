@@ -3,7 +3,6 @@ using DG.Tweening;
 using RedRunner.UI;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PopupData
 {

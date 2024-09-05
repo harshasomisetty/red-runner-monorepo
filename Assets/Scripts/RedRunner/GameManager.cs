@@ -474,7 +474,7 @@ namespace RedRunner
         public void CallToServerOnGameEnd(float m_Score)
         {
             int myscore = ExtractInteger(m_Score.ToLength());
-            API_Manager.Instance.Score_Submit(myscore, StaticDataBank.playerlocalid, (success, message) => {
+            API_Manager.Instance.Score_Submit(myscore, (success, message) => {
                 if (success)
                 {
                     Debug.Log("Score Submited");

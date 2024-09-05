@@ -198,3 +198,35 @@ function fallbackCopyTextToClipboard(text) {
     // Remove the textarea from the document body
     document.body.removeChild(textArea);
 }
+function SaveImageToIndexedDB(key, base64Data) {
+    var dbRequest = indexedDB.open("UnityImageStorage", 1);
+
+    dbRequest.onupgradeneeded = function(event) {
+        var db = event.target.result;
+        if (!db.objectStoreNames.contains('images')) {
+            db.createObjectStore('images');
+        }
+    };
+
+    dbRequest.onsuccess = function(event) {
+        var db = event.target.result;
+        var transaction = db.transaction('images', 'readwrite');
+        var store = transaction.objectStore('images');
+        store.put(base64Data, key);
+    };
+}
+
+function LoadImageFromIndexedDB(key, callback) {
+    var dbRequest = indexedDB.open("UnityImageStorage", 1);
+
+    dbRequest.onsuccess = function(event) {
+        var db = event.target.result;
+        var transaction = db.transaction('images', 'readonly');
+        var store = transaction.objectStore('images');
+        var getRequest = store.get(key);
+
+        getRequest.onsuccess = function() {
+            callback(getRequest.result);
+        };
+    };
+}

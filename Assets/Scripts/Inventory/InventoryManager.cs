@@ -151,7 +151,7 @@ public class InventoryManager : MonoBehaviour
             //CODE HERE//
         }
     }
-    private InventoryCell GetCell(int index,Transform cellContainer,GameObject _inventoryCell)
+    private InventoryCell GetCell(int index, Transform cellContainer, GameObject _inventoryCell)
     {
         if (index < cellContainer.childCount)
         {

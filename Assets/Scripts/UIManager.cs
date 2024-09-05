@@ -102,12 +102,11 @@ public class UIManager : MonoBehaviour
                     FeatureScreenButtons[j].GetComponent<Image>().sprite = NormalFeatureButtonSprite;
                     FeatureScreenButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
                     Canvas canvas = FeatureScreenButtons[j].GetComponent<Canvas>();
-                    canvas.overrideSorting = true;
+                    canvas.overrideSorting = false;
                     canvas.enabled = false;  
                     canvas.enabled = true;
                     if (NormalFeatureButtonSprite != null)
                         FeatureScreenButtons[j].GetComponent<Image>().SetNativeSize();
-                    Debug.Log("feature button name : " + FeatureScreenButtons[j].name);
                 }
             }
 
