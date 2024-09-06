@@ -1,7 +1,7 @@
 
 using System.Text.RegularExpressions;
 
-public static class StaticDataBank 
+public static class StaticDataBank
 {
     #region BackEnd Keys
     public static readonly string FireBase_Web_API_Key = "AIzaSyDd8TaOxZT_tit1Wh5GmBOzYZdoKMMZ6pI";
@@ -24,9 +24,14 @@ public static class StaticDataBank
     #endregion
 
     #region Backend Api's
-    //public static readonly string BackendBaseUrl = "http://192.168.68.134:3000/v1/";
-    //static readonly string BackendBaseUrl = "http://clv.services:3000/v1/";
-    static readonly string BackendBaseUrl = "https://gameshift.clvtechnologies.com/v1/";
+
+    // public static readonly string SOCKET_URL = "http://localhost:3048";
+    // public static readonly string SOCKET_URL = "https://gameshift.clvtechnologies.com";
+    public static readonly string SOCKET_URL = "https://red-runner-backend-952100349016.us-central1.run.app";
+
+    public static readonly string QR_SOCKET_URL = SOCKET_URL + "/qr-signup";
+    public static readonly string BackendBaseUrl = SOCKET_URL + "/v1/";
+
     public static readonly string registerOrLogin = BackendBaseUrl + "auth/registerOrLogin";
     //public static readonly string Register = BackendBaseUrl + "auth/register";
     //public static readonly string LogIn = BackendBaseUrl + "auth/login";
@@ -77,7 +82,7 @@ public static class StaticDataBank
 
     public static string RemoveWordFromString(string m_string)
     {
-        
+
         string[] namesToRemove = new string[] { "Skin", "Speed Boosters", "Double Jumps" };
 
         foreach (string _name in namesToRemove)

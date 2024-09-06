@@ -2,8 +2,11 @@ using RedRunner.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Newtonsoft.Json.Linq;
+using System;
+using Newtonsoft.Json;
 
-public class Login : MonoBehaviour
+public class Login : MonoBehaviour, SocketEventListener
 {
     [Header("UI Items")]
 
@@ -26,7 +29,14 @@ public class Login : MonoBehaviour
         });
     }
 
-    
+    private void Start()
+    {
+        SocketController.Instance.AddListener(this);
+        QRSocketController.Instance.OnQRCodeReceived += SetQRCodeImage;
+        QRSocketController.Instance.OnQRLoginCompleted += HandleQRCodeLoginComplete;
+    }
+
+
     public void UserLogInFirebase()
     {
         if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
@@ -127,11 +137,98 @@ public class Login : MonoBehaviour
 
     public void OnQRCodeLoginButtonClicked()
     {
+        QRSocketController.Instance.InitiateQRCodeLogin();
         QRCodePanel.SetActive(true);
     }
 
-    public void QRPopupClose()
+    private void SetQRCodeImage(string qrCodeDataUrl)
     {
-        QRCodePanel.SetActive(false);
+        if (QRCodeImage == null)
+        {
+            Debug.LogError("QRCodeImage is not assigned in the Login script.");
+            return;
+        }
+
+        string base64Data = qrCodeDataUrl.Substring(qrCodeDataUrl.IndexOf(",") + 1);
+
+        // Convert base64 to byte array
+        byte[] imageData = Convert.FromBase64String(base64Data);
+
+        // Create a new texture and load the image data
+        Texture2D texture = new Texture2D(2, 2);
+        texture.LoadImage(imageData);
+
+        // Create a sprite from the texture
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+
+        // Set the sprite to the Image component
+        QRCodeImage.sprite = sprite;
+    }
+
+    private void HandleQRCodeLoginComplete(string payload)
+    {
+        Debug.Log("Payload in the final handler: " + payload);
+        try
+        {
+            JArray jsonArray = JArray.Parse(payload);
+            if (jsonArray.Count < 2 || jsonArray[0].ToString() != "qrLoginCompleted")
+            {
+                throw new System.Exception("Invalid payload structure");
+            }
+
+            JObject data = (JObject)jsonArray[1]["payload"];
+
+            // Extract user data
+            JObject user = (JObject)data["user"];
+            string walletId = user["walletId"]?.ToString();
+            string username = user["name"]?.ToString();
+            string userId = user["userId"]?.ToString();
+            string email = user["email"]?.ToString();
+
+            // Extract token data
+            JObject tokens = (JObject)data["tokens"];
+            string jwtToken = tokens["access"]["token"]?.ToString();
+
+            // Assign data to StaticDataBank
+            StaticDataBank.walletAddress = walletId;
+            StaticDataBank.UserName = username;
+            StaticDataBank.playerlocalid = userId;
+            StaticDataBank.jwttoken = jwtToken;
+
+            QRCodePanel.SetActive(false);
+            OnSignInCompleted(true, "Login Success");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error parsing QR login payload: " + e.Message);
+            OnSignInCompleted(false, "Login Failed: Error processing login data");
+        }
+    }
+
+    public void OnSocketMessageReceived(SocketEventsType messageHeader, string payload)
+    {
+        Debug.Log("on socket message received: " + messageHeader + " with payload: " + payload);
+        switch (messageHeader)
+        {
+            case SocketEventsType.qrScanned:
+                Debug.Log("QR Code scanned");
+                break;
+            // Handle other non-QR related events here
+            default:
+                Debug.LogWarning("Unhandled socket event: " + messageHeader);
+                break;
+        }
+    }
+
+    public void RemoveListener()
+    {
+        SocketController.Instance.RemoveListener(this);
+    }
+
+    private void OnDestroy()
+    {
+        RemoveListener();
+        QRSocketController.Instance.OnQRCodeReceived -= SetQRCodeImage;
+        QRSocketController.Instance.OnQRLoginCompleted -= HandleQRCodeLoginComplete;
     }
 }
