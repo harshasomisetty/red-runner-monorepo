@@ -20,41 +20,41 @@ public enum SocketEventsType
     assetMintComplete,
     marketAssetListed,
     marketAssetUnListed,
-    marketAssetBought
+    marketAssetBought,
+    loginInitiated,
+    qrGenerated,
+    qrScanned,
+    qrLoginCompleted
 }
 
 public interface SocketEventListener
 {
-    public void OnSocketMessageReceived(SocketEventsType messageHeader,string payLoad = null);
+    public void OnSocketMessageReceived(SocketEventsType messageHeader, string payLoad = null);
     public void RemoveListener();
 }
 
 public class SocketController : SingletonBase<SocketController>
 {
     private SocketManager _manager;
-    private const string SOCKET_URL = "https://gameshift.clvtechnologies.com";
-    // private const string SOCKET_URL = "http://127.0.0.1:3000";
     private List<SocketEventListener> _listeners = new List<SocketEventListener>();
-    
+
     public void AddListener(SocketEventListener listener)
     {
         _listeners.Add(listener);
     }
-    
+
     public void RemoveListener(SocketEventListener listener)
     {
         _listeners.Remove(listener);
     }
-    private void BroadcastToAllListeners(SocketEventsType eventsType, string payload =  null)
+    private void BroadcastToAllListeners(SocketEventsType eventsType, string payload = null)
     {
         foreach (var listener in _listeners)
         {
-            listener?.OnSocketMessageReceived(eventsType,payload);
+            listener?.OnSocketMessageReceived(eventsType, payload);
         }
     }
 
-    // Unity Start event
-    
     public void ConnectSocketWithUserId(string userId)
     {
         if (_manager != null)
@@ -72,20 +72,20 @@ public class SocketController : SingletonBase<SocketController>
             AdditionalQueryParams = new PlatformSupport.Collections.ObjectModel.ObservableDictionary<string, string> { { "userId", userId } }
         };
 
-        _manager = new SocketManager(new Uri(SOCKET_URL), options);
-        
+        _manager = new SocketManager(new Uri(StaticDataBank.SOCKET_URL), options);
+
         // Set subscriptions
         _manager.Socket.On<ConnectResponse>(SocketIOEventTypes.Connect, OnConnected);
         List<string> allNames = Enum.GetNames(typeof(SocketEventsType)).ToList();
-        _manager.Socket.On(allNames,OnSocketEvent);
-        
+        _manager.Socket.On(allNames, OnSocketEvent);
+
         // Start connecting to the server
         _manager.Open();
     }
 
     private void OnSocketEvent()
     {
-        SocketEventsType currentType = (SocketEventsType) Enum.Parse(typeof(SocketEventsType), _manager.Socket.CurrentPacket.EventName); 
+        SocketEventsType currentType = (SocketEventsType)Enum.Parse(typeof(SocketEventsType), _manager.Socket.CurrentPacket.EventName);
         switch (currentType)
         {
             case SocketEventsType.paymentInitiated:
@@ -104,7 +104,7 @@ public class SocketController : SingletonBase<SocketController>
                 BroadcastToAllListeners(SocketEventsType.payoutFailed);
                 break;
             case SocketEventsType.payoutComplete:
-                BroadcastToAllListeners(SocketEventsType.payoutComplete,GetAmountStringFromPayload(_manager.Socket.CurrentPacket.Payload).ToString(CultureInfo.InvariantCulture));
+                BroadcastToAllListeners(SocketEventsType.payoutComplete, GetAmountStringFromPayload(_manager.Socket.CurrentPacket.Payload).ToString(CultureInfo.InvariantCulture));
                 break;
             case SocketEventsType.assetMintInitiated:
                 BroadcastToAllListeners(SocketEventsType.assetMintInitiated);
@@ -113,7 +113,7 @@ public class SocketController : SingletonBase<SocketController>
                 BroadcastToAllListeners(SocketEventsType.assetMintFailed);
                 break;
             case SocketEventsType.assetMintComplete:
-                BroadcastToAllListeners(SocketEventsType.assetMintComplete,GetItemIdStringFromPayload(_manager.Socket.CurrentPacket.Payload));
+                BroadcastToAllListeners(SocketEventsType.assetMintComplete, GetItemIdStringFromPayload(_manager.Socket.CurrentPacket.Payload));
                 break;
             case SocketEventsType.marketAssetListed:
             case SocketEventsType.marketAssetUnListed:
@@ -135,7 +135,7 @@ public class SocketController : SingletonBase<SocketController>
         // Get the value of the "amount" key
         return (jsonObject["payload"] ?? 0f).Value<float>();
     }
-    
+
     private string GetItemIdStringFromPayload(string jsonString)
     {
         JArray jsonArray = JArray.Parse(jsonString);
@@ -146,7 +146,7 @@ public class SocketController : SingletonBase<SocketController>
         // Get the value of the "amount" key
         return (jsonObject["payload"] ?? 0f).Value<string>();
     }
-    
+
     // Connected event handler implementation
     void OnConnected(ConnectResponse resp)
     {
@@ -159,7 +159,7 @@ public class SocketController : SingletonBase<SocketController>
         this._manager?.Close();
         this._manager = null;
     }
-    
+
     private void OnApplicationQuit()
     {
         _manager?.Close();
