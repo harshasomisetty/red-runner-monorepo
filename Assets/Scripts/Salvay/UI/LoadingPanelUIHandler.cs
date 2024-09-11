@@ -18,7 +18,7 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
     private TMP_Text contentText;
 
     private const float SlideDuration = 0.5f;
-    private const float TIME_TO_SHOW_FOR = 60.0f;
+    private const float TIME_TO_SHOW_FOR = 20.0f;
 
     private Vector2 m_ShowingPosition;
     private Vector2 m_HiddenPosition;

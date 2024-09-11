@@ -1,3 +1,4 @@
+using RedRunner.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,12 +9,18 @@ using UnityEngine.UI;
 
 
 [Serializable]
-public class DataIndex
+public class DataContainer
 {
-    public int pageNumber = 0;
-    public int boosterindex = 0;
+    public Sprite m_sprite;
+    public string boosterValue;
+    public bool isListed = false;
 }
-
+[Serializable]
+public class EquipedAssets
+{
+    public string Id;
+    public string collectionId;
+}
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
@@ -26,20 +33,24 @@ public class InventoryManager : MonoBehaviour
     public Transform skinsContainer;
     public Transform currencyContainer;
     public List<InventoryCell> cells;
-    public List<DataIndex> SpeedBoosterIndex;
-    public List<DataIndex> DoubleJumpIndex;
-    public List<DataIndex> SkinsIndex;
-    public List<DataIndex> Currencies;
+    public List<int> SpeedBoosterIndex;
+    public List<int> DoubleJumpIndex;
+    public List<int> SkinsIndex;
+    public List<int> Currencies;
     public GameObject BackButton;
 
     [Header("Detail Panel UI")]
     public GameObject DetailPanel;
+    public GameObject Confirmpanel;
+    public UIButton ListButton;
+    public TextMeshProUGUI ListButtonText;
+    public TextMeshProUGUI ConfirmText;
     public TextMeshProUGUI attribute;
     public TextMeshProUGUI BoosterName;
     public TextMeshProUGUI Description;
     public Image boosterImage;
-    public Button MintButton;
-
+    public TMP_InputField enteredAmount;
+    public PaginationController paginationController;
     public List<InventoryData.Root> m_data;
 
     int current_page = 1;
@@ -54,39 +65,10 @@ public class InventoryManager : MonoBehaviour
         }
         InvokeRepeating(nameof(GetSolValue), 1f, 30f);
     }
-    public void CheckSuccesScreen(bool sequancecall)
-    {
-        if (dataFetchCompleted)
-        {
-            //SUCCESS SCENARIOS//
-            if (!sequancecall)
-                UIManager.Instance.LaunchInventory();
-            else
-            {
-                InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
-                UIManager.Instance.ToggleGameEquipmentFeatures(true);
-                UIManager.Instance.GameEquipmentBackButton.SetActive(true);
-                GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-
-                Debug.Log("Sequence Success");
-            }
-        }
-    }
-    public void FetchInventoryData(bool SequenceCall)
-    {
-        if (!dataFetchCompleted || SequenceCall)
-        {
-            ClearDataToUpdate();
-            CheckInventoryDataForMultiplePages(SequenceCall);
-        }
-        else
-        {
-            CheckSuccesScreen(SequenceCall);
-        }
-    }
+    //bool dataFetchCompleted = false;
     public void ClearDataToUpdate()
     {
-        dataFetchCompleted = false;
+        //dataFetchCompleted = false;
         current_page = 1;
         foreach (InventoryCell curcell in cells)
         {
@@ -102,53 +84,63 @@ public class InventoryManager : MonoBehaviour
         cells.Clear();
         m_data.Clear();
     }
-    bool dataFetchCompleted = false;
-    bool _sequenceCall = false;
-    public void CheckInventoryDataForMultiplePages(bool SequenceCall)
+    
+    public void FetchInventoryData( string collectionId, int PageNumber = 1)
     {
-        _sequenceCall = SequenceCall;
-        if (m_data.Count == 0 ||m_data[0].meta.totalPages >= current_page)
-        {
-            API_Manager.Instance.GetInvectory(Get_InventoryData, current_page++);
-        }
-        else
-        {
-            StartCoroutine(PopulateDataSequence());
-        }
+        ClearDataToUpdate();
+        API_Manager.Instance.GetInvectory(Get_InventoryData, PageNumber, collectionId);
+        //if (/*!dataFetchCompleted ||*/ SequenceCall)
+        //{
+        //CheckInventoryDataForMultiplePages(SequenceCall);
+        //}
+        //else
+        //{
+        //    CheckSuccesScreen(SequenceCall);
+        //}
     }
-    IEnumerator PopulateDataSequence()
-    {
-        for (int i = 0; i < m_data.Count; i++)
-        {
-            if (i == m_data.Count - 1)
-            {
-                dataFetchCompleted = true;
-            }
-            yield return StartCoroutine(GetInventory_Data(m_data[i], i));
-        }
-    }
+    //public void CheckInventoryDataForMultiplePages(bool SequenceCall,int pageNumber)
+    //{
+    //    _sequenceCall = SequenceCall;
+    //    if (m_data.Count == 0 || m_data[0].meta.totalPages >= current_page)
+    //    {
+            
+    //    }
+    //    else
+    //    {
+    //        StartCoroutine(PopulateDataSequence());
+    //    }
+    //}
+    //IEnumerator PopulateDataSequence()
+    //{
+    //    for (int i = 0; i < m_data.Count; i++)
+    //    {
+    //        //if (i == m_data.Count - 1)
+    //        //{
+    //        //    dataFetchCompleted = true;
+    //        //}
+    //        yield return StartCoroutine(GetInventory_Data(m_data[i], i));
+    //    }
+    //}
     public void Get_InventoryData(bool success, InventoryData.Root data)
     {
         if (success)
         {
             Debug.Log("Number of Call Backs");
             m_data.Add(data);
-            CheckInventoryDataForMultiplePages(_sequenceCall);
+            if (m_data[0].data.Count == 0)
+            {
+                UIManager.Instance.LaunchInventory();
+                return;
+            }
+            paginationController.SetTotalPages(m_data[0].meta.totalPages, m_data[0].data[0].item.collection.id, data.meta.page);
+            paginationController.OnPageSelected = FetchInventoryData;
+            //CheckInventoryDataForMultiplePages(_sequenceCall);
+            //StartCoroutine(PopulateDataSequence());
+            StartCoroutine(GetInventory_Data(m_data[0]));
         }
         else
         {
-            if (!_sequenceCall)
-            {
-                Debug.Log("Inventory data failed");
-                UIManager.Instance.SignalInventoryFailure();
-            }
-            else
-            {
-                PlayerPrefs.SetInt("OfflineMode", 1);
-                UIManager.Instance.GameEquipmentBackButton.SetActive(true);
-                Debug.Log("Sequence Failure");
-            }
-            //CODE HERE//
+            UIManager.Instance.SignalInventoryFailure();
         }
     }
     private InventoryCell GetCell(int index, Transform cellContainer, GameObject _inventoryCell)
@@ -162,33 +154,34 @@ public class InventoryManager : MonoBehaviour
             return Instantiate(_inventoryCell, cellContainer).GetComponent<InventoryCell>();
         }
     }
-    IEnumerator GetInventory_Data(InventoryData.Root data, int pageNumber)
+    IEnumerator GetInventory_Data(InventoryData.Root data)
     {
         Debug.Log("Inventory Data Success");
         for (int i = 0; i < data.data.Count; i++)
         {
             InventoryCell cell = null;
-            DataIndex _data = new DataIndex();
-            _data.boosterindex = i;
-            _data.pageNumber = pageNumber;
+            //DataIndex _data = new DataIndex();
+            //_data.boosterindex = i;
+            //_data.pageNumber = pageNumber;
             if (data.data[i].type.Contains("UniqueAsset"))
             {
-                if (data.data[i].item.collection.id == StaticDataBank.SpeedBoosterCollectionID)
+
+                if (data.data[i].item.collection.id == StaticDataBank.GetCollectionId(0))
                 {
-                    _data.boosterindex = i;
-                    SpeedBoosterIndex.Add(_data);
+                    //_data.boosterindex = i;
+                    SpeedBoosterIndex.Add(i);
                     cell = GetCell(SpeedBoosterIndex.Count - 1, speedContainer, inventoryCellBosster);
                 }
-                else if (data.data[i].item.collection.id == StaticDataBank.DoubleJumpCollectionID)
+                else if (data.data[i].item.collection.id == StaticDataBank.GetCollectionId(1))
                 {
-                    _data.boosterindex = i;
-                    DoubleJumpIndex.Add(_data);
+                    //_data.boosterindex = i;
+                    DoubleJumpIndex.Add(i);
                     cell = GetCell(DoubleJumpIndex.Count - 1, doubleJumpContainer, inventoryCellBosster);
                 }
-                else if (data.data[i].item.collection.id == StaticDataBank.SkinCollectionID)
+                else if (data.data[i].item.collection.id == StaticDataBank.GetCollectionId(2))
                 {
-                    _data.boosterindex = i;
-                    SkinsIndex.Add(_data);
+                    //_data.boosterindex = i;
+                    SkinsIndex.Add(i);
                     cell = GetCell(SkinsIndex.Count - 1, skinsContainer, inventoryCellBosster);
                 }
             }
@@ -198,8 +191,8 @@ public class InventoryManager : MonoBehaviour
                 {
                     SetSolValue(data.data[i].quantity);
                 }
-                _data.boosterindex = i;
-                Currencies.Add(_data);
+                //_data.boosterindex = i;
+                Currencies.Add(i);
                 cell = GetCell(Currencies.Count - 1, currencyContainer, inventoryCellCurrency);
             }
 
@@ -207,12 +200,14 @@ public class InventoryManager : MonoBehaviour
             cell.name = dataSetName;
             cells.Add(cell);
             cell.gameObject.SetActive(true);
-            yield return StartCoroutine(GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, _data));
+            cell.escrowOverlay.SetActive(data.data[i].item.escrow.Value);
+            yield return StartCoroutine(GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, i));
         }
-        CheckSuccesScreen(_sequenceCall);
+        //CheckSuccesScreen(_sequenceCall);
+        UIManager.Instance.LaunchInventory();
     }
 
-    IEnumerator GetInventoryItemImage(string url, string datasetname, InventoryCell cell, DataIndex index)
+    IEnumerator GetInventoryItemImage(string url, string datasetname, InventoryCell cell, int index)
     {
         bool istartchecking = false;
 
@@ -250,70 +245,171 @@ public class InventoryManager : MonoBehaviour
         yield return new  WaitUntil(() => istartchecking);
     }
 
-
-    public void ShowDetailsPanel(int dataindex, int pageNumber)
+    int currentItemIndexToList = -1;
+    public void ShowDetailsPanel(int dataindex)
     {
-        Description.text = m_data[pageNumber].data[dataindex].item.description;
+        ListButtonText.text = m_data[0].data[dataindex].item.escrow.Value ? "UnList" : "List";
+        ConfirmText.text = "Are you Sure You want to " + ListButtonText.text + " On Marketplace";
+        currentItemIndexToList = dataindex;
+        Description.text = m_data[0].data[dataindex].item.description;
         //BoosterName.text = m_data[pageNumber].data[dataindex].item.name;
-        BoosterName.text = StaticDataBank.RemoveWordFromString(m_data[pageNumber].data[dataindex].item.name);
-        Debug.Log(m_data[pageNumber].data[dataindex].item.status);
-        
-        if (spriteDictionary.ContainsKey(m_data[pageNumber].data[dataindex].item.name))
+        BoosterName.text = StaticDataBank.RemoveWordFromString(m_data[0].data[dataindex].item.name);
+        Debug.Log(m_data[0].data[dataindex].item.status);
+        attribute.text = m_data[0].data[dataindex].item.attributes[0].value;
+        if (spriteDictionary.ContainsKey(m_data[0].data[dataindex].item.name))
         {
-            boosterImage.sprite = spriteDictionary[m_data[pageNumber].data[dataindex].item.name];
+            boosterImage.sprite = spriteDictionary[m_data[0].data[dataindex].item.name];
             boosterImage.SetNativeSize();
         }
-        MintButton.gameObject.SetActive(false);
+        //MintButton.SetActive(false);
+        //ListButton.gameObject.SetActive(true);
+        ListButton.interactable = m_data[0].data[dataindex].item.escrow.Value;
+        enteredAmount.interactable = !m_data[0].data[dataindex].item.escrow.Value;
         DetailPanel.SetActive(true);
+        if (!ListButton.interactable) 
+        GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Enter Price To list");
     }
 
-    public string getvalueofspeedbooster(DataIndex _data)
+    public DataContainer GetDataOfBoosters(int index)
     {
-        return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
+        DataContainer _data=new DataContainer();
+        _data.boosterValue = m_data[0].data[index].item.attributes[0].value;
+        _data.m_sprite = spriteDictionary[m_data[0].data[index].item.name];
+        _data.isListed = m_data[0].data[index].item.escrow.Value;
+        return _data;
     }
-    public Sprite getspriteofspeedbooster(DataIndex _data)
+    public EquipedAssets GetEquipedAssetDetails(int index)
     {
-        Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
-        return sprite;
+        EquipedAssets _quiped=new EquipedAssets();
+        _quiped.Id = m_data[0].data[index].item.itemId;
+        _quiped.collectionId = m_data[0].data[index].item.id;
+        return _quiped;
     }
-    public string getItemIdOfSpeedBooster(DataIndex _data)
+    public void ListOnMarketplace()
     {
-        string SpeedBoosterItemID = m_data[_data.pageNumber].data[_data.boosterindex].item.itemId;
-        return SpeedBoosterItemID;
+        string assetId = m_data[0].data[currentItemIndexToList].item.id;
+        Debug.Log("Assett Id : "+assetId);
+        if (m_data[0].data[currentItemIndexToList].item.escrow.Value)
+        {
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Unlisting Asset", false);
+            API_Manager.Instance.UnListOnSale(assetId, (success, message) => {
+                if(success) 
+                {
+                    Confirmpanel.SetActive(false);
+                    DetailPanel.transform.GetChild(0).gameObject.SetActive(true);
+                    DetailPanel.SetActive(false);
+                    enteredAmount.text = "";
+                    GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+                    Debug.Log(message);
+                    Utils.OpenURLInNewTab(message);
+                }
+                else
+                {
+                    GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+
+                    GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
+                    {
+                        titleString = "Error",
+                        contentString = message,
+                        firstButtonString = "OK",
+                        firstButtonCallBack = null
+                    });
+                    Debug.Log(message);
+                }
+            });
+        }
+        else
+        {
+            if(!StaticDataBank.CheckInputField(enteredAmount.text) || enteredAmount.text.Length <= 0)
+            {
+                return;
+            }
+            string amount = enteredAmount.text.ToString();
+            float _amount = float.Parse(amount);
+            if (_amount <= 0)
+                return;
+            try
+            {
+                
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Listing Asset", false);
+                API_Manager.Instance.ListOnSale(assetId, _amount, (success, message) =>
+                {
+                    if (success)
+                    {
+                        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+                        Confirmpanel.SetActive(false);
+                        DetailPanel.transform.GetChild(0).gameObject.SetActive(true);
+                        DetailPanel.SetActive(false);
+                        enteredAmount.text = "";
+                        Debug.Log(message);
+                        Utils.OpenURLInNewTab(message);
+                    }
+                    else
+                    {
+                        Debug.Log(message);
+                        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+
+                        GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
+                        {
+                            titleString = "Error",
+                            contentString = message,
+                            firstButtonString = "OK",
+                            firstButtonCallBack = null
+                        });
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Enter Only in Digits");
+            }
+        }
     }
-    public string getAssetIdOfSpeedBooster(DataIndex _data)
+    public void OnInputValueChange(TMP_InputField tMP_Input)
     {
-        string SpeedBoosterAssetID = m_data[_data.pageNumber].data[_data.boosterindex].item.id;
-        return SpeedBoosterAssetID;
+        if (!m_data[0].data[currentItemIndexToList].item.escrow.Value)
+        {
+            ListButton.interactable = StaticDataBank.CheckInputField(tMP_Input.text) && tMP_Input.text.Length > 0;
+        }
     }
-    public string getvalueofdoublejumbbooster(DataIndex _data)
-    {
-        return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
-    }
-    public Sprite getspriteofdoublejumbbooster(DataIndex _data)
-    {
-        Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
-        return sprite;
-    }
-    public string getItemIdOfJumpBooster(DataIndex _data)
-    {
-        string JumpBoosterItemID = m_data[_data.pageNumber].data[_data.boosterindex].item.itemId;
-        return JumpBoosterItemID;
-    }
-    public string getAssetIdOfJumpBooster(DataIndex _data)
-    {
-        string JumpBoosterAssetID = m_data[_data.pageNumber].data[_data.boosterindex].item.id;
-        return JumpBoosterAssetID;
-    }
-    public Sprite getspriteofskinbooster(DataIndex _data)
-    {
-        Sprite sprite = spriteDictionary[m_data[_data.pageNumber].data[_data.boosterindex].item.name];
-        return sprite;
-    }
-    public string getskinamebyindex(DataIndex _data)
-    {
-        return m_data[_data.pageNumber].data[_data.boosterindex].item.attributes[0].value;
-    }
+    //public string getItemIdOfSpeedBooster(int index)
+    //{
+    //    string SpeedBoosterItemID = m_data[0].data[index].item.itemId;
+    //    return SpeedBoosterItemID;
+    //}
+    //public string getAssetIdOfSpeedBooster(int index)
+    //{
+    //    string SpeedBoosterAssetID = m_data[0].data[index].item.id;
+    //    return SpeedBoosterAssetID;
+    //}
+    //public string getvalueofdoublejumbbooster(int index)
+    //{
+    //    return m_data[0].data[index].item.attributes[0].value;
+    //}
+    //public Sprite getspriteofdoublejumbbooster(int index)
+    //{
+    //    Sprite sprite = spriteDictionary[m_data[0].data[index].item.name];
+    //    return sprite;
+    //}
+    //public string getItemIdOfJumpBooster(int index)
+    //{
+    //    string JumpBoosterItemID = m_data[0].data[index].item.itemId;
+    //    return JumpBoosterItemID;
+    //}
+    //public string getAssetIdOfJumpBooster(int index)
+    //{
+    //    string JumpBoosterAssetID = m_data[0].data[index].item.id;
+    //    return JumpBoosterAssetID;
+    //}
+    //public Sprite getspriteofskinbooster(int index)
+    //{
+    //    Sprite sprite = spriteDictionary[m_data[0].data[0].item.name];
+    //    return sprite;
+    //}
+    //public string getskinamebyindex(int index)
+    //{
+    //    return m_data[0].data[index].item.attributes[0].value;
+    //}
     public void SetSolValue(string solValue)
     {
         SolValue.text = "" + solValue;
@@ -321,7 +417,7 @@ public class InventoryManager : MonoBehaviour
     public void GetSolValue()
     {
         Debug.Log("Repeating");
-        API_Manager.Instance.GetInvectory((success, _data) =>
+        API_Manager.Instance.Getcurrency((success, _data) =>
         {
             if (success)
             {
@@ -333,6 +429,6 @@ public class InventoryManager : MonoBehaviour
                     }
                 }
             }
-        }, 1, "Currency");
+        });
     }
 }

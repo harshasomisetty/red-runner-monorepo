@@ -4,14 +4,14 @@ using UnityEngine.UI;
 
 public class LeaderboardCell : MonoBehaviour
 {
-    public int CellNumber = 0;
+    public int CellNumber = 1;
     public TextMeshProUGUI rank;
     public Image userRank;
     public TextMeshProUGUI userName;
     public Image userGift;
     public TextMeshProUGUI score;
 
-    public void SetValues(int ranknum,Sprite[] ranksprite,string name,int getscore,Sprite[] getgift)
+    public void SetValues(int ranknum, Sprite[] ranksprite, string name, int getscore, Sprite[] getgift)
     {
         CellNumber = ranknum;
         if (ranknum < 3)

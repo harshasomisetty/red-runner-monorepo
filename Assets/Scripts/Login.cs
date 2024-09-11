@@ -26,20 +26,10 @@ public class Login : MonoBehaviour
         });
     }
 
-    bool CheckInputField(string checkString)
-    {
-        if (!string.IsNullOrEmpty(checkString) && !string.IsNullOrWhiteSpace(checkString))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    
     public void UserLogInFirebase()
     {
-        if (CheckInputField(email.text) && CheckInputField(Password.text) &&
+        if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
             email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
             Password.text.Length >= 6 && email.text.Length >= 6)
         {
@@ -54,7 +44,7 @@ public class Login : MonoBehaviour
     }
     public void UserSignUpFirebase()
     {
-        if (CheckInputField(email.text) && CheckInputField(Password.text) &&
+        if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
             email.text.Contains(".com", System.StringComparison.OrdinalIgnoreCase) &&
             Password.text.Length >= 6 && email.text.Length >= 6)
         {
