@@ -11,6 +11,9 @@ public class UIDataConatainer
 {
     public string boosterName;
     public TextMeshProUGUI boosterNameText;
+    public TextMeshProUGUI SOL_Price;
+    public TextMeshProUGUI USDC_Price;
+    public TextMeshProUGUI UsesLeft;
     public Image boosterImage;
 }
 
@@ -33,6 +36,7 @@ public class ShopManager : MonoBehaviour
     public TextMeshProUGUI Description;
     public Image boosterImage;
     public Button MintButton;
+    public Button ListButton;
     public GameObject Blocker;
 
     public List<UIDataConatainer> speedbooster;
@@ -60,9 +64,9 @@ public class ShopManager : MonoBehaviour
                 return;
             }
             _gameShop = response;
-            StaticDataBank.SpeedBoosterCollectionID = _gameShop.boosters.speed_boosters.speed_booster_3.collectionId;
-            StaticDataBank.DoubleJumpCollectionID = _gameShop.boosters.double_jump_boosters.double_jump_3.collectionId;
-            StaticDataBank.SkinCollectionID = _gameShop.skins.alienSkin.collectionId;
+            //StaticDataBank.SpeedBoosterCollectionID = _gameShop.boosters.speed_boosters.speed_booster_3.collectionId;
+            //StaticDataBank.DoubleJumpCollectionID = _gameShop.boosters.double_jump_boosters.double_jump_3.collectionId;
+            //StaticDataBank.SkinCollectionID = _gameShop.skins.alienSkin.collectionId;
             StartCoroutine(PopulateData());
         }
         else
@@ -87,28 +91,28 @@ public class ShopManager : MonoBehaviour
     //}
     IEnumerator PopulateData()
     {
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_3.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_3.name, doublejump[0]));
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_6.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_6.name, doublejump[1]));
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_10.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_10.name, doublejump[2]));
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_999.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_999.name, doublejump[3]));
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_3.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_3.name, speedbooster[0]));
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_6.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_6.name, speedbooster[1]));
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_10.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_10.name, speedbooster[2]));
-        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_999.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_999.name, speedbooster[3]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.alienSkin.imageUrl, _gameShop.skins.alienSkin.name, skins[0]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.christmasSkin.imageUrl, _gameShop.skins.christmasSkin.name, skins[1]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.halloweenSkin.imageUrl, _gameShop.skins.halloweenSkin.name, skins[2]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.polkaDotSkin.imageUrl, _gameShop.skins.polkaDotSkin.name, skins[3]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.robotSkin.imageUrl, _gameShop.skins.robotSkin.name, skins[4]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.solanaSkin.imageUrl, _gameShop.skins.solanaSkin.name, skins[5]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.spaceSkin.imageUrl, _gameShop.skins.spaceSkin.name, skins[6]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.thiefSkin.imageUrl, _gameShop.skins.thiefSkin.name, skins[7]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.wrestlerSkin.imageUrl, _gameShop.skins.wrestlerSkin.name, skins[8]));
-        yield return StartCoroutine(DownloadImage(_gameShop.skins.zombieSkin.imageUrl, _gameShop.skins.zombieSkin.name, skins[9]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_3.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_3.name, _gameShop.boosters.double_jump_boosters.double_jump_3.price.SOL, _gameShop.boosters.double_jump_boosters.double_jump_3.price.USDC, _gameShop.boosters.double_jump_boosters.double_jump_3.attributes[0].value, doublejump[0]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_6.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_6.name, _gameShop.boosters.double_jump_boosters.double_jump_6.price.SOL, _gameShop.boosters.double_jump_boosters.double_jump_6.price.USDC, _gameShop.boosters.double_jump_boosters.double_jump_6.attributes[0].value, doublejump[1]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_10.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_10.name, _gameShop.boosters.double_jump_boosters.double_jump_10.price.SOL, _gameShop.boosters.double_jump_boosters.double_jump_10.price.USDC, _gameShop.boosters.double_jump_boosters.double_jump_10.attributes[0].value, doublejump[2]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.double_jump_boosters.double_jump_999.imageUrl, _gameShop.boosters.double_jump_boosters.double_jump_999.name, _gameShop.boosters.double_jump_boosters.double_jump_999.price.SOL, _gameShop.boosters.double_jump_boosters.double_jump_999.price.USDC, _gameShop.boosters.double_jump_boosters.double_jump_999.attributes[0].value, doublejump[3]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_3.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_3.name, _gameShop.boosters.speed_boosters.speed_booster_3.price.SOL, _gameShop.boosters.speed_boosters.speed_booster_3.price.USDC, _gameShop.boosters.speed_boosters.speed_booster_3.attributes[0].value, speedbooster[0]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_6.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_6.name, _gameShop.boosters.speed_boosters.speed_booster_6.price.SOL, _gameShop.boosters.speed_boosters.speed_booster_6.price.USDC, _gameShop.boosters.speed_boosters.speed_booster_6.attributes[0].value, speedbooster[1]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_10.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_10.name, _gameShop.boosters.speed_boosters.speed_booster_10.price.SOL, _gameShop.boosters.speed_boosters.speed_booster_10.price.USDC, _gameShop.boosters.speed_boosters.speed_booster_10.attributes[0].value, speedbooster[2]));
+        yield return StartCoroutine(DownloadImage(_gameShop.boosters.speed_boosters.speed_booster_999.imageUrl, _gameShop.boosters.speed_boosters.speed_booster_999.name, _gameShop.boosters.speed_boosters.speed_booster_999.price.SOL, _gameShop.boosters.speed_boosters.speed_booster_999.price.USDC, _gameShop.boosters.speed_boosters.speed_booster_999.attributes[0].value, speedbooster[3]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.alienSkin.imageUrl, _gameShop.skins.alienSkin.name, _gameShop.skins.alienSkin.price.SOL, _gameShop.skins.alienSkin.price.USDC, _gameShop.skins.alienSkin.attributes[0].value, skins[0]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.christmasSkin.imageUrl, _gameShop.skins.christmasSkin.name, _gameShop.skins.christmasSkin.price.SOL, _gameShop.skins.christmasSkin.price.USDC, _gameShop.skins.christmasSkin.attributes[0].value, skins[1]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.halloweenSkin.imageUrl, _gameShop.skins.halloweenSkin.name, _gameShop.skins.halloweenSkin.price.SOL, _gameShop.skins.halloweenSkin.price.USDC, _gameShop.skins.halloweenSkin.attributes[0].value, skins[2]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.polkaDotSkin.imageUrl, _gameShop.skins.polkaDotSkin.name, _gameShop.skins.polkaDotSkin.price.SOL, _gameShop.skins.polkaDotSkin.price.USDC, _gameShop.skins.polkaDotSkin.attributes[0].value, skins[3]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.robotSkin.imageUrl, _gameShop.skins.robotSkin.name, _gameShop.skins.robotSkin.price.SOL, _gameShop.skins.robotSkin.price.USDC, _gameShop.skins.robotSkin.attributes[0].value, skins[4]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.solanaSkin.imageUrl, _gameShop.skins.solanaSkin.name, _gameShop.skins.solanaSkin.price.SOL, _gameShop.skins.solanaSkin.price.USDC, _gameShop.skins.solanaSkin.attributes[0].value, skins[5]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.spaceSkin.imageUrl, _gameShop.skins.spaceSkin.name, _gameShop.skins.spaceSkin.price.SOL, _gameShop.skins.spaceSkin.price.USDC, _gameShop.skins.spaceSkin.attributes[0].value, skins[6]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.thiefSkin.imageUrl, _gameShop.skins.thiefSkin.name, _gameShop.skins.thiefSkin.price.SOL, _gameShop.skins.thiefSkin.price.USDC, _gameShop.skins.thiefSkin.attributes[0].value, skins[7]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.wrestlerSkin.imageUrl, _gameShop.skins.wrestlerSkin.name, _gameShop.skins.wrestlerSkin.price.SOL, _gameShop.skins.wrestlerSkin.price.USDC, _gameShop.skins.wrestlerSkin.attributes[0].value, skins[8]));
+        yield return StartCoroutine(DownloadImage(_gameShop.skins.zombieSkin.imageUrl, _gameShop.skins.zombieSkin.name, _gameShop.skins.zombieSkin.price.SOL, _gameShop.skins.zombieSkin.price.USDC, _gameShop.skins.zombieSkin.attributes[0].value, skins[9]));
         yield return new WaitForSecondsRealtime(1f);
         UIManager.Instance.SelectDefaultFeatureWindowOption();
     }
-    IEnumerator DownloadImage(string imageUrl,string imageName,UIDataConatainer data)
+    IEnumerator DownloadImage(string imageUrl, string imageName, string SOLPrice, string USDCPrice, string _UsesLeft,UIDataConatainer data)
     {
         bool istartchecking = false;
         GlobalFeaturesManager.Instance.ImageCache.DownloadImage(imageUrl, (m_sprite) => {
@@ -129,6 +133,9 @@ public class ShopManager : MonoBehaviour
                 }
                 data.boosterNameText.text = StaticDataBank.RemoveWordFromString(imageName);
                 data.boosterImage.sprite = tempSprite;
+                data.SOL_Price.text = SOLPrice;
+                data.USDC_Price.text = USDCPrice;
+                data.UsesLeft.text = _UsesLeft;
                 
                 if(imageName.Contains("Skin"))
                     data.boosterImage.SetNativeSize();
@@ -144,7 +151,6 @@ public class ShopManager : MonoBehaviour
     
     public void GetSkinsDetails(int index)
     {
-        DetailPanel.SetActive(true);
         switch (index)
         {
             case 0:
@@ -192,7 +198,6 @@ public class ShopManager : MonoBehaviour
     
     public void GetSpeedBoostersDetails(int index)
     {
-        DetailPanel.SetActive(true);
         switch (index)
         {
             case 0:
@@ -216,7 +221,6 @@ public class ShopManager : MonoBehaviour
     }
     public void GetJumpBoostersDetails(int index)
     {
-        DetailPanel.SetActive(true);
         switch (index)
         {
             case 0:
@@ -248,7 +252,10 @@ public class ShopManager : MonoBehaviour
         Description.text = skin.description;
         attribute.text = skin.attributes[0].traitType + ":" + skin.attributes[0].value;
         _selectedMintId = skin.attributes[0].value;
-        MintButton.gameObject.SetActive(true);
+        DetailPanel.SetActive(true);
+
+        //MintButton.gameObject.SetActive(true);
+        //ListButton.gameObject.SetActive(false);
     }
     public void ShowDetailPanel(GameShop.Booster booster, string mintid)
     {
@@ -262,7 +269,10 @@ public class ShopManager : MonoBehaviour
         Description.text = booster.description;
         attribute.text = booster.attributes[0].traitType + ":" + booster.attributes[0].value;
         _selectedMintId = mintid;
-        MintButton.gameObject.SetActive(true);
+        DetailPanel.SetActive(true);
+
+        //MintButton.gameObject.SetActive(true);
+        //ListButton.gameObject.SetActive(false);
     }
 
     public void DetailsBuyButtonPressed()
@@ -275,7 +285,7 @@ public class ShopManager : MonoBehaviour
         PopupData newPopupData = new PopupData();
         newPopupData.showSecondButton = true;
         newPopupData.titleString = "Buy Asset";
-        newPopupData.contentString = "Are you sure you want to buy this ?";
+        newPopupData.contentString = "Choose a currency to buy with";
         newPopupData.firstButtonString = "SOL";
         newPopupData.secondButtonString = "USD";
         newPopupData.firstButtonCallBack = () => MintNft(MintID,true);

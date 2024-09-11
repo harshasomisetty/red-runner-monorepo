@@ -8,28 +8,32 @@ public class InventoryCell : MonoBehaviour
 
     public Image BoosterImage;
     public TextMeshProUGUI Name;
+    public TextMeshProUGUI Owned;
     public UIButton ShowPanelButton;
     public int DataIndex;
-    public int pageNumber;
+    public GameObject escrowOverlay;
 
 
-    public void SetValues(DataIndex dataIndex,string assetname, Sprite _boosterImage)
+    public void SetValues(int dataIndex, string assetname, Sprite _boosterImage)
     {
         Name.text = assetname;
+        if (escrowOverlay.activeSelf)
+            Owned.text = "Listed";
+        else
+            Owned.text = "Owned";
         //if (_boosterImage == null)
         //{
         //    BoosterImage.enabled = false;
         //}
         BoosterImage.sprite = _boosterImage;
-        DataIndex = dataIndex.boosterindex;
-        pageNumber = dataIndex.pageNumber;
+        DataIndex = dataIndex;
         ShowPanelButton.onClick.RemoveAllListeners();
         ShowPanelButton.onClick.AddListener(delegate {
-            GetDataFromMangertoDisplay(DataIndex, pageNumber);
+            GetDataFromMangertoDisplay(DataIndex);
         });
     }
-    public void GetDataFromMangertoDisplay(int index,int _pageNumber)
+    public void GetDataFromMangertoDisplay(int index)
     {
-        InventoryManager.Instance.ShowDetailsPanel(index, _pageNumber);
+        InventoryManager.Instance.ShowDetailsPanel(index);
     }
 }

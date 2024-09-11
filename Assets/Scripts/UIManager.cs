@@ -2,10 +2,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using RedRunner.UI;
+using UnityEngine.Events;
 
 
 public class UIManager : MonoBehaviour
 {
+
+    public Sprite NormalButtonSprite;
+    public Sprite HighlightedButtonSprite;
+
     public static UIManager Instance;
     private void Awake()
     {
@@ -31,6 +36,7 @@ public class UIManager : MonoBehaviour
         ToggleMainScreen(!State);
         if (State)
         {
+            ResetParentButtons();
             GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!", false);
             ShopManager.Instance.FetchShopData();
         }
@@ -39,19 +45,28 @@ public class UIManager : MonoBehaviour
             CurrentSelectedFeatureButton = -1;
             CurrentSelectedInventoryVertical = -1;
             CurrentSelectedShopVertical = -1;
+            ResetTrackingVariables();
             FailureScreenText.text = "";
             FailureScreen.SetActive(false);
-            for (int i = 0; i < FeatureScreenButtons.Length; i++)
-            {
-                FeatureScreenButtons[i].gameObject.SetActive(false);
-                FeatureScreenButtons[i].GetComponent<Canvas>().overrideSorting = false;
-            }
+            ResetParentButtons();
             for (int i = 0; i < FeatureScreenWindows.Length; i++)
             {
                 FeatureScreenWindows[i].SetActive(false);
             }
             ShopHeaderBar.SetActive(false);
             FeatureScreenBackButton.SetActive(false);
+        }
+    }
+    void ResetParentButtons()
+    {
+        for (int i = 0; i < FeatureScreenButtons.Length; i++)
+        {
+            FeatureScreenButtons[i].gameObject.SetActive(true);
+            Canvas _Canvas = FeatureScreenButtons[i].GetComponent<Canvas>();
+            _Canvas.overrideSorting = false;
+            _Canvas.enabled = false;
+            _Canvas.enabled = true;
+            FeatureScreenButtons[i].gameObject.SetActive(false);
         }
     }
     [Header("Feature Screen Buttons")]
@@ -73,6 +88,7 @@ public class UIManager : MonoBehaviour
 
             bool LoadInventoryFromOtherFeature = false;
             bool LoadShopFromOtherFeature = false;
+            bool LoadMarketPlaceFromOtherFeature = false;
 
             if (CurrentSelectedFeatureButton != 0 && i == 0)
             {
@@ -82,12 +98,17 @@ public class UIManager : MonoBehaviour
             {
                 LoadInventoryFromOtherFeature = true;
             }
-        
-            CurrentSelectedFeatureButton = i;
+            else if (CurrentSelectedFeatureButton != 2 && i == 2)
+            {
+                LoadMarketPlaceFromOtherFeature = true;
+            }
 
+            CurrentSelectedFeatureButton = i;
             for (int j = 0; j < FeatureScreenButtons.Length; j++)
             {
-                if(j==i)
+                bool state = FeatureScreenButtons[i].gameObject.activeSelf;
+                FeatureScreenButtons[i].gameObject.SetActive(true);
+                if (j==i)
                 {
                     FeatureScreenButtons[i].GetComponent<Image>().sprite = HighlightedFeatureButtonSprite;
                     FeatureScreenButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
@@ -108,8 +129,9 @@ public class UIManager : MonoBehaviour
                     if (NormalFeatureButtonSprite != null)
                         FeatureScreenButtons[j].GetComponent<Image>().SetNativeSize();
                 }
+                FeatureScreenButtons[i].gameObject.SetActive(state);
             }
-
+            InventoryManager.Instance.paginationController.SetPagesOff();
             
 
             CloseAllFeatureWindows();
@@ -121,9 +143,15 @@ public class UIManager : MonoBehaviour
             }
             else if (LoadShopFromOtherFeature)
             {
+                InventoryManager.Instance.paginationController.SetPagesOff();
                 GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!", false);
                 ShopManager.Instance.FetchShopData();
                 LaunchFeatureWindow(i);
+            }
+            else if (LoadMarketPlaceFromOtherFeature)
+            {
+                //GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Marketplace  Data!", false);
+                ToggleMarketplace(true);
             }
             else
             {
@@ -133,13 +161,18 @@ public class UIManager : MonoBehaviour
     }
     void ResetTrackingVariables()
     {
+        InventoryManager.Instance.paginationController.SetPagesOff();
         CloseAllInventoryVerticals();
         CloseAllShopVerticals();
+        CloseAllMarketplaceVerticals();
         InventoryHeaderBar.SetActive(false);
         ShopHeaderBar.SetActive(false);
+        MarketplaceHeaderBar.SetActive(false);
         ToggleInventory(false);
+        ToggleMarketplace(false);
         CurrentSelectedInventoryVertical = -1;
         CurrentSelectedShopVertical = -1;
+        CurrentSelectedMarketplaceVertical = -1;
     }
     void CloseAllFeatureWindows()
     {
@@ -174,6 +207,9 @@ public class UIManager : MonoBehaviour
             case "Inventory":
                 FailureScreenText.text = "Failed To Load Inventory Data!";
                 break;
+            case "Marketplace":
+                FailureScreenText.text = "Failed To Load Marketplace Data!";
+                break;
         }
         GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
         FailureScreen.SetActive(true);
@@ -181,12 +217,11 @@ public class UIManager : MonoBehaviour
     }
     #endregion
     #region ShopVerticals
+   
     public GameObject ShopHeaderBar;
     [Header("ShopCategoryButtons")]
-    public Button[] ShopCategoryButtons;
-    public Sprite NormalShopCategoryButtonSprite;
-    public Sprite HighlightedShopCategoryButtonSprite;
-    int CurrentSelectedShopVertical = 1;
+    public UIButton[] ShopCategoryButtons;
+    int CurrentSelectedShopVertical = -1;
     [Header("Shop Vertical Windows")]
     public GameObject[] ShopVerticalWindows;
     public void OnClickShopVerticalButton(int i)
@@ -198,24 +233,23 @@ public class UIManager : MonoBehaviour
         else
         {
             CurrentSelectedShopVertical = i;
-            for (int j = 0; j < ShopCategoryButtons.Length; j++)
-            {
-                if (NormalShopCategoryButtonSprite != null)
-                {
-                    ShopCategoryButtons[j].GetComponent<Image>().sprite = NormalShopCategoryButtonSprite;
-                    ShopCategoryButtons[j].GetComponent<Image>().SetNativeSize();
-                    //ShopCategoryButtons[j].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.2f, 97 / 1.2f);
-                    ShopCategoryButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
-                }
-                else
-                {
-                    ShopCategoryButtons[j].GetComponent<Image>().sprite = null;
-                }
-            }
-            ShopCategoryButtons[i].GetComponent<Image>().sprite = HighlightedShopCategoryButtonSprite;
-            ShopCategoryButtons[i].GetComponent<Image>().SetNativeSize();
-            //ShopCategoryButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.02f, 97 / 1.02f);
-            ShopCategoryButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
+            UpdateButtonAppearance(ShopCategoryButtons, CurrentSelectedShopVertical, 45, 35);
+            //for (int j = 0; j < ShopCategoryButtons.Length; j++)
+            //{
+            //    if (NormalButtonSprite != null)
+            //    {
+            //        ShopCategoryButtons[j].GetComponent<Image>().sprite = NormalButtonSprite;
+            //        ShopCategoryButtons[j].GetComponent<Image>().SetNativeSize();
+            //        ShopCategoryButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
+            //    }
+            //    else
+            //    {
+            //        ShopCategoryButtons[j].GetComponent<Image>().sprite = null;
+            //    }
+            //}
+            //ShopCategoryButtons[i].GetComponent<Image>().sprite = HighlightedButtonSprite;
+            //ShopCategoryButtons[i].GetComponent<Image>().SetNativeSize();
+            //ShopCategoryButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
 
             CloseAllShopVerticals();
             LaunchShopVertical(i);
@@ -237,9 +271,7 @@ public class UIManager : MonoBehaviour
     public GameObject InventoryHeaderBar;
     [Header("Inventory Category Windows")]
     public UIButton[] InventoryCategoryButtons;
-    public Sprite NormalInventoryCategoryButtonSprite;
-    public Sprite HighlightedInventoryCategoryButtonSprite;
-    int CurrentSelectedInventoryVertical = 1;
+    int CurrentSelectedInventoryVertical = -1;
     [Header("Inventory Vertical Windows")]
     public GameObject[] InventoryVerticalWindows;
 
@@ -247,24 +279,52 @@ public class UIManager : MonoBehaviour
     {
         if (State)
         {
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!",false);
-            InventoryManager.Instance.FetchInventoryData(false);
+            //GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!",false);
+            //InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(0));
+            _sequenceCall = false;
+            OnClickInventoryVerticalButton(0);
+            LaunchInventory();
         }
     }
+    public bool _sequenceCall = false;
     public void LaunchInventory()
     {
-        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-        InventoryHeaderBar.SetActive(true);
-        LaunchFeatureWindow(1);
-        OnClickInventoryVerticalButton(1);
-        FeatureScreenBackButton.SetActive(true);
+        if (!_sequenceCall)
+        {
+            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+            InventoryHeaderBar.SetActive(true);
+            LaunchFeatureWindow(1);
+            //OnClickInventoryVerticalButton(CurrentSelectedInventoryVertical);
+            FeatureScreenBackButton.SetActive(true);
+        }
+        else
+        {
+            InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
+            ToggleGameEquipmentFeatures(true);
+            GameEquipmentBackButton.SetActive(true);
+            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+
+            Debug.Log("Sequence Success");
+        }
+        
     }
     public void SignalInventoryFailure()
     {
-        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-        FailureScreenText.text = "Failed To Load Inventory Data!";
-        FailureScreen.SetActive(true);
-        FeatureScreenBackButton.SetActive(true);
+        if (!_sequenceCall)
+        {
+            Debug.Log("Inventory data failed");
+            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+            FailureScreenText.text = "Failed To Load Inventory Data!";
+            FailureScreen.SetActive(true);
+            FeatureScreenBackButton.SetActive(true);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("OfflineMode", 1);
+            GameEquipmentBackButton.SetActive(true);
+            Debug.Log("Sequence Failure");
+        }
+        
     }
     public void OnClickInventoryVerticalButton(int i)
     {
@@ -275,25 +335,33 @@ public class UIManager : MonoBehaviour
         else
         {
             CurrentSelectedInventoryVertical = i;
-            for (int j = 0; j < InventoryCategoryButtons.Length; j++)
-            {
-                if (NormalInventoryCategoryButtonSprite != null)
-                {
-                    InventoryCategoryButtons[j].GetComponent<Image>().sprite = NormalInventoryCategoryButtonSprite;
-                    InventoryCategoryButtons[j].GetComponent<Image>().SetNativeSize();
-                    //InventoryCategoryButtons[j].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.2f, 97 / 1.2f);
-                    InventoryCategoryButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
-                }
-                else
-                {
-                    InventoryCategoryButtons[j].GetComponent<Image>().sprite = null;
+            UpdateButtonAppearance(InventoryCategoryButtons, CurrentSelectedInventoryVertical, 45, 35, delegate {
+                _sequenceCall = false;
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!", false);
+                InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(i));
+            });
+            //for (int j = 0; j < InventoryCategoryButtons.Length; j++)
+            //{
+            //    if (j == i) 
+            //    {
+            //        InventoryCategoryButtons[i].GetComponent<Image>().sprite = HighlightedButtonSprite;
+            //        InventoryCategoryButtons[i].GetComponent<Image>().SetNativeSize();
+            //        InventoryCategoryButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
+                    
+            //    }
+            //    else if (NormalButtonSprite != null)
+            //    {
+            //        InventoryCategoryButtons[j].GetComponent<Image>().sprite = NormalButtonSprite;
+            //        InventoryCategoryButtons[j].GetComponent<Image>().SetNativeSize();
+            //        InventoryCategoryButtons[j].GetComponentInChildren<TextMeshProUGUI>().fontSize = 30;
+            //    }
+            //    else
+            //    {
+            //        InventoryCategoryButtons[j].GetComponent<Image>().sprite = null;
 
-                }
-            }
-            InventoryCategoryButtons[i].GetComponent<Image>().sprite = HighlightedInventoryCategoryButtonSprite;
-            InventoryCategoryButtons[i].GetComponent<Image>().SetNativeSize();
-            //InventoryCategoryButtons[i].GetComponent<RectTransform>().sizeDelta = new Vector2(370 / 1.02f, 97 / 1.02f);
-            InventoryCategoryButtons[i].GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
+            //    }
+            //}
+            
             CloseAllInventoryVerticals();
             LaunchInventoryVertical(i);
         }
@@ -320,8 +388,83 @@ public class UIManager : MonoBehaviour
     {
         GameEquipmentFeatures.SetActive(State);
     }
-    
+
     #endregion
+
+
+
+
+    #region Marketplace
+    [Space(40)]
+    public GameObject MarketplaceHeaderBar;
+    [Header("Inventory Category Windows")]
+    public UIButton[] MarketplaceCategoryButtons;
+    int CurrentSelectedMarketplaceVertical = -1;
+    [Header("Inventory Vertical Windows")]
+    public GameObject[] MarketplaceVerticalWindows;
+
+
+
+    public void ToggleMarketplace(bool State)
+    {
+        if (State)
+        {
+            //GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Marketplace Data!", false);
+            //MarketPlaceManager.Instance.FetchMarketPlaceData(StaticDataBank.GetCollectionId(0));
+            OnClickMarketplaceVerticalButton(0);
+            LaunchMarketplace();
+        }
+    }
+    public void LaunchMarketplace()
+    {
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+        MarketplaceHeaderBar.SetActive(true);
+        LaunchFeatureWindow(2);
+        //OnClickMarketplaceVerticalButton(CurrentSelectedMarketplaceVertical);
+        FeatureScreenBackButton.SetActive(true);
+    }
+    public void SignalMarketplaceFailure()
+    {
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+        FailureScreenText.text = "Failed To Load Marketplace Data!";
+        FailureScreen.SetActive(true);
+        FeatureScreenBackButton.SetActive(true);
+    }
+    public void OnClickMarketplaceVerticalButton(int i)
+    {
+        if (i == CurrentSelectedMarketplaceVertical)
+        {
+            return;
+        }
+        else
+        {
+            CurrentSelectedMarketplaceVertical = i;
+            UpdateButtonAppearance(MarketplaceCategoryButtons, CurrentSelectedMarketplaceVertical, 45, 35, delegate {
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Marketplace Data!", false);
+                MarketPlaceManager.Instance.FetchMarketPlaceData(StaticDataBank.GetCollectionId(CurrentSelectedMarketplaceVertical));
+            });
+
+            CloseAllMarketplaceVerticals();
+            LaunchMarketplaceVertical(i);
+        }
+    }
+    void CloseAllMarketplaceVerticals()
+    {
+        for (int i = 0; i < MarketplaceVerticalWindows.Length; i++)
+        {
+            MarketplaceVerticalWindows[i].SetActive(false);
+        }
+    }
+    void LaunchMarketplaceVertical(int i)
+    {
+        MarketplaceVerticalWindows[i].SetActive(true);
+    }
+
+
+    #endregion
+
+
+
     #region Minting
     [Header ("Minting")]
     public GameObject MintingDialogPanel;
@@ -366,6 +509,42 @@ public class UIManager : MonoBehaviour
         ToggleMintingDialog(false);
     }
     #endregion
+
+    private void UpdateButtonAppearance(UIButton[] buttons, int selectedIndex, int highlightedFontSize, int normalFontSize, UnityAction call = null)
+    {
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            var button = buttons[i].GetComponent<Image>();
+            var text = buttons[i].GetComponentInChildren<TextMeshProUGUI>();
+
+            if (i == selectedIndex)
+            {
+                button.sprite = HighlightedButtonSprite;
+                text.fontSize = highlightedFontSize;
+                call?.Invoke();
+            }
+            else
+            {
+                button.sprite = NormalButtonSprite;
+                text.fontSize = normalFontSize;
+            }
+
+            button.SetNativeSize();
+        }
+    }
+
+    private void ResetButtons(UIButton[] buttons, Sprite sprite, int fontSize)
+    {
+        foreach (var button in buttons)
+        {
+            var image = button.GetComponent<Image>();
+            var text = button.GetComponentInChildren<TextMeshProUGUI>();
+
+            image.sprite = sprite;
+            text.fontSize = fontSize;
+            image.SetNativeSize();
+        }
+    }
 
 
 }

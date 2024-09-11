@@ -7,12 +7,12 @@ public class BoosterInGame : MonoBehaviour
     public Image BoosterImage;
     public TextMeshProUGUI BoosterValue;
 
-    public void PopulateBooster(Sprite m_Sprite, string m_boosterValue)
+    public void PopulateBooster(DataContainer data)
     {
-        BoosterImage.sprite = m_Sprite;
+        BoosterImage.sprite = data.m_sprite;
         if (BoosterValue != null)
         {
-            BoosterValue.text = m_boosterValue;
+            BoosterValue.text = data.boosterValue;
         }
     }
 }

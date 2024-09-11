@@ -40,7 +40,10 @@ public static class StaticDataBank
     public static readonly string Withdraw = BackendBaseUrl + "gs/withdraw?userId=";
     public static readonly string TokensPushingLink = BackendBaseUrl + "gs/claimCoins?userId=";
     public static readonly string InventoryUpdateLink = BackendBaseUrl + "gs/updateNft?userId=";
-    public static readonly string BuyItem = BackendBaseUrl + "gs/buyItem?userId=";
+    public static readonly string GetMarketPlace = BackendBaseUrl + "gs/getMarketPlace?userId=";
+    public static readonly string listForSale = BackendBaseUrl + "gs/listForSale?userId=";
+    public static readonly string UnlistForSale = BackendBaseUrl + "gs/cancelListing?userId=";
+    public static readonly string BuyItemFromMarketplace = BackendBaseUrl + "gs/buyItemFromMarket?userId=";
     #endregion
 
     #region Static Profile Data
@@ -51,12 +54,25 @@ public static class StaticDataBank
     public static string walletAddress = "";
 
 
-    public static string SpeedBoosterCollectionID = "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14";
-    public static string DoubleJumpCollectionID = "0b9d2116-b3a2-4452-affb-03282313ab77";
-    public static string SkinCollectionID = "36399a18-941c-4c18-bb0d-8cc2aaaa8b06";
+    private static string SpeedBoosterCollectionID = "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14";
+    private static string DoubleJumpCollectionID = "0b9d2116-b3a2-4452-affb-03282313ab77";
+    private static string SkinCollectionID = "36399a18-941c-4c18-bb0d-8cc2aaaa8b06";
 
     #endregion
-
+    public static string GetCollectionId(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return SpeedBoosterCollectionID.ToString();
+            case 1:
+                return DoubleJumpCollectionID.ToString();
+            case 2:
+                return SkinCollectionID.ToString();
+            default:
+                return null;
+        }
+    }
 
 
     public static string RemoveWordFromString(string m_string)
@@ -70,5 +86,19 @@ public static class StaticDataBank
         }
 
         return m_string;
+    }
+
+
+
+    public static bool CheckInputField(string checkString)
+    {
+        if (!string.IsNullOrEmpty(checkString) && !string.IsNullOrWhiteSpace(checkString))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

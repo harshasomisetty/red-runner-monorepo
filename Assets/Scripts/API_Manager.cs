@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Profiling;
 
 public class API_Manager : SingletonBase<API_Manager>
 {
@@ -19,6 +20,8 @@ public class API_Manager : SingletonBase<API_Manager>
     public delegate void TokenPushingDelg(bool success, string message);
     public delegate void InventoryUpdateDelg(bool success, string message);
     public delegate void BuyItemCall(bool success, string message);
+    public delegate void GetMarketPlaceCall(bool success, MarketPlace.Root message);
+    public delegate void ListOnSaleCal(bool success, string message);
     SignInCallback GoogleAuth = null;
 
 
@@ -429,7 +432,7 @@ public class API_Manager : SingletonBase<API_Manager>
             else
             {
                 string jsonResponse = www.downloadHandler.text;
-                //Debug.Log(jsonResponse);
+                Debug.Log(jsonResponse);
                 GameShop gameShop = JsonUtility.FromJson<GameShop>(jsonResponse);
                 Call(true, gameShop);
             }
@@ -437,20 +440,31 @@ public class API_Manager : SingletonBase<API_Manager>
     }
 
     #endregion
-    
+
     #region Inventory
-    public void GetInvectory(GetInventory getInventory,int pageNumber, string _fetchType = "UniqueAsset,Currency")
-    {
-        StartCoroutine(Get_Inventory(getInventory, pageNumber, _fetchType));
-    }
-    private IEnumerator Get_Inventory(GetInventory getInventory, int page_Number, string _type)
+    public void GetInvectory(GetInventory getInventory, int _pageNumber, string _collectionID = "", string _fetchType = "UniqueAsset")
     {
         var userData = new
         {
-            pageNumber = page_Number,
-            types = _type,
-            forSale = false
+            pageNumber = _pageNumber,
+            types = _fetchType,
+            forSale = false,
+            collectionId = _collectionID
         };
+
+        StartCoroutine(Get_Inventory(getInventory, userData));
+    }
+    public void Getcurrency(GetInventory getInventory, int _pageNumber = 1, string _fetchType = "Currency")
+    {
+        var userData = new
+        {
+            pageNumber = _pageNumber,
+            types = _fetchType,
+        };
+        StartCoroutine(Get_Inventory(getInventory, userData));
+    }
+    private IEnumerator Get_Inventory(GetInventory getInventory,object userData)
+    {
 
         string userDatajson = JsonConvert.SerializeObject(userData);
 
@@ -470,20 +484,17 @@ public class API_Manager : SingletonBase<API_Manager>
 
         yield return request.SendWebRequest();
 
-        InventoryData.Root inventoryData;
 
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            inventoryData.data = null;
-            inventoryData.meta = null;
-            getInventory(false, inventoryData);
-            Debug.LogError(request.error);
+            getInventory(false, null);
+            Debug.Log(request.error);
         }
         else
         {
             string jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
-            inventoryData = JsonConvert.DeserializeObject<InventoryData.Root>(jsonResponse);
+            InventoryData.Root inventoryData = JsonConvert.DeserializeObject<InventoryData.Root>(jsonResponse);
             //Debug.Log(inventory.data[0].item.name);
             getInventory(true, inventoryData);
         }
@@ -672,6 +683,7 @@ public class API_Manager : SingletonBase<API_Manager>
             usesLeft = _UsesLeftValue
         };
         string userDatajson = JsonConvert.SerializeObject(userData);
+        Debug.Log(userDatajson);
         string url = StaticDataBank.InventoryUpdateLink + StaticDataBank.playerlocalid;
         UnityWebRequest request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
@@ -696,47 +708,195 @@ public class API_Manager : SingletonBase<API_Manager>
     #endregion
 
 
-    #region BuyItem
+    #region Get MarketPlace
 
-    public void BuyItem(string ItemID, string CurrencyType, BuyItemCall _buyItemCall)
+    public void GetMarketPlace(string collectionID, int pageNumber, GetMarketPlaceCall _Marketlacecall)
     {
-        StartCoroutine(BuyItemRoutine(ItemID, CurrencyType, _buyItemCall));
+        StartCoroutine(Get_MarketPlace(collectionID, pageNumber, _Marketlacecall));
     }
-    private IEnumerator BuyItemRoutine(string ItemID, string CurrencyType, BuyItemCall buyItemCall)
+    private IEnumerator Get_MarketPlace(string _collectionID, int page_Number, GetMarketPlaceCall _marketplacecall)
     {
         var userData = new
         {
-            itemId = ItemID,
-            currencyId = CurrencyType
+            pageNumber = page_Number,
+            types = "UniqueAsset,Currency",
+            collectionId = _collectionID
         };
         string userDatajson = JsonConvert.SerializeObject(userData);
-        string url = StaticDataBank.BuyItem + StaticDataBank.playerlocalid;
+        string url = StaticDataBank.GetMarketPlace + StaticDataBank.playerlocalid;
         UnityWebRequest request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
         request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
-        Debug.Log("Link for inventory update is " + url);
+
         yield return request.SendWebRequest();
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            buyItemCall(false, request.error);
+            _marketplacecall(false, null);
             Debug.Log(request.error);
         }
         else
         {
-            JObject resoponse = JObject.Parse(request.downloadHandler.text);
-
-            string checkoutUrl = resoponse["checkoutUrl"].ToString();
-
-            Debug.Log("Opening URL : " + checkoutUrl);
-
-            buyItemCall(true, checkoutUrl);
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            MarketPlace.Root data = JsonConvert.DeserializeObject<MarketPlace.Root>(jsonResponse);
+            _marketplacecall(true, data);
         }
     }
 
     #endregion
+
+
+    #region ListOnSale
+    public void ListOnSale(string boosterId, float amount, ListOnSaleCal Sale)
+    {
+        StartCoroutine(List_On_Sale(boosterId, amount, Sale));
+    }
+    private IEnumerator List_On_Sale(string _boosterId, float _amount, ListOnSaleCal _Sale)
+    {
+        var userData = new
+        {
+            assetId = _boosterId,
+            amount = _amount
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.listForSale + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            _Sale?.Invoke(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            JObject jsonObject = JObject.Parse(jsonResponse);
+
+            // Extract the checkoutUrl value
+            string checkoutUrl = jsonObject["data"]["consentUrl"]?.ToString();
+            Debug.Log(checkoutUrl);
+            _Sale?.Invoke(true, checkoutUrl);
+        }
+    }
+    public void UnListOnSale(string assetId, ListOnSaleCal Sale)
+    {
+        StartCoroutine(UnList_On_Sale(assetId, Sale));
+    }
+    private IEnumerator UnList_On_Sale(string _assetId, ListOnSaleCal _Sale)
+    {
+        var userData = new
+        {
+            assetId = _assetId,
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.UnlistForSale + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            _Sale?.Invoke(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            JObject jsonObject = JObject.Parse(jsonResponse);
+
+            // Extract the checkoutUrl value
+            string checkoutUrl = jsonObject["data"]["consentUrl"]?.ToString();
+            Debug.Log(checkoutUrl);
+            _Sale?.Invoke(true, checkoutUrl);
+        }
+    }
+    #endregion
+
+    #region BuyFromMarketPlace
+
+    public void BuyFromMarket(string assetId, ListOnSaleCal Sale)
+    {
+        StartCoroutine(Buy_From_Market(assetId, Sale));
+    }
+    private IEnumerator Buy_From_Market(string _assetId, ListOnSaleCal _Sale)
+    {
+        var userData = new
+        {
+            assetId = _assetId,
+        };
+
+        string userDatajson = JsonConvert.SerializeObject(userData);
+
+        string url = StaticDataBank.BuyItemFromMarketplace + StaticDataBank.playerlocalid;
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(userDatajson);
+
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        request.SetRequestHeader("Authorization", "Bearer " + StaticDataBank.jwttoken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            _Sale?.Invoke(false, request.error);
+            Debug.Log(request.error);
+        }
+        else
+        {
+            string jsonResponse = request.downloadHandler.text;
+            Debug.Log(jsonResponse);
+            JObject jsonObject = JObject.Parse(jsonResponse);
+
+            // Extract the checkoutUrl value
+            string checkoutUrl = jsonObject["data"]["consentUrl"]?.ToString();
+            Debug.Log(checkoutUrl);
+            _Sale?.Invoke(true, checkoutUrl);
+        }
+    }
+
+
+    #endregion
+
 
 
     #region Generic API Caller
