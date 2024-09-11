@@ -26,6 +26,7 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance;
 
     public TextMeshProUGUI SolValue;
+    public TextMeshProUGUI RRValue;
 
     public GameObject inventoryCellBosster, inventoryCellCurrency;
     public Transform speedContainer;
@@ -414,6 +415,10 @@ public class InventoryManager : MonoBehaviour
     {
         SolValue.text = "" + solValue;
     }
+    public void SetRRValue(string solValue)
+    {
+        RRValue.text = "" + solValue;
+    }
     public void GetSolValue()
     {
         Debug.Log("Repeating");
@@ -426,6 +431,10 @@ public class InventoryManager : MonoBehaviour
                     if (_data.data[i].item.id == "SOL")
                     {
                         SetSolValue(_data.data[i].quantity);
+                    }
+                    if (_data.data[i].item.id == "97653f2a-d058-47bd-9f0f-ff6c254c88f3")
+                    {
+                        SetRRValue(_data.data[i].quantity);
                     }
                 }
             }

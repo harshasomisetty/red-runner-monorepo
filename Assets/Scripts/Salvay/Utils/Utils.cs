@@ -29,7 +29,7 @@ public static class Utils
             SocketEventsType.paymentComplete => "Payment Complete",
             SocketEventsType.payoutInitiated => "Payout Initiated",
             SocketEventsType.payoutFailed => "Payout Failed",
-            SocketEventsType.payoutComplete => "Payout Complete {0}$",
+            SocketEventsType.payoutComplete => "Payout Complete {0}RR",
             SocketEventsType.assetMintInitiated => "Asset Mint Initiated",
             SocketEventsType.assetMintFailed => "Asset Mint Failed",
             SocketEventsType.assetMintComplete => "{0} Minted",

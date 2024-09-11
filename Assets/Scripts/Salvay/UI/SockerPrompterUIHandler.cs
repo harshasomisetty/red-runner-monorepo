@@ -49,7 +49,7 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
             animatedUIState = AnimatedUIState.Animating;
             
             // Slide in to the initial position
-            popupTransform.DOAnchorPos(m_InitialPosition, SlideDuration).SetEase(Ease.OutCubic).OnComplete(() =>
+            popupTransform.DOAnchorPos(m_InitialPosition, SlideDuration).SetUpdate(UpdateType.Normal,true).SetEase(Ease.OutCubic).OnComplete(() =>
             {
                 // Update the state to Visible after the animation completes
                 animatedUIState = AnimatedUIState.Visible;
@@ -58,7 +58,7 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
                 DOVirtual.DelayedCall(StayDuration, () =>
                 {
                     HidePopup();
-                });
+                }).SetUpdate(UpdateType.Normal,true);
             });
         }
     }
@@ -71,7 +71,7 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
             animatedUIState = AnimatedUIState.Animating;
 
             // Slide out to the hidden position
-            popupTransform.DOAnchorPos(m_HiddenPosition, SlideDuration).SetEase(Ease.InCubic).OnComplete(() =>
+            popupTransform.DOAnchorPos(m_HiddenPosition, SlideDuration).SetEase(Ease.InCubic).SetUpdate(UpdateType.Normal,true).OnComplete(() =>
             {
                 // Update the state to Hidden after the animation completes
                 animatedUIState = AnimatedUIState.Hidden;

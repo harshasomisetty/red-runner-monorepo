@@ -262,7 +262,7 @@ namespace RedRunner
                         {
                             Debug.Log("Skin Unlocked");
                             
-                            GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Wrestler Skin Unlocked");
+                            GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Congrats! Received New Skin");
                         }
                     });
                 }

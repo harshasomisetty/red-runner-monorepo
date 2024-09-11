@@ -20,8 +20,8 @@ public class WebGLPostProcessBuild
             string jsToAdd = @"
     <script type='text/javascript'>
         function OpenPopupWindow(url, title) {
-            var width = screen.width / 4;
-            var height = screen.height / 4;
+            var width = 960;
+            var height = 540;
             var left = (screen.width - width) / 2;
             var top = (screen.height - height) / 2;
             var options = 'width=' + width + ', height=' + height + 

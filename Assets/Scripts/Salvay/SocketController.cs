@@ -133,7 +133,7 @@ public class SocketController : SingletonBase<SocketController>
         JObject jsonObject = (JObject)jsonArray[1];
 
         // Get the value of the "amount" key
-        return (jsonObject["amount"] ?? 0f).Value<float>();
+        return (jsonObject["payload"] ?? 0f).Value<float>();
     }
     
     private string GetItemIdStringFromPayload(string jsonString)
@@ -144,7 +144,7 @@ public class SocketController : SingletonBase<SocketController>
         JObject jsonObject = (JObject)jsonArray[1];
 
         // Get the value of the "amount" key
-        return (jsonObject["itemId"] ?? 0f).Value<string>();
+        return (jsonObject["payload"] ?? 0f).Value<string>();
     }
     
     // Connected event handler implementation
