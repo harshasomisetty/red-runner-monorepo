@@ -28,8 +28,6 @@ public class UIManager : MonoBehaviour
     [Header("Features Screen")]
     public GameObject FeatureScreenBackButton;
     public GameObject FeaturesScreen;
-    public GameObject FailureScreen;
-    public TextMeshProUGUI FailureScreenText;
     public void ToggleFeaturesScreen(bool State)
     {
         FeaturesScreen.SetActive(State);
@@ -37,7 +35,7 @@ public class UIManager : MonoBehaviour
         if (State)
         {
             ResetParentButtons();
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!", false);
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!");
             ShopManager.Instance.FetchShopData();
         }
         else
@@ -46,8 +44,6 @@ public class UIManager : MonoBehaviour
             CurrentSelectedInventoryVertical = -1;
             CurrentSelectedShopVertical = -1;
             ResetTrackingVariables();
-            FailureScreenText.text = "";
-            FailureScreen.SetActive(false);
             ResetParentButtons();
             for (int i = 0; i < FeatureScreenWindows.Length; i++)
             {
@@ -144,7 +140,7 @@ public class UIManager : MonoBehaviour
             else if (LoadShopFromOtherFeature)
             {
                 InventoryManager.Instance.paginationController.SetPagesOff();
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!", false);
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!");
                 ShopManager.Instance.FetchShopData();
                 LaunchFeatureWindow(i);
             }
@@ -199,25 +195,12 @@ public class UIManager : MonoBehaviour
     }
     public void ActivateFailureScreen(string Key)
     {
-        switch (Key)
-        {
-            case "Shop":
-                FailureScreenText.text = "Failed To Load Shop Data!";
-                break;
-            case "Inventory":
-                FailureScreenText.text = "Failed To Load Inventory Data!";
-                break;
-            case "Marketplace":
-                FailureScreenText.text = "Failed To Load Marketplace Data!";
-                break;
-        }
         GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-        FailureScreen.SetActive(true);
-        FeatureScreenBackButton.SetActive(true);
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Failed To Load " + Key + " Data!", 3);
     }
     #endregion
     #region ShopVerticals
-   
+
     public GameObject ShopHeaderBar;
     [Header("ShopCategoryButtons")]
     public UIButton[] ShopCategoryButtons;
@@ -283,15 +266,15 @@ public class UIManager : MonoBehaviour
             //InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(0));
             _sequenceCall = false;
             OnClickInventoryVerticalButton(0);
-            LaunchInventory();
+            //LaunchInventory();
         }
     }
     public bool _sequenceCall = false;
     public void LaunchInventory()
     {
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
         if (!_sequenceCall)
         {
-            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
             InventoryHeaderBar.SetActive(true);
             LaunchFeatureWindow(1);
             //OnClickInventoryVerticalButton(CurrentSelectedInventoryVertical);
@@ -302,29 +285,23 @@ public class UIManager : MonoBehaviour
             InGameEquipmentWindow.Instance.SetDefaultSelectedOption();
             ToggleGameEquipmentFeatures(true);
             GameEquipmentBackButton.SetActive(true);
-            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-
             Debug.Log("Sequence Success");
         }
         
     }
     public void SignalInventoryFailure()
     {
-        if (!_sequenceCall)
-        {
-            Debug.Log("Inventory data failed");
-            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-            FailureScreenText.text = "Failed To Load Inventory Data!";
-            FailureScreen.SetActive(true);
-            FeatureScreenBackButton.SetActive(true);
-        }
-        else
+        if (_sequenceCall)
         {
             PlayerPrefs.SetInt("OfflineMode", 1);
             GameEquipmentBackButton.SetActive(true);
             Debug.Log("Sequence Failure");
+            
         }
-        
+        else
+        {
+            ActivateFailureScreen("Inventory");
+        }
     }
     public void OnClickInventoryVerticalButton(int i)
     {
@@ -337,7 +314,7 @@ public class UIManager : MonoBehaviour
             CurrentSelectedInventoryVertical = i;
             UpdateButtonAppearance(InventoryCategoryButtons, CurrentSelectedInventoryVertical, 45, 35, delegate {
                 _sequenceCall = false;
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!", false);
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!");
                 InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(i));
             });
             //for (int j = 0; j < InventoryCategoryButtons.Length; j++)
@@ -412,7 +389,7 @@ public class UIManager : MonoBehaviour
             //GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Marketplace Data!", false);
             //MarketPlaceManager.Instance.FetchMarketPlaceData(StaticDataBank.GetCollectionId(0));
             OnClickMarketplaceVerticalButton(0);
-            LaunchMarketplace();
+            //LaunchMarketplace();
         }
     }
     public void LaunchMarketplace()
@@ -423,13 +400,7 @@ public class UIManager : MonoBehaviour
         //OnClickMarketplaceVerticalButton(CurrentSelectedMarketplaceVertical);
         FeatureScreenBackButton.SetActive(true);
     }
-    public void SignalMarketplaceFailure()
-    {
-        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-        FailureScreenText.text = "Failed To Load Marketplace Data!";
-        FailureScreen.SetActive(true);
-        FeatureScreenBackButton.SetActive(true);
-    }
+    
     public void OnClickMarketplaceVerticalButton(int i)
     {
         if (i == CurrentSelectedMarketplaceVertical)
@@ -440,7 +411,7 @@ public class UIManager : MonoBehaviour
         {
             CurrentSelectedMarketplaceVertical = i;
             UpdateButtonAppearance(MarketplaceCategoryButtons, CurrentSelectedMarketplaceVertical, 45, 35, delegate {
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Marketplace Data!", false);
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Marketplace Data!");
                 MarketPlaceManager.Instance.FetchMarketPlaceData(StaticDataBank.GetCollectionId(CurrentSelectedMarketplaceVertical));
             });
 

@@ -60,7 +60,7 @@ public class InventoryManager : MonoBehaviour
 
     void Awake()
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
         }
@@ -85,8 +85,8 @@ public class InventoryManager : MonoBehaviour
         cells.Clear();
         m_data.Clear();
     }
-    
-    public void FetchInventoryData( string collectionId, int PageNumber = 1)
+
+    public void FetchInventoryData(string collectionId, int PageNumber = 1)
     {
         ClearDataToUpdate();
         API_Manager.Instance.GetInvectory(Get_InventoryData, PageNumber, collectionId);
@@ -104,7 +104,7 @@ public class InventoryManager : MonoBehaviour
     //    _sequenceCall = SequenceCall;
     //    if (m_data.Count == 0 || m_data[0].meta.totalPages >= current_page)
     //    {
-            
+
     //    }
     //    else
     //    {
@@ -202,30 +202,30 @@ public class InventoryManager : MonoBehaviour
             cells.Add(cell);
             cell.gameObject.SetActive(true);
             cell.escrowOverlay.SetActive(data.data[i].item.escrow.Value);
-            yield return StartCoroutine(GetInventoryItemImage(data.data[i].item.imageUrl, dataSetName, cell, i));
+            yield return StartCoroutine(GetInventoryItemImage(dataSetName, cell, i));
         }
         //CheckSuccesScreen(_sequenceCall);
         UIManager.Instance.LaunchInventory();
     }
 
-    IEnumerator GetInventoryItemImage(string url, string datasetname, InventoryCell cell, int index)
+    IEnumerator GetInventoryItemImage(string datasetname, InventoryCell cell, int index)
     {
         bool istartchecking = false;
-
+        string url = m_data[0].data[index].item.imageUrl;
         if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
         {
-            cell.SetValues(index, datasetname, null);
+            cell.SetValues(index, datasetname, m_data[0].data[index].item.attributes[0].value, m_data[0].data[index].item.attributes[0].traitType, null);
             istartchecking = true;
         }
         else
         {
-            GlobalFeaturesManager.Instance.ImageCache.DownloadImage(url, (sprite) =>
+            GlobalFeaturesManager.Instance.ImageCache.DownloadImage(url, m_data[0].data[index].item.name,(sprite) =>
             {
                 istartchecking = true;
                 if (sprite != null)
                 {
                     Sprite m_sprite = Sprite.Create(sprite, new Rect(0, 0, sprite.width, sprite.height), new Vector2(0.5f, 0.5f));
-                    
+
                     if (spriteDictionary.ContainsKey(datasetname))
                     {
                         spriteDictionary[datasetname] = m_sprite;
@@ -234,7 +234,7 @@ public class InventoryManager : MonoBehaviour
                     {
                         spriteDictionary.Add(datasetname, m_sprite);
                     }
-                    cell.SetValues(index, StaticDataBank.RemoveWordFromString(datasetname), m_sprite);
+                    cell.SetValues(index, StaticDataBank.RemoveWordFromString(datasetname), m_data[0].data[index].item.attributes[0].value, m_data[0].data[index].item.attributes[0].traitType, m_sprite);
                 }
                 else
                 {
@@ -243,7 +243,7 @@ public class InventoryManager : MonoBehaviour
             });
 
         }
-        yield return new  WaitUntil(() => istartchecking);
+        yield return new WaitUntil(() => istartchecking);
     }
 
     int currentItemIndexToList = -1;
@@ -267,13 +267,13 @@ public class InventoryManager : MonoBehaviour
         ListButton.interactable = m_data[0].data[dataindex].item.escrow.Value;
         enteredAmount.interactable = !m_data[0].data[dataindex].item.escrow.Value;
         DetailPanel.SetActive(true);
-        if (!ListButton.interactable) 
-        GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Enter Price To list");
+        if (!ListButton.interactable)
+            GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Enter Price To list");
     }
 
     public DataContainer GetDataOfBoosters(int index)
     {
-        DataContainer _data=new DataContainer();
+        DataContainer _data = new DataContainer();
         _data.boosterValue = m_data[0].data[index].item.attributes[0].value;
         _data.m_sprite = spriteDictionary[m_data[0].data[index].item.name];
         _data.isListed = m_data[0].data[index].item.escrow.Value;
@@ -281,7 +281,7 @@ public class InventoryManager : MonoBehaviour
     }
     public EquipedAssets GetEquipedAssetDetails(int index)
     {
-        EquipedAssets _quiped=new EquipedAssets();
+        EquipedAssets _quiped = new EquipedAssets();
         _quiped.Id = m_data[0].data[index].item.itemId;
         _quiped.collectionId = m_data[0].data[index].item.id;
         return _quiped;
@@ -289,12 +289,12 @@ public class InventoryManager : MonoBehaviour
     public void ListOnMarketplace()
     {
         string assetId = m_data[0].data[currentItemIndexToList].item.id;
-        Debug.Log("Assett Id : "+assetId);
+        Debug.Log("Assett Id : " + assetId);
         if (m_data[0].data[currentItemIndexToList].item.escrow.Value)
         {
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Unlisting Asset", false);
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Unlisting Asset");
             API_Manager.Instance.UnListOnSale(assetId, (success, message) => {
-                if(success) 
+                if (success)
                 {
                     Confirmpanel.SetActive(false);
                     DetailPanel.transform.GetChild(0).gameObject.SetActive(true);
@@ -321,7 +321,7 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            if(!StaticDataBank.CheckInputField(enteredAmount.text) || enteredAmount.text.Length <= 0)
+            if (!StaticDataBank.CheckInputField(enteredAmount.text) || enteredAmount.text.Length <= 0)
             {
                 return;
             }
@@ -331,8 +331,8 @@ public class InventoryManager : MonoBehaviour
                 return;
             try
             {
-                
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Listing Asset", false);
+
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Listing Asset");
                 API_Manager.Instance.ListOnSale(assetId, _amount, (success, message) =>
                 {
                     if (success)
@@ -373,44 +373,7 @@ public class InventoryManager : MonoBehaviour
             ListButton.interactable = StaticDataBank.CheckInputField(tMP_Input.text) && tMP_Input.text.Length > 0;
         }
     }
-    //public string getItemIdOfSpeedBooster(int index)
-    //{
-    //    string SpeedBoosterItemID = m_data[0].data[index].item.itemId;
-    //    return SpeedBoosterItemID;
-    //}
-    //public string getAssetIdOfSpeedBooster(int index)
-    //{
-    //    string SpeedBoosterAssetID = m_data[0].data[index].item.id;
-    //    return SpeedBoosterAssetID;
-    //}
-    //public string getvalueofdoublejumbbooster(int index)
-    //{
-    //    return m_data[0].data[index].item.attributes[0].value;
-    //}
-    //public Sprite getspriteofdoublejumbbooster(int index)
-    //{
-    //    Sprite sprite = spriteDictionary[m_data[0].data[index].item.name];
-    //    return sprite;
-    //}
-    //public string getItemIdOfJumpBooster(int index)
-    //{
-    //    string JumpBoosterItemID = m_data[0].data[index].item.itemId;
-    //    return JumpBoosterItemID;
-    //}
-    //public string getAssetIdOfJumpBooster(int index)
-    //{
-    //    string JumpBoosterAssetID = m_data[0].data[index].item.id;
-    //    return JumpBoosterAssetID;
-    //}
-    //public Sprite getspriteofskinbooster(int index)
-    //{
-    //    Sprite sprite = spriteDictionary[m_data[0].data[0].item.name];
-    //    return sprite;
-    //}
-    //public string getskinamebyindex(int index)
-    //{
-    //    return m_data[0].data[index].item.attributes[0].value;
-    //}
+    
     public void SetSolValue(string solValue)
     {
         SolValue.text = "" + solValue;

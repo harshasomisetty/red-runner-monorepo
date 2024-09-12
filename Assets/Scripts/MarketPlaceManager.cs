@@ -22,9 +22,20 @@ public class MarketPlaceManager : MonoBehaviour
             Instance = this;
         }
     }
-
+    public void ClearDataToUpdate()
+    {
+        foreach (MarketplaceCell curcell in cells)
+        {
+            if (curcell != null)
+            {
+                curcell.gameObject.SetActive(false);
+            }
+        }
+        cells.Clear();
+    }
     public void FetchMarketPlaceData(string collectionId, int PageNumber = 1)
     {
+        ClearDataToUpdate();
         API_Manager.Instance.GetMarketPlace(collectionId, PageNumber, GetMarketPlaceData);
     }
     public void GetMarketPlaceData(bool success, MarketPlace.Root _data)
@@ -41,6 +52,10 @@ public class MarketPlaceManager : MonoBehaviour
             paginationController.SetTotalPages(data.meta.totalPages, data.data[0].item.collection.id, data.meta.page);
             paginationController.OnPageSelected = FetchMarketPlaceData;
             StartCoroutine(PopulateData());
+        }
+        else
+        {
+            UIManager.Instance.ActivateFailureScreen("Marketplace");
         }
     }
     IEnumerator PopulateData()
@@ -95,7 +110,7 @@ public class MarketPlaceManager : MonoBehaviour
         }
         else
         {
-            GlobalFeaturesManager.Instance.ImageCache.DownloadImage(url, (sprite) =>
+            GlobalFeaturesManager.Instance.ImageCache.DownloadImage(url, data.data[index].item.name, (sprite) =>
             {
                 istartchecking = true;
                 if (sprite != null)
@@ -130,7 +145,7 @@ public class MarketPlaceManager : MonoBehaviour
 
     public void BuyItem()
     {
-        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Buy From Market", false);
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Buy From Market");
         API_Manager.Instance.BuyFromMarket(data.data[CurrentitemIndexForBuy].item.id, (Success, Message) => {
             if(Success)
             {

@@ -56,7 +56,7 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedGameEquipmentOption = selectedGameEquipmentOption;
             UIManager.Instance._sequenceCall = true;
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...", false);
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...");
             InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(CurrentSelectedGameEquipmentOption));
             HighlightedGameEquipmentOptionButtons(CurrentSelectedGameEquipmentOption);
             ClearEquipmentBar();
@@ -133,7 +133,7 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         if (State)
         {
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...", false);
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...");
             UIManager.Instance.GameEquipmentBackButton.SetActive(false);
             UIManager.Instance._sequenceCall = true;
             ChangeGameEquipmentOption(0);

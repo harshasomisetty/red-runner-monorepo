@@ -18,12 +18,12 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
     private TMP_Text contentText;
 
     private const float SlideDuration = 0.5f;
-    private const float TIME_TO_SHOW_FOR = 20.0f;
+    //private const float TIME_TO_SHOW_FOR = 20.0f;
 
     private Vector2 m_ShowingPosition;
     private Vector2 m_HiddenPosition;
 
-    private bool m_IsTimeBased = true;
+    //private bool m_IsTimeBased = true;
     private Tween m_CurrentTween = null; // Track the current active tween
 
     private List<SocketEventsType> m_EventsToCloseOn;
@@ -48,7 +48,7 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
         popupState = PopupState.Hidden;
     }
 
-    public void ShowPopup(string text, bool _isTimeBased,List<SocketEventsType> _events = null)
+    public void ShowPopup(string text, float _delayTime = 0,List<SocketEventsType> _events = null)
     {
         if (popupState == PopupState.Hidden || popupState == PopupState.Animating)
         {
@@ -58,12 +58,11 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
 
             panelBackgroundImage.gameObject.SetActive(true);
             contentText.text = text;
-            m_IsTimeBased = _isTimeBased;
 
             popupState = PopupState.Animating;
 
-            if (m_IsTimeBased)
-                Invoke(nameof(HidePopup), TIME_TO_SHOW_FOR);
+            if (_delayTime > 0)
+                Invoke(nameof(HidePopup), _delayTime);
 
             m_CurrentTween = popupTransform.DOAnchorPos(m_ShowingPosition, SlideDuration)
                 .SetEase(Ease.OutCubic)
@@ -77,6 +76,7 @@ public class LoadingPanelUIHandler : MonoBehaviour, SocketEventListener
 
     public void HidePopup()
     {
+        Debug.Log("Hiding PopUp");
         if (popupState == PopupState.Visible || popupState == PopupState.Animating)
         {
             m_CurrentTween?.Kill(); // Kill any ongoing tween

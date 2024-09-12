@@ -9,22 +9,27 @@ public class InventoryCell : MonoBehaviour
     public Image BoosterImage;
     public TextMeshProUGUI Name;
     public TextMeshProUGUI Owned;
+    public TextMeshProUGUI UsesLeftText;
+    public GameObject UsesLeft;
     public UIButton ShowPanelButton;
     public int DataIndex;
     public GameObject escrowOverlay;
 
 
-    public void SetValues(int dataIndex, string assetname, Sprite _boosterImage)
+    public void SetValues(int dataIndex, string assetname, string _usesLeft, string _traitorType, Sprite _boosterImage)
     {
         Name.text = assetname;
+
         if (escrowOverlay.activeSelf)
             Owned.text = "Listed";
         else
             Owned.text = "Owned";
-        //if (_boosterImage == null)
-        //{
-        //    BoosterImage.enabled = false;
-        //}
+
+        if (_traitorType == "UsesLeft")
+            UsesLeftText.text = _usesLeft;
+        else
+            UsesLeft.SetActive(false);
+
         BoosterImage.sprite = _boosterImage;
         DataIndex = dataIndex;
         ShowPanelButton.onClick.RemoveAllListeners();
