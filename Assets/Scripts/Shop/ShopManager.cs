@@ -297,7 +297,7 @@ public class ShopManager : MonoBehaviour
     public void MintNft(string itemName,bool withSol)
     {
         DetailPanel.SetActive(false);
-        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing Payment", 10,
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing Payment", 5,
     new List<SocketEventsType> { SocketEventsType.paymentComplete });
         
         Debug.Log("Item Name : " + itemName);

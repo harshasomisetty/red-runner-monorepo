@@ -97,7 +97,7 @@ public class PaginationController : MonoBehaviour
         {
             currentPage = pageNumber;
             UpdatePagination();
-
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Assets");
             OnPageSelected?.Invoke(CurrentCollectionID, currentPage);
         });
 
@@ -125,7 +125,7 @@ public class PaginationController : MonoBehaviour
         {
             currentPage++;
             UpdatePagination();
-
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Assets");
             OnPageSelected?.Invoke(CurrentCollectionID, currentPage);
         }
     }
@@ -136,7 +136,7 @@ public class PaginationController : MonoBehaviour
         {
             currentPage--;
             UpdatePagination();
-
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Assets");
             OnPageSelected?.Invoke(CurrentCollectionID, currentPage);
         }
     }

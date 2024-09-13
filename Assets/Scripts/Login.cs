@@ -31,6 +31,7 @@ public class Login : MonoBehaviour
     {
         if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
             email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
+            email.text.Contains("@", System.StringComparison.OrdinalIgnoreCase) &&
             Password.text.Length >= 6 && email.text.Length >= 6)
         {
             ToggleDataLoadingWindow(true);
@@ -45,7 +46,8 @@ public class Login : MonoBehaviour
     public void UserSignUpFirebase()
     {
         if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
-            email.text.Contains(".com", System.StringComparison.OrdinalIgnoreCase) &&
+            email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
+            email.text.Contains("@", System.StringComparison.OrdinalIgnoreCase) &&
             Password.text.Length >= 6 && email.text.Length >= 6)
         {
             ToggleDataLoadingWindow(true);

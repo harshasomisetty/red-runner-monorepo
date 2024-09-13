@@ -2,6 +2,7 @@ using RedRunner.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -55,6 +56,7 @@ public class InventoryManager : MonoBehaviour
     public List<InventoryData.Root> m_data;
 
     int current_page = 1;
+    string CollectionID = "";
 
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
 
@@ -64,6 +66,7 @@ public class InventoryManager : MonoBehaviour
         {
             Instance = this;
         }
+        CollectionID = StaticDataBank.GetCollectionId(0);
         InvokeRepeating(nameof(GetSolValue), 1f, 30f);
     }
     //bool dataFetchCompleted = false;
@@ -89,6 +92,8 @@ public class InventoryManager : MonoBehaviour
     public void FetchInventoryData(string collectionId, int PageNumber = 1)
     {
         ClearDataToUpdate();
+        current_page = PageNumber;
+        CollectionID = collectionId;
         API_Manager.Instance.GetInvectory(Get_InventoryData, PageNumber, collectionId);
         //if (/*!dataFetchCompleted ||*/ SequenceCall)
         //{
@@ -104,7 +109,6 @@ public class InventoryManager : MonoBehaviour
     //    _sequenceCall = SequenceCall;
     //    if (m_data.Count == 0 || m_data[0].meta.totalPages >= current_page)
     //    {
-
     //    }
     //    else
     //    {
@@ -279,6 +283,19 @@ public class InventoryManager : MonoBehaviour
         _data.isListed = m_data[0].data[index].item.escrow.Value;
         return _data;
     }
+    //public List<DataContainer> GetListofBoostersData()
+    //{
+    //    List<DataContainer> boostersdatalist = new List<DataContainer>();
+    //    for(int i=0;i < cells.Count; i++)
+    //    {
+    //        DataContainer _data = new DataContainer();
+    //        _data.boosterValue = m_data[0].data[i].item.attributes[0].value;
+    //        _data.m_sprite = spriteDictionary[m_data[0].data[i].item.name];
+    //        _data.isListed = m_data[0].data[i].item.escrow.Value;
+    //        boostersdatalist.Add(_data);
+    //    }
+    //    return boostersdatalist;
+    //}
     public EquipedAssets GetEquipedAssetDetails(int index)
     {
         EquipedAssets _quiped = new EquipedAssets();

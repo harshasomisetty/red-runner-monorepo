@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -68,7 +67,7 @@ public class ImageCache : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Failed to download image: " + webRequest.error);
+                Debug.Log("Failed to download image: " + webRequest.error);
             }
         }
     }
@@ -77,6 +76,7 @@ public class ImageCache : MonoBehaviour
     private Dictionary<string, string> LoadImageReferences()
     {
         string json = PlayerPrefs.GetString(jsonKey, "{}");
+        //Debug.Log(json);
         return JsonUtility.FromJson<SerializableDictionary<string, string>>(json).ToDictionary();
     }
 
@@ -84,12 +84,12 @@ public class ImageCache : MonoBehaviour
     private void SaveImageReferences(Dictionary<string, string> imageReferences)
     {
         string json = JsonUtility.ToJson(new SerializableDictionary<string, string>(imageReferences));
-        Debug.Log(json);
+        //Debug.Log(json);
         PlayerPrefs.SetString(jsonKey, json);
     }
 }
 // Serializable dictionary to handle JSON conversions
-[System.Serializable]
+[Serializable]
 public class SerializableDictionary<TKey, TValue>
 {
     public List<TKey> keys = new List<TKey>();
