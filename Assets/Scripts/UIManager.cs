@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
 
     public Sprite NormalButtonSprite;
     public Sprite HighlightedButtonSprite;
+    public PaginationController paginationController;
 
     public static UIManager Instance;
     private void Awake()
@@ -127,6 +128,7 @@ public class UIManager : MonoBehaviour
                 }
                 FeatureScreenButtons[i].gameObject.SetActive(state);
             }
+            InventoryManager.Instance.paginationController = paginationController;
             InventoryManager.Instance.paginationController.SetPagesOff();
             
 
@@ -315,6 +317,7 @@ public class UIManager : MonoBehaviour
             UpdateButtonAppearance(InventoryCategoryButtons, CurrentSelectedInventoryVertical, 45, 35, delegate {
                 _sequenceCall = false;
                 GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!");
+                InventoryManager.Instance.paginationController = paginationController;
                 InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(i));
             });
             //for (int j = 0; j < InventoryCategoryButtons.Length; j++)

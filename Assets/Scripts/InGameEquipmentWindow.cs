@@ -30,8 +30,11 @@ public class InGameEquipmentWindow : MonoBehaviour
     public Transform EquipmentBar;
 
     [Header("NFT_Selector_Unit")]
-    public GameObject NFT_Selector_Unit_Boosters;
-    public GameObject NFT_Selector_Unit_Skins;
+    public GameObject NFT_Selector_Unit;
+
+
+
+    public PaginationController paginationController;
 
     int CurrentSelectedGameEquipmentOption = -1;
     int CurrentSelectedSpeedBoosterAsset = -1;
@@ -57,6 +60,8 @@ public class InGameEquipmentWindow : MonoBehaviour
             CurrentSelectedGameEquipmentOption = selectedGameEquipmentOption;
             UIManager.Instance._sequenceCall = true;
             GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...");
+            paginationController.SetPagesOff();
+            InventoryManager.Instance.paginationController = paginationController;
             InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(CurrentSelectedGameEquipmentOption));
             HighlightedGameEquipmentOptionButtons(CurrentSelectedGameEquipmentOption);
             ClearEquipmentBar();
@@ -133,9 +138,9 @@ public class InGameEquipmentWindow : MonoBehaviour
     {
         if (State)
         {
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...");
+            //GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...");
             UIManager.Instance.GameEquipmentBackButton.SetActive(false);
-            UIManager.Instance._sequenceCall = true;
+            //UIManager.Instance._sequenceCall = true;
             ChangeGameEquipmentOption(0);
             //InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(0));
         }
@@ -144,6 +149,8 @@ public class InGameEquipmentWindow : MonoBehaviour
             CurrentSelectedSpeedBoosterAsset = -1;
             CurrentSelectedJumpBoosterAsset = -1;
             CurrentSelectedSkinAsset = -1;
+            CurrentSelectedGameEquipmentOption = -1;
+            UIManager.Instance._sequenceCall = false;
             PlayerPrefs.SetInt("SpeedBoostersEquipped", 0);
             PlayerPrefs.SetInt("JumpBoostersEquipped", 0);
             UIManager.Instance.ToggleGameEquipmentFeatures(false);
@@ -155,64 +162,89 @@ public class InGameEquipmentWindow : MonoBehaviour
     }
     void CreateNFT_SelectorUnits(int Variation)
     {
-        switch (Variation)
+        for (int i = 0; i < InventoryManager.Instance.cells.Count; i++)
         {
-            case 0:
-
-                Debug.Log("CreateNFT_Units Speed Boosters"+ InventoryManager.Instance.SpeedBoosterIndex.Count);
-                for (int i = 0; i < InventoryManager.Instance.SpeedBoosterIndex.Count; i++)
+            DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(i);
+            GameObject temp = Instantiate(NFT_Selector_Unit, EquipmentBar);
+            temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
+            int index = i;
+            UIButton uIButton = temp.GetComponent<UIButton>();
+            uIButton.interactable = !_data.isListed;
+            uIButton.onClick.AddListener(delegate {
+                switch (Variation) 
                 {
-                    DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(InventoryManager.Instance.SpeedBoosterIndex[i]);
-                    GameObject temp = Instantiate(NFT_Selector_Unit_Boosters, EquipmentBar);
-                    temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
-                    int index = i;
-                    Debug.Log(temp.name);
-                    UIButton uIButton = temp.GetComponent<UIButton>();
-                    uIButton.interactable = !_data.isListed;
-                    uIButton.onClick.AddListener(delegate {
-
+                    case 0:
                         SelectSpeedBoosterAsset(index, _data);
-                    });
-                }
-                break;
-            case 1:
-                Debug.Log("CreateNFT_Units Jump Boosters"+ InventoryManager.Instance.DoubleJumpIndex.Count);
-                for (int i = 0; i < InventoryManager.Instance.DoubleJumpIndex.Count; i++)
-                {
-                    DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(InventoryManager.Instance.DoubleJumpIndex[i]);
-                    GameObject temp = Instantiate(NFT_Selector_Unit_Boosters, EquipmentBar);
-                    temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
-                    int index = i;
-                    UIButton uIButton = temp.GetComponent<UIButton>();
-                    uIButton.interactable = !_data.isListed;
-                    uIButton.onClick.AddListener(delegate {
-
+                        break;
+                    case 1:
                         SelectJumpBoosterAsset(index, _data);
-                    });
-                }
-                break;
-            case 2:
-                for (int i = 0; i < InventoryManager.Instance.SkinsIndex.Count; i++)
-                {
-                    DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(InventoryManager.Instance.SkinsIndex[i]);
-                    GameObject temp = Instantiate(NFT_Selector_Unit_Skins, EquipmentBar);
-                    temp.transform.GetChild(0).GetChild(0).GetComponent<RectTransform>().localPosition = new Vector3(0f, -44, 0f);
-                    temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
-                    int index = i;
-                    UIButton uIButton = temp.GetComponent<UIButton>();
-                    uIButton.interactable = !_data.isListed;
-                    uIButton.onClick.AddListener(delegate {
-
+                        break;
+                    case 2:
                         SelectSkinAsset(index, _data);
-                    });
+                        break;
                 }
-                Debug.Log("CreateNFT_Units  Skins");
-                break;
+            });
         }
+
+        //switch (Variation)
+        //{
+        //    case 0:
+
+        //        Debug.Log("CreateNFT_Units Speed Boosters"+ InventoryManager.Instance.SpeedBoosterIndex.Count);
+        //        for (int i = 0; i < InventoryManager.Instance.SpeedBoosterIndex.Count; i++)
+        //        {
+        //            DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(InventoryManager.Instance.SpeedBoosterIndex[i]);
+        //            GameObject temp = Instantiate(NFT_Selector_Unit, EquipmentBar);
+        //            temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
+        //            int index = i;
+        //            Debug.Log(temp.name);
+        //            UIButton uIButton = temp.GetComponent<UIButton>();
+        //            uIButton.interactable = !_data.isListed;
+        //            uIButton.onClick.AddListener(delegate {
+
+        //                SelectSpeedBoosterAsset(index, _data);
+        //            });
+        //        }
+        //        break;
+        //    case 1:
+        //        Debug.Log("CreateNFT_Units Jump Boosters"+ InventoryManager.Instance.DoubleJumpIndex.Count);
+        //        for (int i = 0; i < InventoryManager.Instance.DoubleJumpIndex.Count; i++)
+        //        {
+        //            DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(InventoryManager.Instance.DoubleJumpIndex[i]);
+        //            GameObject temp = Instantiate(NFT_Selector_Unit, EquipmentBar);
+        //            temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
+        //            int index = i;
+        //            UIButton uIButton = temp.GetComponent<UIButton>();
+        //            uIButton.interactable = !_data.isListed;
+        //            uIButton.onClick.AddListener(delegate {
+
+        //                SelectJumpBoosterAsset(index, _data);
+        //            });
+        //        }
+        //        break;
+        //    case 2:
+        //        for (int i = 0; i < InventoryManager.Instance.SkinsIndex.Count; i++)
+        //        {
+        //            DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(InventoryManager.Instance.SkinsIndex[i]);
+        //            GameObject temp = Instantiate(NFT_Selector_Unit, EquipmentBar);
+        //            temp.transform.GetChild(0).GetChild(0).GetComponent<RectTransform>().localPosition = new Vector3(0f, -44, 0f);
+        //            temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
+        //            int index = i;
+        //            UIButton uIButton = temp.GetComponent<UIButton>();
+        //            uIButton.interactable = !_data.isListed;
+        //            uIButton.onClick.AddListener(delegate {
+
+        //                SelectSkinAsset(index, _data);
+        //            });
+        //        }
+        //        Debug.Log("CreateNFT_Units  Skins");
+        //        break;
+        //}
     }
     public void SetDefaultSelectedOption()
     {
         //ChangeGameEquipmentOption(0);
+        ClearEquipmentBar();
         CreateNFT_SelectorUnits(CurrentSelectedGameEquipmentOption);
     }
     public void SelectSpeedBoosterAsset(int SelectIndex, DataContainer data)
@@ -296,6 +328,7 @@ public class InGameEquipmentWindow : MonoBehaviour
         PlayerPrefs.SetInt("SpeedBoostersEquipped", 0);
         PlayerPrefs.SetInt("JumpBoostersEquipped", 0);
         PlayerPrefs.SetString("SkinEquipped", "Default");
+        paginationController.SetPagesOff();
         GlobalFeaturesManager.Instance.ClearEquippedItemDetails();
     }
 }
