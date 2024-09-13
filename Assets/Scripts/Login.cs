@@ -103,7 +103,7 @@ public class Login : MonoBehaviour
         LoginPanel.SetActive(!state);
 
         if (state)
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Logging In...", false);
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Logging In...");
         else
             GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
     }

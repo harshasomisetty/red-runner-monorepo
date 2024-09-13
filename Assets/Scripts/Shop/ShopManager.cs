@@ -115,7 +115,7 @@ public class ShopManager : MonoBehaviour
     IEnumerator DownloadImage(string imageUrl, string imageName, string SOLPrice, string USDCPrice, string _UsesLeft,UIDataConatainer data)
     {
         bool istartchecking = false;
-        GlobalFeaturesManager.Instance.ImageCache.DownloadImage(imageUrl, (m_sprite) => {
+        GlobalFeaturesManager.Instance.ImageCache.DownloadImage(imageUrl, imageName,(m_sprite) => {
             
             istartchecking = true;
             
@@ -297,7 +297,7 @@ public class ShopManager : MonoBehaviour
     public void MintNft(string itemName,bool withSol)
     {
         DetailPanel.SetActive(false);
-        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing Payment", true,
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing Payment", 10,
     new List<SocketEventsType> { SocketEventsType.paymentComplete });
         
         Debug.Log("Item Name : " + itemName);

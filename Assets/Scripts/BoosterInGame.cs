@@ -12,7 +12,12 @@ public class BoosterInGame : MonoBehaviour
         BoosterImage.sprite = data.m_sprite;
         if (BoosterValue != null)
         {
-            BoosterValue.text = data.boosterValue;
+            string m_value = data.boosterValue.ToString();
+            if (data.boosterValue.Contains("Skin"))
+            {
+                m_value = m_value.Replace("Skin", "");
+            }
+            BoosterValue.text = m_value;
         }
     }
 }

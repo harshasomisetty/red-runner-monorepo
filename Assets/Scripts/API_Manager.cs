@@ -432,7 +432,7 @@ public class API_Manager : SingletonBase<API_Manager>
             else
             {
                 string jsonResponse = www.downloadHandler.text;
-                Debug.Log(jsonResponse);
+                //Debug.Log(jsonResponse);
                 GameShop gameShop = JsonUtility.FromJson<GameShop>(jsonResponse);
                 Call(true, gameShop);
             }
@@ -493,7 +493,7 @@ public class API_Manager : SingletonBase<API_Manager>
         else
         {
             string jsonResponse = request.downloadHandler.text;
-            Debug.Log(jsonResponse);
+            //Debug.Log(jsonResponse);
             InventoryData.Root inventoryData = JsonConvert.DeserializeObject<InventoryData.Root>(jsonResponse);
             //Debug.Log(inventory.data[0].item.name);
             getInventory(true, inventoryData);
