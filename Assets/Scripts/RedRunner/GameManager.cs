@@ -110,13 +110,13 @@ namespace RedRunner
 
         void Awake()
         {
-            if (m_Singleton != null)
+            if (m_Singleton == null)
             {
-                Destroy(gameObject);
-                return;
+                m_Singleton = this;
+                //Destroy(gameObject);
+                //return;
             }
             SaveGame.Serializer = new SaveGameBinarySerializer();
-            m_Singleton = this;
             m_Score = 0f;
 
             if (SaveGame.Exists("coin"))

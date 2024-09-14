@@ -52,12 +52,12 @@ namespace RedRunner
 
         void Awake()
         {
-            if (m_Singleton != null)
+            if (m_Singleton == null)
             {
-                Destroy(gameObject);
-                return;
+                //Destroy(gameObject);
+                m_Singleton = this;
+                //return;
             }
-            m_Singleton = this;
 
             Cursor.SetCursor(m_CursorDefaultTexture, Vector2.zero, CursorMode.Auto);
         }
