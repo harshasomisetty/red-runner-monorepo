@@ -15,6 +15,8 @@ public class MarketPlaceManager : MonoBehaviour
     public MarketPlace.Root data;
     public Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
     public static MarketPlaceManager Instance;
+    int current_Page = 1;
+    string CollectionID = "";
     private void Awake()
     {
         if(Instance == null)
@@ -33,8 +35,17 @@ public class MarketPlaceManager : MonoBehaviour
         }
         cells.Clear();
     }
+    public void RefreshMarketPlaceData()
+    {
+        if (UIManager.Instance.GetActiveScreenState(2))
+        {
+            FetchMarketPlaceData(CollectionID, current_Page);
+        }
+    }
     public void FetchMarketPlaceData(string collectionId, int PageNumber = 1)
     {
+        current_Page = PageNumber;
+        CollectionID = collectionId;
         ClearDataToUpdate();
         API_Manager.Instance.GetMarketPlace(collectionId, PageNumber, GetMarketPlaceData);
     }

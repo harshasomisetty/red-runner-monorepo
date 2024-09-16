@@ -81,6 +81,17 @@ public class SockerPrompterUIHandler : MonoBehaviour, SocketEventListener
     
     public void OnSocketMessageReceived(SocketEventsType eventType, string payLoad = null)
     {
+        switch (eventType)
+        {
+            case SocketEventsType.marketAssetListed:
+            case SocketEventsType.marketAssetUnListed:
+                InventoryManager.Instance.RefreshInventory();
+                break;
+            case SocketEventsType.marketAssetBought:
+                MarketPlaceManager.Instance.RefreshMarketPlaceData();
+                break;
+        }
+       
         ShowPopup(string.Format(eventType.GetStringForType(), payLoad));
     }
 

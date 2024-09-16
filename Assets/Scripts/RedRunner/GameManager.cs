@@ -227,7 +227,7 @@ namespace RedRunner
 
         public void Init()
         {
-            EndGame();
+            //EndGame();
             //UIManager.Singleton.Init();
             StartCoroutine(Load());
         }

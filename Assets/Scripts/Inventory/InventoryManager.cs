@@ -1,8 +1,8 @@
+using DG.Tweening;
 using RedRunner.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,6 +44,7 @@ public class InventoryManager : MonoBehaviour
     [Header("Detail Panel UI")]
     public GameObject DetailPanel;
     public GameObject Confirmpanel;
+    public GameObject PricePanel;
     public UIButton ListButton;
     public TextMeshProUGUI ListButtonText;
     public TextMeshProUGUI ConfirmText;
@@ -88,7 +89,13 @@ public class InventoryManager : MonoBehaviour
         cells.Clear();
         m_data.Clear();
     }
-
+    public void RefreshInventory()
+    {
+        if (UIManager.Instance.GetActiveScreenState(1))
+        {
+            FetchInventoryData(CollectionID, current_page);
+        }
+    }
     public void FetchInventoryData(string collectionId, int PageNumber = 1)
     {
         ClearDataToUpdate();
@@ -253,13 +260,14 @@ public class InventoryManager : MonoBehaviour
     int currentItemIndexToList = -1;
     public void ShowDetailsPanel(int dataindex)
     {
-        ListButtonText.text = m_data[0].data[dataindex].item.escrow.Value ? "UnList" : "List";
+        bool isListed = m_data[0].data[dataindex].item.escrow.Value;
+        ListButtonText.text = isListed ? "UnList" : "List";
         ConfirmText.text = "Are you Sure You want to " + ListButtonText.text + " On Marketplace";
         currentItemIndexToList = dataindex;
         Description.text = m_data[0].data[dataindex].item.description;
         //BoosterName.text = m_data[pageNumber].data[dataindex].item.name;
         BoosterName.text = StaticDataBank.RemoveWordFromString(m_data[0].data[dataindex].item.name);
-        Debug.Log(m_data[0].data[dataindex].item.status);
+        //Debug.Log(m_data[0].data[dataindex].item.status);
         attribute.text = m_data[0].data[dataindex].item.attributes[0].value;
         if (spriteDictionary.ContainsKey(m_data[0].data[dataindex].item.name))
         {
@@ -268,8 +276,10 @@ public class InventoryManager : MonoBehaviour
         }
         //MintButton.SetActive(false);
         //ListButton.gameObject.SetActive(true);
-        ListButton.interactable = m_data[0].data[dataindex].item.escrow.Value;
-        enteredAmount.interactable = !m_data[0].data[dataindex].item.escrow.Value;
+        ListButton.interactable = isListed;
+        ListButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, isListed ? 70 : 20);
+        PricePanel.SetActive(!isListed);
+        enteredAmount.interactable = !isListed;
         DetailPanel.SetActive(true);
         if (!ListButton.interactable)
             GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Enter Price To list");
