@@ -113,10 +113,12 @@ public class MarketPlaceManager : MonoBehaviour
     IEnumerator GetInventoryItemImage(string datasetname, MarketplaceCell cell, int index)
     {
         bool istartchecking = false;
+        bool CheckOwned = data.data[index].item.owner.address == StaticDataBank.walletAddress;
         string url = data.data[index].item.imageUrl;
         if (string.IsNullOrEmpty(url) || string.IsNullOrWhiteSpace(url))
         {
             cell.SetValues(index, datasetname, data.data[index].item.priceCents, data.data[index].item.attributes[0].value, data.data[index].item.attributes[0].traitType, null);
+            cell.SetButtonText(CheckOwned);
             istartchecking = true;
         }
         else
@@ -137,6 +139,7 @@ public class MarketPlaceManager : MonoBehaviour
                         spriteDictionary.Add(datasetname, m_sprite);
                     }
                     cell.SetValues(index, StaticDataBank.RemoveWordFromString(datasetname), data.data[index].item.priceCents, data.data[index].item.attributes[0].value, data.data[index].item.attributes[0].traitType, m_sprite);
+                    cell.SetButtonText(CheckOwned);
                 }
                 else
                 {
@@ -151,6 +154,11 @@ public class MarketPlaceManager : MonoBehaviour
     public void ShowConfirmPanel(int index)
     {
         CurrentitemIndexForBuy = index;
+        if(data.data[CurrentitemIndexForBuy].item.owner.address == StaticDataBank.walletAddress)
+        {
+            //GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Its Your Own Asset", 0.8f);
+            return;
+        }
         ConfirmPanel.SetActive(true);
     }
 

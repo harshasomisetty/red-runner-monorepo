@@ -18,6 +18,7 @@ public class Login : MonoBehaviour, SocketEventListener
     public TextMeshProUGUI PopUpMessage;
     public GameObject LoginPanel;
     public UIButton OkButton;
+    public Toggle AcceptConditions;
     public TextMeshProUGUI SignUpSuccessButtonText;
 
 
@@ -39,6 +40,11 @@ public class Login : MonoBehaviour, SocketEventListener
 
     public void UserLogInFirebase()
     {
+        //if (!AcceptConditions.isOn)
+        //{
+        //    GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Please Accept All Terms", 1);
+        //    return;
+        //}
         if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
             email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
             email.text.Contains("@", System.StringComparison.OrdinalIgnoreCase) &&
@@ -55,6 +61,11 @@ public class Login : MonoBehaviour, SocketEventListener
     }
     public void UserSignUpFirebase()
     {
+        if (!AcceptConditions.isOn)
+        {
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Please Accept All Terms", 1);
+            return;
+        }
         if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
             email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
             email.text.Contains("@", System.StringComparison.OrdinalIgnoreCase) &&
@@ -70,6 +81,11 @@ public class Login : MonoBehaviour, SocketEventListener
     }
     public void SignInWithGoogle()
     {
+        if (!AcceptConditions.isOn)
+        {
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Please Accept All Terms", 1);
+            return;
+        }
         ToggleDataLoadingWindow(true);
         API_Manager.Instance.SignInWithGoogle(OnSignInCompleted);
     }
@@ -140,12 +156,16 @@ public class Login : MonoBehaviour, SocketEventListener
         QRSocketController.Instance.InitiateQRCodeLogin();
         QRCodePanel.SetActive(true);
     }
+    public void QRPopupClose()
+    {
+        QRCodePanel.SetActive(false);
+    }
 
     private void SetQRCodeImage(string qrCodeDataUrl)
     {
         if (QRCodeImage == null)
         {
-            Debug.LogError("QRCodeImage is not assigned in the Login script.");
+            Debug.Log("QRCodeImage is not assigned in the Login script.");
             return;
         }
 

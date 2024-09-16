@@ -175,6 +175,14 @@ public class InventoryManager : MonoBehaviour
             //DataIndex _data = new DataIndex();
             //_data.boosterindex = i;
             //_data.pageNumber = pageNumber;
+            if (data.data[i].item.attributes[0].traitType == "UsesLeft")
+            {
+                int amount = int.Parse(data.data[i].item.attributes[0].value);
+                if(amount <= 0)
+                {
+                    continue;
+                }
+            }
             if (data.data[i].type.Contains("UniqueAsset"))
             {
 
@@ -288,6 +296,14 @@ public class InventoryManager : MonoBehaviour
     public DataContainer GetDataOfBoosters(int index)
     {
         DataContainer _data = new DataContainer();
+        if (m_data[0].data[index].item.attributes[0].traitType == "UsesLeft")
+        {
+            int amount = int.Parse(m_data[0].data[index].item.attributes[0].value);
+            if (amount <= 0)
+            {
+                return _data;
+            }
+        }
         _data.boosterValue = m_data[0].data[index].item.attributes[0].value;
         _data.m_sprite = spriteDictionary[m_data[0].data[index].item.name];
         _data.isListed = m_data[0].data[index].item.escrow.Value;
