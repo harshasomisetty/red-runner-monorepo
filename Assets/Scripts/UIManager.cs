@@ -54,6 +54,17 @@ public class UIManager : MonoBehaviour
             FeatureScreenBackButton.SetActive(false);
         }
     }
+    public bool GetActiveScreenState(int index)
+    {
+        if (index == CurrentSelectedFeatureButton)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     void ResetParentButtons()
     {
         for (int i = 0; i < FeatureScreenButtons.Length; i++)

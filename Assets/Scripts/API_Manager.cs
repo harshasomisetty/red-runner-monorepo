@@ -27,6 +27,7 @@ public class API_Manager : SingletonBase<API_Manager>
 
     protected override void Awake()
     {
+        Application.runInBackground = true;
         base.Awake();
     }
     #region JsCallingMethod

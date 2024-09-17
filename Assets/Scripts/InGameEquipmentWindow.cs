@@ -165,25 +165,29 @@ public class InGameEquipmentWindow : MonoBehaviour
         for (int i = 0; i < InventoryManager.Instance.cells.Count; i++)
         {
             DataContainer _data = InventoryManager.Instance.GetDataOfBoosters(i);
-            GameObject temp = Instantiate(NFT_Selector_Unit, EquipmentBar);
-            temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
-            int index = i;
-            UIButton uIButton = temp.GetComponent<UIButton>();
-            uIButton.interactable = !_data.isListed;
-            uIButton.onClick.AddListener(delegate {
-                switch (Variation) 
+            if (_data.boosterValue != null)
+            {
+                GameObject temp = Instantiate(NFT_Selector_Unit, EquipmentBar);
+                temp.GetComponent<BoosterInGame>().PopulateBooster(_data);
+                int index = i;
+                UIButton uIButton = temp.GetComponent<UIButton>();
+                uIButton.interactable = !_data.isListed;
+                uIButton.onClick.AddListener(delegate
                 {
-                    case 0:
-                        SelectSpeedBoosterAsset(index, _data);
-                        break;
-                    case 1:
-                        SelectJumpBoosterAsset(index, _data);
-                        break;
-                    case 2:
-                        SelectSkinAsset(index, _data);
-                        break;
-                }
-            });
+                    switch (Variation)
+                    {
+                        case 0:
+                            SelectSpeedBoosterAsset(index, _data);
+                            break;
+                        case 1:
+                            SelectJumpBoosterAsset(index, _data);
+                            break;
+                        case 2:
+                            SelectSkinAsset(index, _data);
+                            break;
+                    }
+                });
+            }
         }
 
         //switch (Variation)
