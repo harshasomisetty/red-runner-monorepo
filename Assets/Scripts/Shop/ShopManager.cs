@@ -71,7 +71,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            UIManager.Instance.ActivateFailureScreen("Shop");
+            UIManager.Instance.ActivateFailureScreen("shop");
         }
     }
     //Sprite DownloadImage(string imageUrl)
@@ -297,7 +297,7 @@ public class ShopManager : MonoBehaviour
     public void MintNft(string itemName,bool withSol)
     {
         DetailPanel.SetActive(false);
-        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing Payment", 5,
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Processing payment", 5,
     new List<SocketEventsType> { SocketEventsType.paymentComplete });
         
         Debug.Log("Item Name : " + itemName);

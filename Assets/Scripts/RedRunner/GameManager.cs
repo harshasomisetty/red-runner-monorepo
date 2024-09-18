@@ -79,8 +79,6 @@ namespace RedRunner
         int SpeedBoostersStartValue = 0;
         bool FoundSpeedBoosters = false;
 
-        [Header("Cursor handler")]
-        public CursorVisibilityHandler _cursorVisibilityHandler;
 
         #region Getters
         public bool gameStarted
@@ -273,7 +271,7 @@ namespace RedRunner
         {
             var startScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.START_SCREEN);
             yield return new WaitForSecondsRealtime(3f);
-           // UIManager.Singleton.OpenScreen(startScreen);
+            //UIManager.Singleton.OpenScreen(startScreen);
         }
 
         void OnApplicationQuit()

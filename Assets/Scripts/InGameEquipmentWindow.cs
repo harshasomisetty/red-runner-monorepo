@@ -59,7 +59,7 @@ public class InGameEquipmentWindow : MonoBehaviour
         {
             CurrentSelectedGameEquipmentOption = selectedGameEquipmentOption;
             UIManager.Instance._sequenceCall = true;
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing Inventory...");
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Refreshing inventory...");
             paginationController.SetPagesOff();
             InventoryManager.Instance.paginationController = paginationController;
             InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(CurrentSelectedGameEquipmentOption));
