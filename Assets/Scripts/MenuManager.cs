@@ -11,10 +11,12 @@ public class MenuManager : MonoBehaviour
     [Header("Profile Attributes Placeholders")]
     public TextMeshProUGUI PlayerName_Placeholder;
     public TextMeshProUGUI WalletID_Placeholder;
+    public Texture2D m_CursorDefaultTexture;
 
     bool GameLaunched = false;
     private void Awake()
     {
+        Cursor.SetCursor(m_CursorDefaultTexture, Vector2.zero, CursorMode.Auto);
         PopulateProfileDetails();
     }
     public void LaunchGame()

@@ -185,7 +185,7 @@ public class API_Manager : SingletonBase<API_Manager>
 
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            callback(false, "User Already Exists");
+            callback(false, "User already exists");
             Debug.LogError(request.result);
         }
         else
@@ -272,7 +272,7 @@ public class API_Manager : SingletonBase<API_Manager>
                 if (www.responseCode == 409)
                 {
                     Debug.LogWarning("Conflict detected: HTTP 409. Attempting to resolve the conflict...");
-                    signUp(false, " User Already Exist");
+                    signUp(false, " User already exist");
                 }
                 else
                 {

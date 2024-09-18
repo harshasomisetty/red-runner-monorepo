@@ -23,6 +23,7 @@ public class MarketPlaceManager : MonoBehaviour
         {
             Instance = this;
         }
+        CollectionID = StaticDataBank.GetCollectionId(0);
     }
     public void ClearDataToUpdate()
     {
@@ -66,7 +67,7 @@ public class MarketPlaceManager : MonoBehaviour
         }
         else
         {
-            UIManager.Instance.ActivateFailureScreen("Marketplace");
+            UIManager.Instance.ActivateFailureScreen("marketplace");
         }
     }
     IEnumerator PopulateData()
@@ -164,7 +165,7 @@ public class MarketPlaceManager : MonoBehaviour
 
     public void BuyItem()
     {
-        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Buy From Market");
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Buy from market");
         API_Manager.Instance.BuyFromMarket(data.data[CurrentitemIndexForBuy].item.id, (Success, Message) => {
             if(Success)
             {

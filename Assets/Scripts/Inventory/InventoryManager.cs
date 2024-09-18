@@ -26,8 +26,11 @@ public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
 
+    [Header("Currency UI Refernce")]
     public TextMeshProUGUI SolValue;
     public TextMeshProUGUI RRValue;
+    public GameObject SolLoader;
+    public GameObject RRLoader;
 
     public GameObject inventoryCellBosster, inventoryCellCurrency;
     public Transform speedContainer;
@@ -68,7 +71,8 @@ public class InventoryManager : MonoBehaviour
             Instance = this;
         }
         CollectionID = StaticDataBank.GetCollectionId(0);
-        InvokeRepeating(nameof(GetSolValue), 1f, 30f);
+        ResetCurrencyValues();
+        InvokeRepeating(nameof(GetSolValue), 0.1f, 30f);
     }
     //bool dataFetchCompleted = false;
     public void ClearDataToUpdate()
@@ -269,8 +273,8 @@ public class InventoryManager : MonoBehaviour
     public void ShowDetailsPanel(int dataindex)
     {
         bool isListed = m_data[0].data[dataindex].item.escrow.Value;
-        ListButtonText.text = isListed ? "UnList" : "List";
-        ConfirmText.text = "Are you Sure You want to " + ListButtonText.text + " On Marketplace";
+        ListButtonText.text = isListed ? "unlist" : "list";
+        ConfirmText.text = "Are you sure you want to " + ListButtonText.text + " on marketplace?";
         currentItemIndexToList = dataindex;
         Description.text = m_data[0].data[dataindex].item.description;
         //BoosterName.text = m_data[pageNumber].data[dataindex].item.name;
@@ -335,7 +339,7 @@ public class InventoryManager : MonoBehaviour
         Debug.Log("Assett Id : " + assetId);
         if (m_data[0].data[currentItemIndexToList].item.escrow.Value)
         {
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Unlisting Asset");
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Unlisting asset");
             API_Manager.Instance.UnListOnSale(assetId, (success, message) => {
                 if (success)
                 {
@@ -354,7 +358,7 @@ public class InventoryManager : MonoBehaviour
                     GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
                     {
                         titleString = "Error",
-                        contentString = message,
+                        contentString = "Oops! Something went wrong on our end. Please try again later.",
                         firstButtonString = "OK",
                         firstButtonCallBack = null
                     });
@@ -375,7 +379,7 @@ public class InventoryManager : MonoBehaviour
             try
             {
 
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Listing Asset");
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Listing asset");
                 API_Manager.Instance.ListOnSale(assetId, _amount, (success, message) =>
                 {
                     if (success)
@@ -396,7 +400,7 @@ public class InventoryManager : MonoBehaviour
                         GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
                         {
                             titleString = "Error",
-                            contentString = message,
+                            contentString = "Oops! Something went wrong on our end. Please try again later.",
                             firstButtonString = "OK",
                             firstButtonCallBack = null
                         });
@@ -425,6 +429,13 @@ public class InventoryManager : MonoBehaviour
     {
         RRValue.text = "" + solValue;
     }
+    public void ResetCurrencyValues()
+    {
+        SetSolValue("");
+        SetRRValue("");
+        SolLoader.SetActive(true);
+        RRLoader.SetActive(true);
+    }
     public void GetSolValue()
     {
         Debug.Log("Repeating");
@@ -436,10 +447,12 @@ public class InventoryManager : MonoBehaviour
                 {
                     if (_data.data[i].item.id == "SOL")
                     {
+                        SolLoader.SetActive(false);
                         SetSolValue(_data.data[i].quantity);
                     }
-                    if (_data.data[i].item.id == "97653f2a-d058-47bd-9f0f-ff6c254c88f3")
+                    else if (_data.data[i].item.id == "97653f2a-d058-47bd-9f0f-ff6c254c88f3")
                     {
+                        RRLoader.SetActive(false);
                         SetRRValue(_data.data[i].quantity);
                     }
                 }
