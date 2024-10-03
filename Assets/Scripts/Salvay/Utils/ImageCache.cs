@@ -13,10 +13,7 @@ public class ImageCache : MonoBehaviour
     {
         StartCoroutine(LoadImage(imageUrl, _name, onComplete));
     }
-
-
-
-
+    
     // Check if the image is available locally, otherwise download it
     public IEnumerator LoadImage(string url, string imageName, Action<Texture2D> _onComplete)
     {
