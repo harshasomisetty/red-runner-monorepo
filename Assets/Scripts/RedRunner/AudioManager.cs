@@ -62,12 +62,14 @@ namespace RedRunner
 		protected AudioClip m_MaceSlamSound;
 		[SerializeField]
 		protected AudioClip m_ButtonClickSound;
+		[SerializeField]
+		protected AudioClip m_InputTypeSound;
 
-		#endregion
+        #endregion
 
-		#region MonoBehaviour Messages
+        #region MonoBehaviour Messages
 
-		void Awake ()
+        void Awake ()
 		{
 			m_Singleton = this;
 			PlayMusic ();
@@ -94,7 +96,11 @@ namespace RedRunner
 			audio.Play ();
 		}
 
-		public void PlayChestSound (Vector3 position)
+        public void PlayTypingSound()
+        {
+            PlaySoundOn(m_UIAudioSource, m_InputTypeSound);
+        }
+        public void PlayChestSound (Vector3 position)
 		{
 			PlaySoundOn (m_CoinAudioSource, m_ChestSound);
 		}

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace RedRunner.UI
@@ -18,10 +19,19 @@ namespace RedRunner.UI
         {
             ResetButton.SetButtonAction(() =>
             {
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 GameManager.Singleton.Reset();
-                var ingameScreen = UIManager.Singleton.GetUIScreen(UIScreenInfo.IN_GAME_SCREEN);
-                UIManager.Singleton.OpenScreen(ingameScreen);
+                var ingameScreen = GameTemplateUIManager.Singleton.GetUIScreen(UIScreenInfo.IN_GAME_SCREEN);
+                GameTemplateUIManager.Singleton.OpenScreen(ingameScreen);
                 GameManager.Singleton.StartGame();
+                Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
+            });
+            HomeButton.SetButtonAction(() => 
+            {
+                //GameManager.Singleton.Reset();
+                //GameManager.Singleton.Init();
+                Time.timeScale = 1f;
+                Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
             });
         }
 

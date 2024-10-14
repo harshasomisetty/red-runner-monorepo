@@ -13,28 +13,35 @@ namespace RedRunner.UI
 
 		protected bool m_Collected = false;
 
-		protected override void Awake ()
+		protected override void Awake()
 		{
 			GameManager.OnScoreChanged += GameManager_OnScoreChanged;
 			GameManager.OnReset += GameManager_OnReset;
-			base.Awake ();
+			base.Awake();
 		}
 
-		void GameManager_OnReset ()
+		void GameManager_OnReset()
 		{
 			m_Collected = false;
 		}
 
-		void GameManager_OnScoreChanged ( float newScore, float highScore, float lastScore )
+		void GameManager_OnScoreChanged(float newScore, float highScore, float lastScore)
 		{
-			text = newScore.ToLength ();
-			if ( newScore > highScore && !m_Collected )
+			if (text != null)
+			{
+				text = newScore.ToLength();
+			}
+			if (newScore > highScore && !m_Collected)
 			{
 				m_Collected = true;
-				GetComponent<Animator> ().SetTrigger ( "Collect" );
+				GetComponent<Animator>().SetTrigger("Collect");
 			}
 		}
-
-	}
+        protected override void OnDisable()
+        {
+            GameManager.OnScoreChanged -= GameManager_OnScoreChanged;
+            GameManager.OnReset -= GameManager_OnReset;
+        }
+    }
 
 }

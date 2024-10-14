@@ -357,6 +357,11 @@ namespace RedRunner.TerrainGeneration
 			return blocks [ blocks.Length - 1 ];
 		}
 
-	}
+        private void OnDisable()
+        {
+            GameManager.OnReset -= Reset;
+        }
+
+    }
 
 }
