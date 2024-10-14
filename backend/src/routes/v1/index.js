@@ -11,7 +11,7 @@ const config = require('../../config/config');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Red Runner API routes', status: 'OK' });
+  res.json({ message: 'Welcome to the Red Runner API routes. Monorepo', status: 'OK' });
 });
 
 const defaultRoutes = [
