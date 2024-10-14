@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "apis": [
+    {
+      "identifier": "gameshift",
+      "source": "@gameshift/v3#2dnpt1blyow0g70",
+      "integrity": "sha512-mN7W0spHvaWDk+m2ObcDoYEAjgSiHoUreln7gDT7n+JbfMPfLdiwM3yoCf1e6Pnlu6IYMm1m+7FUuIZx+FEYxA==",
+      "installerVersion": "6.1.2"
+    }
+  ]
+}

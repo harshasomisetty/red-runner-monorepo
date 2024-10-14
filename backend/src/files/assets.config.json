@@ -1,0 +1,348 @@
+{
+  "boosters": {
+    "speed_boosters": {
+      "speed_booster_3": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "3"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "speed_booster_3"
+          }
+        ],
+        "collectionId": "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14",
+        "description": "A surge of adrenaline, a rush of speed",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/speed-booster.png",
+        "name": "Nitro Rush",
+        "price": {
+          "SOL": "0.1",
+          "USDC": "1",
+          "DUMMY": "0.1"
+        }
+      },
+      "speed_booster_6": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "6"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "speed_booster_6"
+          }
+        ],
+        "collectionId": "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14",
+        "description": "A surge of adrenaline, a rush of speed",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/speed-booster.png",
+        "name": "Nitro Rush",
+        "price": {
+          "SOL": "0.2",
+          "USDC": "15",
+          "DUMMY": "0.1"
+        }
+      },
+      "speed_booster_10": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "10"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "speed_booster_10"
+          }
+        ],
+        "collectionId": "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14",
+        "description": "A surge of adrenaline, a rush of speed",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/speed-booster.png",
+        "name": "Nitro Rush",
+        "price": {
+          "SOL": "0.3",
+          "USDC": "25",
+          "DUMMY": "0.1"
+        }
+      },
+      "speed_booster_999": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "999"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "speed_booster_999"
+          }
+        ],
+        "collectionId": "0dfe473e-bbb7-453f-8d3f-ba9af79dfc14",
+        "description": "A surge of adrenaline, a rush of speed",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/speed-booster.png",
+        "name": "Nitro Rush",
+        "price": {
+          "SOL": "0.5",
+          "USDC": "50",
+          "DUMMY": "0.1"
+        }
+      }
+    },
+    "double_jump_boosters": {
+      "double_jump_3": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "3"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "double_jump_3"
+          }
+        ],
+        "collectionId": "0b9d2116-b3a2-4452-affb-03282313ab77",
+        "description": "Defy gravity and soar above the competition with this powerful double jump boost",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/double-jump.png",
+        "name": "Dual leap",
+        "price": {
+          "SOL": "0.1",
+          "USDC": "10",
+          "DUMMY": "0.1"
+        }
+      },
+      "double_jump_6": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "6"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "double_jump_6"
+          }
+        ],
+        "collectionId": "0b9d2116-b3a2-4452-affb-03282313ab77",
+        "description": "Defy gravity and soar above the competition with this powerful double jump boost",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/double-jump.png",
+        "name": "Dual leap",
+        "price": {
+          "SOL": "0.2",
+          "USDC": "15",
+          "DUMMY": "0.1"
+        }
+      },
+      "double_jump_10": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "10"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "double_jump_10"
+          }
+        ],
+        "collectionId": "0b9d2116-b3a2-4452-affb-03282313ab77",
+        "description": "Defy gravity and soar above the competition with this powerful double jump boost",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/double-jump.png",
+        "name": "Dual leap",
+        "price": {
+          "SOL": "0.3",
+          "USDC": "20",
+          "DUMMY": "0.1"
+        }
+      },
+      "double_jump_999": {
+        "attributes": [
+          {
+            "traitType": "UsesLeft",
+            "value": "999"
+          },
+          {
+            "traitType": "ItemId",
+            "value": "double_jump_999"
+          }
+        ],
+        "collectionId": "0b9d2116-b3a2-4452-affb-03282313ab77",
+        "description": "Defy gravity and soar above the competition with this powerful double jump boost",
+        "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/double-jump.png",
+        "name": "Dual leap",
+        "price": {
+          "SOL": "0.5",
+          "USDC": "30",
+          "DUMMY": "0.1"
+        }
+      }
+    }
+  },
+  "skins": {
+    "alienSkin": {
+      "attributes": [
+        {
+          "traitType": "SkinId",
+          "value": "alienSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "Unlock the secrets of alien locomotion with this powerful skin",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/alienSkin.png",
+      "name": "Alien Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "15",
+        "DUMMY": "0.1"
+      }
+    },
+    "robotSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "robotSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "Crafted from cold steel and warm imagination, this robotic skin is a unique and unforgettable piece.",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/robotSkin.png",
+      "name": "Robot Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "16",
+        "DUMMY": "0.1"
+      }
+    },
+    "christmasSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "christmasSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": " timeless holiday classic, this skin brings the spirit of Christmas to life",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/christmasSkin.png",
+      "name": "Christmas Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "11",
+        "DUMMY": "0.1"
+      }
+    },
+    "halloweenSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "halloweenSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "Trick or treat yourself to this frightful yet fun Halloween skin",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/halloweenSkin.png",
+      "name": "Halloween Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "20",
+        "DUMMY": "0.1"
+      }
+    },
+    "polkaDotSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "polkaDotSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "Relive the retro era with this classic and timeless polka dot pattern",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/polkaDotSkin.png",
+      "name": "Polka Dot Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "20",
+        "DUMMY": "0.1"
+      }
+    },
+    "solanaSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "solanaSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "A digital masterpiece inspired by the Solana ecosystem",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/solanaSkin.png",
+      "name": "Gameshift Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "24",
+        "DUMMY": "0.1"
+      }
+    },
+    "spaceSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "spaceSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "A testament to human ingenuity, this space skin blends technology and imagination",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/spaceSkin.png",
+      "name": "Space Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "22",
+        "DUMMY": "0.1"
+      }
+    },
+    "thiefSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "thiefSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "A thrill-seeker and a risk-taker, this thief skin is always ready for action",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/thiefSkin.png",
+      "name": "Thief Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "26",
+        "DUMMY": "0.1"
+      }
+    },
+    "wrestlerSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "wrestlerSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "Exude confidence and charisma with this powerful and imposing skin",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/wrestlerSkin.png",
+      "name": "Wrestler Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "19",
+        "DUMMY": "0.1"
+      }
+    },
+    "zombieSkin": {
+      "attributes": [
+        {
+          "traitType": "ItemId",
+          "value": "zombieSkin"
+        }
+      ],
+      "collectionId": "36399a18-941c-4c18-bb0d-8cc2aaaa8b06",
+      "description": "Uncover the secrets of the undead with this eerie and alluring skin",
+      "imageUrl": "https://buckets.clvtechnologies.com/solana-gameshift/collections/thumbs/zombieSkin.png",
+      "name": "Zombie Skin",
+      "price": {
+        "SOL": "0.1",
+        "USDC": "25",
+        "DUMMY": "0.1"
+      }
+    }
+  }
+}
