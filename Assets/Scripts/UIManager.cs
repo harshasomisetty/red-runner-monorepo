@@ -36,7 +36,7 @@ public class UIManager : MonoBehaviour
         if (State)
         {
             ResetParentButtons();
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!");
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading shop data!");
             ShopManager.Instance.FetchShopData();
         }
         else
@@ -52,6 +52,17 @@ public class UIManager : MonoBehaviour
             }
             ShopHeaderBar.SetActive(false);
             FeatureScreenBackButton.SetActive(false);
+        }
+    }
+    public bool GetActiveScreenState(int index)
+    {
+        if (index == CurrentSelectedFeatureButton)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
     void ResetParentButtons()
@@ -142,7 +153,7 @@ public class UIManager : MonoBehaviour
             else if (LoadShopFromOtherFeature)
             {
                 InventoryManager.Instance.paginationController.SetPagesOff();
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Shop Data!");
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading shop data!");
                 ShopManager.Instance.FetchShopData();
                 LaunchFeatureWindow(i);
             }
@@ -198,7 +209,7 @@ public class UIManager : MonoBehaviour
     public void ActivateFailureScreen(string Key)
     {
         GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
-        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Failed To Load " + Key + " Data!", 3);
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Failed to load " + Key + " data!", 3);
     }
     #endregion
     #region ShopVerticals
@@ -302,7 +313,7 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            ActivateFailureScreen("Inventory");
+            ActivateFailureScreen("inventory");
         }
     }
     public void OnClickInventoryVerticalButton(int i)
@@ -316,7 +327,7 @@ public class UIManager : MonoBehaviour
             CurrentSelectedInventoryVertical = i;
             UpdateButtonAppearance(InventoryCategoryButtons, CurrentSelectedInventoryVertical, 45, 35, delegate {
                 _sequenceCall = false;
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Inventory Data!");
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading inventory data!");
                 InventoryManager.Instance.paginationController = paginationController;
                 InventoryManager.Instance.FetchInventoryData(StaticDataBank.GetCollectionId(i));
             });
@@ -414,7 +425,7 @@ public class UIManager : MonoBehaviour
         {
             CurrentSelectedMarketplaceVertical = i;
             UpdateButtonAppearance(MarketplaceCategoryButtons, CurrentSelectedMarketplaceVertical, 45, 35, delegate {
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading Marketplace Data!");
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Loading marketplace data!");
                 MarketPlaceManager.Instance.FetchMarketPlaceData(StaticDataBank.GetCollectionId(CurrentSelectedMarketplaceVertical));
             });
 

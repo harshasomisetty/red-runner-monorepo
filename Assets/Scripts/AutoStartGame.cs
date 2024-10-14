@@ -5,12 +5,12 @@ using UnityEngine;
 
 public class AutoStartGame : MonoBehaviour
 {
-    float TimeToShowUI = 1.8f;
+    float TimeToShowUI = 0.5f;
     public CanvasGroup[] UIGroups; 
     private void Start()
     {
-        StartGame();
         Invoke("DisableUITransperancy", TimeToShowUI);
+        StartGame();
     }
     public void StartGame()
     {

@@ -17,6 +17,7 @@ public class LeaderboardCell : MonoBehaviour
         if (ranknum < 3)
         {
             userRank.sprite = ranksprite[ranknum];
+            userRank.enabled = true;
             userName.text = name;
             rank.gameObject.SetActive(false);
             userGift.sprite = getgift[ranknum];

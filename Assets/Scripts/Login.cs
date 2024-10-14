@@ -18,8 +18,9 @@ public class Login : MonoBehaviour, SocketEventListener
     public TextMeshProUGUI PopUpMessage;
     public GameObject LoginPanel;
     public UIButton OkButton;
+    public Toggle AcceptConditions;
     public TextMeshProUGUI SignUpSuccessButtonText;
-
+    public Texture2D m_CursorDefaultTexture;
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public class Login : MonoBehaviour, SocketEventListener
         {
             TogglePopUpPanel(false, "");
         });
+        Cursor.SetCursor(m_CursorDefaultTexture, Vector2.zero, CursorMode.Auto);
     }
 
     private void Start()
@@ -39,6 +41,11 @@ public class Login : MonoBehaviour, SocketEventListener
 
     public void UserLogInFirebase()
     {
+        //if (!AcceptConditions.isOn)
+        //{
+        //    GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Please Accept All Terms", 1);
+        //    return;
+        //}
         if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
             email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
             email.text.Contains("@", System.StringComparison.OrdinalIgnoreCase) &&
@@ -49,12 +56,17 @@ public class Login : MonoBehaviour, SocketEventListener
         }
         else
         {
-            TogglePopUpPanel(true, "email or password is incorrect");
+            TogglePopUpPanel(true, "Email or password is incorrect");
             Debug.Log("email or password is incorrect");
         }
     }
     public void UserSignUpFirebase()
     {
+        if (!AcceptConditions.isOn)
+        {
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Please accept all the terms and conditions", 1);
+            return;
+        }
         if (StaticDataBank.CheckInputField(email.text) && StaticDataBank.CheckInputField(Password.text) &&
             email.text.Contains(".", System.StringComparison.OrdinalIgnoreCase) &&
             email.text.Contains("@", System.StringComparison.OrdinalIgnoreCase) &&
@@ -70,6 +82,11 @@ public class Login : MonoBehaviour, SocketEventListener
     }
     public void SignInWithGoogle()
     {
+        if (!AcceptConditions.isOn)
+        {
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Please accept all the terms and conditions", 1);
+            return;
+        }
         ToggleDataLoadingWindow(true);
         API_Manager.Instance.SignInWithGoogle(OnSignInCompleted);
     }
@@ -79,12 +96,12 @@ public class Login : MonoBehaviour, SocketEventListener
         if (success)
         {
             Debug.Log("Sign-Up Successfull: " + message);
-            TogglePopUpPanel(true, "Your account has been created. Click 'PLAY' To Login");
+            TogglePopUpPanel(true, "Your account has been created. Click 'PLAY' to login");
             SwitchOkSignUpButtonToLogin();
         }
         else
         {
-            TogglePopUpPanel(true, "Sign-Up Failed: " + message);
+            TogglePopUpPanel(true, "Sign up failed: " + message);
         }
     }
     void OnSignInCompleted(bool success, string message)
@@ -94,12 +111,12 @@ public class Login : MonoBehaviour, SocketEventListener
         {
             SocketController.Instance.ConnectSocketWithUserId(StaticDataBank.playerlocalid);
 
-            Debug.Log("Sign In Success: " + message);
+            Debug.Log("Sign in success: " + message);
             Loader.Instance.LoadScene(Loader.SceneToLoad.Menu);
         }
         else
         {
-            TogglePopUpPanel(true, "Login Failed: " + message);
+            TogglePopUpPanel(true, "Login failed: " + message);
         }
     }
 
@@ -115,7 +132,7 @@ public class Login : MonoBehaviour, SocketEventListener
         LoginPanel.SetActive(!state);
 
         if (state)
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Logging In...");
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Logging in...");
         else
             GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
     }
@@ -137,15 +154,16 @@ public class Login : MonoBehaviour, SocketEventListener
 
     public void OnQRCodeLoginButtonClicked()
     {
+        GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Generating QR");
         QRSocketController.Instance.InitiateQRCodeLogin();
         QRCodePanel.SetActive(true);
     }
-
+    
     private void SetQRCodeImage(string qrCodeDataUrl)
     {
         if (QRCodeImage == null)
         {
-            Debug.LogError("QRCodeImage is not assigned in the Login script.");
+            Debug.Log("QRCodeImage is not assigned in the Login script.");
             return;
         }
 
@@ -163,6 +181,7 @@ public class Login : MonoBehaviour, SocketEventListener
 
         // Set the sprite to the Image component
         QRCodeImage.sprite = sprite;
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
     }
 
     private void HandleQRCodeLoginComplete(string payload)
@@ -196,12 +215,14 @@ public class Login : MonoBehaviour, SocketEventListener
             StaticDataBank.jwttoken = jwtToken;
 
             QRCodePanel.SetActive(false);
-            OnSignInCompleted(true, "Login Success");
+            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+            OnSignInCompleted(true, "Login success");
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
-            Debug.LogError("Error parsing QR login payload: " + e.Message);
-            OnSignInCompleted(false, "Login Failed: Error processing login data");
+            Debug.Log("Error parsing QR login payload: " + e.Message);
+            GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+            OnSignInCompleted(false, "Login failed: Error processing login data");
         }
     }
 
@@ -212,6 +233,7 @@ public class Login : MonoBehaviour, SocketEventListener
         {
             case SocketEventsType.qrScanned:
                 Debug.Log("QR Code scanned");
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Log in with QR");
                 break;
             // Handle other non-QR related events here
             default:
@@ -220,6 +242,11 @@ public class Login : MonoBehaviour, SocketEventListener
         }
     }
 
+    public void QRPopupClose()
+    {
+        GlobalCanvasManager.Instance.LoadingPanel.HidePopup();
+        QRCodePanel.SetActive(false);
+    }
     public void RemoveListener()
     {
         SocketController.Instance.RemoveListener(this);
