@@ -8,13 +8,18 @@ using BayatGames.SaveGameFree;
 using BayatGames.SaveGameFree.Serializers;
 
 using RedRunner.Characters;
-using RedRunner.Collectables;
 using RedRunner.TerrainGeneration;
+using RedRunner.Utilities;
+using TMPro;
+using System.Text.RegularExpressions;
+using RedRunner.UI;
 
 namespace RedRunner
 {
     public sealed class GameManager : MonoBehaviour
     {
+        private const float ScoreForSkinUnlock = 20;
+        private const string PrefsKeySkinUnlock = "SkinUnlock";
         public delegate void AudioEnabledHandler(bool active);
 
         public delegate void ScoreHandler(float newScore, float highScore, float lastScore);
@@ -34,7 +39,7 @@ namespace RedRunner
                 return m_Singleton;
             }
         }
-
+        private int CoinsCollectedForPushing = 0;
         [SerializeField]
         private Character m_MainCharacter;
         [SerializeField]
@@ -58,6 +63,24 @@ namespace RedRunner
         /// </summary>
         public Property<int> m_Coin = new Property<int>(0);
 
+        //Jump Boosters//
+        [Header("Jump Booster")]
+        public int NumberOfJumpBoosters = 0;
+        public bool IsJumpBoosterActive = false;
+        public UIButton JumpBoosterButton;
+        public TextMeshProUGUI JumpBoosterCountText;
+        int JumpBoostersStartValue = 0;
+        bool FoundJumpBoosters = false;
+        [Header("Speed Booster")]
+        public int NumberOfSpeedBoosters = 0;
+        public bool IsSpeedBoosterActive = false;
+        public UIButton SpeedBoosterButton;
+        public TextMeshProUGUI SpeedBoosterCountText;
+        int SpeedBoostersStartValue = 0;
+        bool FoundSpeedBoosters = false;
+
+        [Header("Cursor handler")]
+        public CursorVisibilityHandler _cursorVisibilityHandler;
 
         #region Getters
         public bool gameStarted
@@ -87,13 +110,13 @@ namespace RedRunner
 
         void Awake()
         {
-            if (m_Singleton != null)
+            if (m_Singleton == null)
             {
-                Destroy(gameObject);
-                return;
+                m_Singleton = this;
+                //Destroy(gameObject);
+                //return;
             }
             SaveGame.Serializer = new SaveGameBinarySerializer();
-            m_Singleton = this;
             m_Score = 0f;
 
             if (SaveGame.Exists("coin"))
@@ -128,7 +151,13 @@ namespace RedRunner
             {
                 m_HighScore = 0f;
             }
+            string SkinEquipped = PlayerPrefs.GetString("SkinEquipped", "Default");
+            ChangeSkinWithIndex(SkinEquipped);
+        }
 
+        public void ChangeSkinWithIndex(string _SkinEquipped)
+        {
+            m_MainCharacter.Skeleton.ChangeCharacterSkin(_SkinEquipped, CharacterSkins);
         }
 
         void UpdateDeathEvent(bool isDead)
@@ -154,25 +183,52 @@ namespace RedRunner
             {
                 OnScoreChanged(m_Score, m_HighScore, m_LastScore);
             }
-
+            Debug.Log("Score Submit" + m_Score);
+            CallToServerOnGameEnd(m_Score);
             yield return new WaitForSecondsRealtime(1.5f);
 
             EndGame();
-            var endScreen = UIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.END_SCREEN);
-            UIManager.Singleton.OpenScreen(endScreen);
+            SendTokensToServer();
+            if (FoundJumpBoosters)
+            {
+                if (JumpBoostersStartValue > NumberOfJumpBoosters)
+                {
+                    GlobalFeaturesManager.Instance.UpdateJumpBoosterValue(NumberOfJumpBoosters);
+                }
+            }
+            if (FoundSpeedBoosters)
+            {
+                if (SpeedBoostersStartValue > NumberOfSpeedBoosters)
+                {
+                    GlobalFeaturesManager.Instance.UpdateSpeedBoosterValue(NumberOfSpeedBoosters);
+                }
+            }
+            var endScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.END_SCREEN);
+            GameTemplateUIManager.Singleton.OpenScreen(endScreen);
         }
+        public static int ExtractInteger(string s)
+        {
+            Match match = Regex.Match(s, @"\d+");
 
+            if (match.Success)
+            {
+                return int.Parse(match.Value);
+            }
+
+            throw new InvalidOperationException("No integer found in the string.");
+        }
         private void Start()
         {
             m_MainCharacter.IsDead.AddEventAndFire(UpdateDeathEvent, this);
             m_StartScoreX = m_MainCharacter.transform.position.x;
             Init();
+            FetchBoosters();
         }
 
         public void Init()
         {
             EndGame();
-            UIManager.Singleton.Init();
+            //UIManager.Singleton.Init();
             StartCoroutine(Load());
         }
 
@@ -186,16 +242,38 @@ namespace RedRunner
                     if (OnScoreChanged != null)
                     {
                         OnScoreChanged(m_Score, m_HighScore, m_LastScore);
+                        CheckSkinUnlock(m_Score);
                     }
+                }
+            }
+        }
+
+        private void CheckSkinUnlock(float score)
+        {
+            if(!PlayerPrefs.HasKey(PrefsKeySkinUnlock))
+            {
+                if (score.ToScore() >= ScoreForSkinUnlock)
+                {
+                    PlayerPrefs.SetInt(PrefsKeySkinUnlock,1);
+                    
+                    API_Manager.Instance.MintNft("wrestlerSkin", (success, message) =>
+                    {
+                        if (success)
+                        {
+                            Debug.Log("Skin Unlocked");
+                            
+                            GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Congrats! Received New Skin");
+                        }
+                    });
                 }
             }
         }
 
         IEnumerator Load()
         {
-            var startScreen = UIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.START_SCREEN);
+            var startScreen = GameTemplateUIManager.Singleton.UISCREENS.Find(el => el.ScreenInfo == UIScreenInfo.START_SCREEN);
             yield return new WaitForSecondsRealtime(3f);
-            UIManager.Singleton.OpenScreen(startScreen);
+           // UIManager.Singleton.OpenScreen(startScreen);
         }
 
         void OnApplicationQuit()
@@ -233,6 +311,7 @@ namespace RedRunner
         {
             m_GameStarted = true;
             ResumeGame();
+            ReactivateJumpBoosterIfAvailable();
         }
 
         public void StopGame()
@@ -257,11 +336,7 @@ namespace RedRunner
         {
             RespawnCharacter(m_MainCharacter);
         }
-        public void ActivateBooster()
-        {
-			Debug.Log("m_boosterActive");
-            m_MainCharacter.BoosterAcitve = true;
-        }
+
 
         public void RespawnCharacter(Character character)
         {
@@ -275,6 +350,98 @@ namespace RedRunner
                 character.Reset();
             }
         }
+
+        //BOOSTER METHODS//
+        void FetchBoosters()
+        {
+            if (PlayerPrefs.GetInt("SpeedBoostersEquipped") != 0)
+            {
+                FoundSpeedBoosters = true;
+            }
+            if (PlayerPrefs.GetInt("JumpBoostersEquipped") != 0)
+            {
+                FoundJumpBoosters = true;
+            }
+            if (FoundSpeedBoosters)
+            {
+                NumberOfSpeedBoosters = GlobalFeaturesManager.Instance.GetSpeedBoosterUses();
+                SpeedBoostersStartValue = NumberOfSpeedBoosters;
+                UpdateSpeedBoosterCount();
+            }
+            else
+            {
+                KillSpeedBoosters();
+            }
+            if (FoundJumpBoosters)
+            {
+                NumberOfJumpBoosters = GlobalFeaturesManager.Instance.GetJumpBoosterUses();
+                JumpBoostersStartValue = NumberOfJumpBoosters;
+                UpdateJumpBoosterCount();
+            }
+            else
+            {
+                KillJumpBoosters();
+            }
+        }
+        void KillSpeedBoosters()
+        {
+            SpeedBoosterButton.gameObject.SetActive(false);
+        }
+        void KillJumpBoosters()
+        {
+            JumpBoosterButton.gameObject.SetActive(false);
+        }
+        //BOOSTER START//
+        public void ConsumeJumpBooster()
+        {
+            if (NumberOfJumpBoosters > 0)
+            {
+                NumberOfJumpBoosters--;
+                UpdateJumpBoosterCount();
+                JumpBoosterButton.interactable = false;
+                IsJumpBoosterActive = true;
+            }
+        }
+        void UpdateJumpBoosterCount()
+        {
+            JumpBoosterCountText.text = NumberOfJumpBoosters.ToString();
+        }
+        public void ReactivateJumpBoosterIfAvailable()
+        {
+            if (NumberOfJumpBoosters > 0)
+            {
+                JumpBoosterButton.interactable = true;
+            }
+        }
+   
+        public void ConsumeSpeedBooster()
+        {
+            if (NumberOfSpeedBoosters > 0)
+            {
+                NumberOfSpeedBoosters--;
+                UpdateSpeedBoosterCount();
+                SpeedBoosterButton.interactable = false;
+                IsSpeedBoosterActive = true;
+            }
+        }
+        void UpdateSpeedBoosterCount()
+        {
+            SpeedBoosterCountText.text = NumberOfSpeedBoosters.ToString();
+        }
+
+        public void ReactivateSpeedBoosterIfAvailable()
+        {
+            if (NumberOfSpeedBoosters > 0)
+            {
+                SpeedBoosterButton.interactable = true;
+            }
+        }
+
+        public void SpeedBoosterNotAllowed()
+        {
+            SpeedBoosterButton.interactable = false;
+        }
+        //BOOSTERS METHOD END//
 
         public void Reset()
         {
@@ -304,6 +471,27 @@ namespace RedRunner
         {
             Application.OpenURL(string.Format(url, m_ShareText, m_ShareUrl));
         }
+        public void CallToServerOnGameEnd(float m_Score)
+        {
+            int myscore = ExtractInteger(m_Score.ToLength());
+            API_Manager.Instance.Score_Submit(myscore, (success, message) => {
+                if (success)
+                {
+                    Debug.Log("Score Submited");
+                }
+            });
+        }
+
+        public void SendTokensToServer()
+        {
+            GlobalFeaturesManager.Instance.SetTokensToPushQty(CoinsCollectedForPushing);
+        }
+
+        public void IncrementCollectibleTokens()
+        {
+            CoinsCollectedForPushing++;
+        }
+        
 
         [System.Serializable]
         public class LoadEvent : UnityEvent

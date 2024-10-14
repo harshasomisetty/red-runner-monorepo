@@ -19,9 +19,15 @@ namespace RedRunner.UI
 
 		void GameManager_OnScoreChanged ( float newScore, float highScore, float lastScore )
 		{
+			if(text!=null)
 			text = highScore.ToLength ();
 		}
 
-	}
+        protected override void OnDisable()
+        {
+            GameManager.OnScoreChanged -= GameManager_OnScoreChanged;
+        }
+
+    }
 
 }

@@ -29,7 +29,14 @@ namespace RedRunner.UI
 		{
 			image.sprite = active ? m_DefaultSprite : m_DisabledSoundSprite;
 		}
-
-	}
+        protected override void OnDestroy()
+        {
+            GameManager.OnAudioEnabled -= GameManager_OnAudioEnabled;
+        }
+        protected override void OnDisable()
+        {
+            GameManager.OnAudioEnabled -= GameManager_OnAudioEnabled;
+        }
+    }
 
 }

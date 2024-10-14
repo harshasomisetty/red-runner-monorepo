@@ -74,6 +74,8 @@ namespace RedRunner.Characters
 		protected bool m_Guard = false;
 		protected bool m_Block = false;
 		protected bool m_boosterActive = false;
+		protected bool m_Jump = false;
+		public int maxJumps = 2;
         protected Vector2 m_Speed = Vector2.zero;
 		protected float m_CurrentRunSpeed = 0f;
 		protected float m_CurrentSmoothVelocity = 0f;
@@ -82,12 +84,12 @@ namespace RedRunner.Characters
 		protected Vector3 m_InitialScale;
 		protected Vector3 m_InitialPosition;
 		protected float m_previousHorizontalInput = 0;
+		protected float min_speed_needed_for_booster = 3f;
+        #endregion
 
-		#endregion
+        #region Properties
 
-		#region Properties
-
-		public override float MaxRunSpeed
+        public override float MaxRunSpeed
 		{
 			get
 			{
@@ -292,19 +294,28 @@ namespace RedRunner.Characters
 		{
 			m_InitialPosition = transform.position;
 			m_InitialScale = transform.localScale;
-			m_GroundCheck.OnGrounded += GroundCheck_OnGrounded;
-			m_Skeleton.OnActiveChanged += Skeleton_OnActiveChanged;
             IsDead = new Property<bool>(false);
 			m_ClosingEye = false;
 			m_Guard = false;
 			m_Block = false;
 			m_CurrentFootstepSoundIndex = 0;
-			GameManager.OnReset += GameManager_OnReset;
-			Skeleton.ChangeCharacterSkin(2, GameManager.Singleton.CharacterSkins);
-
+			
         }
-
-		void Update ()
+        private void Start()
+        {
+            m_GroundCheck.OnGrounded += GroundCheck_OnGrounded;
+            m_Skeleton.OnActiveChanged += Skeleton_OnActiveChanged;
+            GameManager.OnReset += GameManager_OnReset;
+        }
+        bool IsAnyKeyHeld()
+        {
+            // Check if any of the specified keys are being held down
+            return Input.GetKey(KeyCode.D) ||
+                   Input.GetKey(KeyCode.RightArrow) ||
+                   Input.GetKey(KeyCode.A) ||
+                   Input.GetKey(KeyCode.LeftArrow);
+        }
+        void Update ()
 		{
 			if ( !GameManager.Singleton.gameStarted || !GameManager.Singleton.gameRunning )
 			{
@@ -316,22 +327,42 @@ namespace RedRunner.Characters
 				Die ();
 			}
 
-			// Speed
-			m_Speed = new Vector2 ( Mathf.Abs ( m_Rigidbody2D.velocity.x ), Mathf.Abs ( m_Rigidbody2D.velocity.y ) );
+            if (IsAnyKeyHeld() && CrossPlatformInputManager.GetButtonDown("SpeedBooster"))
+            {
+                //Consume speed booster
+				GameManager.Singleton.ConsumeSpeedBooster ();
+            }
+            if (CrossPlatformInputManager.GetButtonDown("DoubleJump"))
+            {
+                //Consume Jump Booster
+				GameManager.Singleton.ConsumeJumpBooster ();
+            }
+
+            // Speed
+            m_Speed = new Vector2 ( Mathf.Abs ( m_Rigidbody2D.velocity.x ), Mathf.Abs ( m_Rigidbody2D.velocity.y ) );
             float horizontalInput = CrossPlatformInputManager.GetAxis("Horizontal");
 
-            
-            m_CurrentRunSpeed = m_boosterActive ? m_boosterspeed : m_RunSpeed;
-            // Speed Calculations
-            //m_CurrentRunSpeed = m_RunSpeed;
-            m_previousHorizontalInput = horizontalInput;
+			//ORIGINAL CODE
+			//m_CurrentRunSpeed = m_boosterActive ? m_boosterspeed : m_RunSpeed;
 
-            if ( m_Speed.x >= m_RunSpeed && !BoosterAcitve)
+			m_CurrentRunSpeed = GameManager.Singleton.IsSpeedBoosterActive ? m_boosterspeed : m_RunSpeed;
+			// Speed Calculations
+			//m_CurrentRunSpeed = m_RunSpeed;
+			m_previousHorizontalInput = horizontalInput;
+
+            if ( m_Speed.x >= m_RunSpeed && !GameManager.Singleton.IsSpeedBoosterActive)
 			{
 				m_CurrentRunSpeed = Mathf.SmoothDamp ( m_Speed.x, m_MaxRunSpeed, ref m_CurrentSmoothVelocity, m_RunSmoothTime );
 			}
-
-            if (m_boosterActive)
+			if (m_Speed.x >= min_speed_needed_for_booster && !GameManager.Singleton.IsSpeedBoosterActive)
+			{
+                GameManager.Singleton.ReactivateSpeedBoosterIfAvailable();
+            }
+			else
+			{
+                GameManager.Singleton.SpeedBoosterNotAllowed();
+            }
+            if (GameManager.Singleton.IsSpeedBoosterActive)
             {
                 if (horizontalInput == 0 || Mathf.Sign(horizontalInput) != Mathf.Sign(m_previousHorizontalInput) || CrossPlatformInputManager.GetButtonDown("Jump"))
                 //if ((horizontalInput < 0 && m_previousHorizontalInput > 0) ||
@@ -339,9 +370,22 @@ namespace RedRunner.Characters
                 //CrossPlatformInputManager.GetButtonDown("Jump"))
                 {
                     Debug.Log("Deactivate booster");
-                    m_boosterActive = false;
+                    GameManager.Singleton.IsSpeedBoosterActive = false;
+                    GameManager.Singleton.SpeedBoosterNotAllowed();
                 }
             }
+			//ORIGINAL CODE
+            //if (m_boosterActive)
+            //{
+            //    if (horizontalInput == 0 || Mathf.Sign(horizontalInput) != Mathf.Sign(m_previousHorizontalInput) || CrossPlatformInputManager.GetButtonDown("Jump"))
+            //    //if ((horizontalInput < 0 && m_previousHorizontalInput > 0) ||
+            //    //(horizontalInput > 0 && m_previousHorizontalInput < 0) ||
+            //    //CrossPlatformInputManager.GetButtonDown("Jump"))
+            //    {
+            //        Debug.Log("Deactivate booster");
+            //        m_boosterActive = false;
+            //    }
+            //}
 
             // Input Processing
             Move (horizontalInput);
@@ -353,9 +397,23 @@ namespace RedRunner.Characters
                     {
 						m_numberofjumps = 0;
                     }
-					if (m_numberofjumps++ < 2)
+               
+                    if ((m_numberofjumps++ < maxJumps) && GameManager.Singleton.IsJumpBoosterActive)
 					{
+						Debug.Log("DOUBLE JUMPING");
                         Jump();
+						if (m_numberofjumps == maxJumps)
+						{
+							GameManager.Singleton.IsJumpBoosterActive = false;
+							GameManager.Singleton.ReactivateJumpBoosterIfAvailable();
+                        }
+					}
+                    else
+                    {
+						if (m_GroundCheck.IsGrounded)
+						{
+							Jump();
+						}
 					}
                 }
                 
@@ -582,10 +640,13 @@ namespace RedRunner.Characters
 				AudioManager.Singleton.PlayGroundedSound ( m_JumpAndGroundedAudioSource );
 			}
 		}
+        private void OnDisable()
+        {
+            GameManager.OnReset -= GameManager_OnReset;
+        }
+        #endregion
 
-		#endregion
-
-		[System.Serializable]
+        [System.Serializable]
 		public class CharacterDeadEvent : UnityEvent
 		{
 
