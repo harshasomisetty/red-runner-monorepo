@@ -1,5 +1,15 @@
 import { NextResponse } from 'next/server';
 
+declare global {
+  var sessions: {
+    [key: string]: {
+      connectedWallets: string[];
+      activeWallet: string;
+      timestamp: number;
+    };
+  };
+}
+
 export async function POST(request: Request) {
   const { sessionId, wallet } = await request.json();
 
