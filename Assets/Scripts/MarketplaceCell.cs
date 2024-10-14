@@ -34,4 +34,8 @@ public class MarketplaceCell : MonoBehaviour
     {
         MarketPlaceManager.Instance.ShowConfirmPanel(index);
     }
+    public void SetButtonText(bool GetValue)
+    {
+        ShowPanelButton.GetComponentInChildren<TextMeshProUGUI>().text = GetValue ? "Owned" : "Buy";
+    }
 }

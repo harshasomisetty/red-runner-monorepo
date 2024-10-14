@@ -1,8 +1,8 @@
+using DG.Tweening;
 using RedRunner.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,8 +26,11 @@ public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
 
+    [Header("Currency UI Refernce")]
     public TextMeshProUGUI SolValue;
     public TextMeshProUGUI RRValue;
+    public GameObject SolLoader;
+    public GameObject RRLoader;
 
     public GameObject inventoryCellBosster, inventoryCellCurrency;
     public Transform speedContainer;
@@ -44,6 +47,7 @@ public class InventoryManager : MonoBehaviour
     [Header("Detail Panel UI")]
     public GameObject DetailPanel;
     public GameObject Confirmpanel;
+    public GameObject PricePanel;
     public UIButton ListButton;
     public TextMeshProUGUI ListButtonText;
     public TextMeshProUGUI ConfirmText;
@@ -67,7 +71,8 @@ public class InventoryManager : MonoBehaviour
             Instance = this;
         }
         CollectionID = StaticDataBank.GetCollectionId(0);
-        InvokeRepeating(nameof(GetSolValue), 1f, 30f);
+        ResetCurrencyValues();
+        InvokeRepeating(nameof(GetSolValue), 0.1f, 30f);
     }
     //bool dataFetchCompleted = false;
     public void ClearDataToUpdate()
@@ -88,7 +93,13 @@ public class InventoryManager : MonoBehaviour
         cells.Clear();
         m_data.Clear();
     }
-
+    public void RefreshInventory()
+    {
+        if (UIManager.Instance.GetActiveScreenState(1))
+        {
+            FetchInventoryData(CollectionID, current_page);
+        }
+    }
     public void FetchInventoryData(string collectionId, int PageNumber = 1)
     {
         ClearDataToUpdate();
@@ -168,6 +179,14 @@ public class InventoryManager : MonoBehaviour
             //DataIndex _data = new DataIndex();
             //_data.boosterindex = i;
             //_data.pageNumber = pageNumber;
+            if (data.data[i].item.attributes[0].traitType == "UsesLeft")
+            {
+                int amount = int.Parse(data.data[i].item.attributes[0].value);
+                if(amount <= 0)
+                {
+                    continue;
+                }
+            }
             if (data.data[i].type.Contains("UniqueAsset"))
             {
 
@@ -253,13 +272,14 @@ public class InventoryManager : MonoBehaviour
     int currentItemIndexToList = -1;
     public void ShowDetailsPanel(int dataindex)
     {
-        ListButtonText.text = m_data[0].data[dataindex].item.escrow.Value ? "UnList" : "List";
-        ConfirmText.text = "Are you Sure You want to " + ListButtonText.text + " On Marketplace";
+        bool isListed = m_data[0].data[dataindex].item.escrow.Value;
+        ListButtonText.text = isListed ? "unlist" : "list";
+        ConfirmText.text = "Are you sure you want to " + ListButtonText.text + " on marketplace?";
         currentItemIndexToList = dataindex;
         Description.text = m_data[0].data[dataindex].item.description;
         //BoosterName.text = m_data[pageNumber].data[dataindex].item.name;
         BoosterName.text = StaticDataBank.RemoveWordFromString(m_data[0].data[dataindex].item.name);
-        Debug.Log(m_data[0].data[dataindex].item.status);
+        //Debug.Log(m_data[0].data[dataindex].item.status);
         attribute.text = m_data[0].data[dataindex].item.attributes[0].value;
         if (spriteDictionary.ContainsKey(m_data[0].data[dataindex].item.name))
         {
@@ -268,8 +288,10 @@ public class InventoryManager : MonoBehaviour
         }
         //MintButton.SetActive(false);
         //ListButton.gameObject.SetActive(true);
-        ListButton.interactable = m_data[0].data[dataindex].item.escrow.Value;
-        enteredAmount.interactable = !m_data[0].data[dataindex].item.escrow.Value;
+        ListButton.interactable = isListed;
+        ListButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, isListed ? 70 : 20);
+        PricePanel.SetActive(!isListed);
+        enteredAmount.interactable = !isListed;
         DetailPanel.SetActive(true);
         if (!ListButton.interactable)
             GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Enter Price To list");
@@ -278,6 +300,14 @@ public class InventoryManager : MonoBehaviour
     public DataContainer GetDataOfBoosters(int index)
     {
         DataContainer _data = new DataContainer();
+        if (m_data[0].data[index].item.attributes[0].traitType == "UsesLeft")
+        {
+            int amount = int.Parse(m_data[0].data[index].item.attributes[0].value);
+            if (amount <= 0)
+            {
+                return _data;
+            }
+        }
         _data.boosterValue = m_data[0].data[index].item.attributes[0].value;
         _data.m_sprite = spriteDictionary[m_data[0].data[index].item.name];
         _data.isListed = m_data[0].data[index].item.escrow.Value;
@@ -309,7 +339,7 @@ public class InventoryManager : MonoBehaviour
         Debug.Log("Assett Id : " + assetId);
         if (m_data[0].data[currentItemIndexToList].item.escrow.Value)
         {
-            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Unlisting Asset");
+            GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Unlisting asset");
             API_Manager.Instance.UnListOnSale(assetId, (success, message) => {
                 if (success)
                 {
@@ -328,7 +358,7 @@ public class InventoryManager : MonoBehaviour
                     GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
                     {
                         titleString = "Error",
-                        contentString = message,
+                        contentString = "Oops! Something went wrong on our end. Please try again later.",
                         firstButtonString = "OK",
                         firstButtonCallBack = null
                     });
@@ -349,7 +379,7 @@ public class InventoryManager : MonoBehaviour
             try
             {
 
-                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Listing Asset");
+                GlobalCanvasManager.Instance.LoadingPanel.ShowPopup("Listing asset");
                 API_Manager.Instance.ListOnSale(assetId, _amount, (success, message) =>
                 {
                     if (success)
@@ -370,7 +400,7 @@ public class InventoryManager : MonoBehaviour
                         GlobalCanvasManager.Instance.PopUIHandler.ShowPopup(new PopupData()
                         {
                             titleString = "Error",
-                            contentString = message,
+                            contentString = "Oops! Something went wrong on our end. Please try again later.",
                             firstButtonString = "OK",
                             firstButtonCallBack = null
                         });
@@ -399,6 +429,13 @@ public class InventoryManager : MonoBehaviour
     {
         RRValue.text = "" + solValue;
     }
+    public void ResetCurrencyValues()
+    {
+        SetSolValue("");
+        SetRRValue("");
+        SolLoader.SetActive(true);
+        RRLoader.SetActive(true);
+    }
     public void GetSolValue()
     {
         Debug.Log("Repeating");
@@ -410,10 +447,12 @@ public class InventoryManager : MonoBehaviour
                 {
                     if (_data.data[i].item.id == "SOL")
                     {
+                        SolLoader.SetActive(false);
                         SetSolValue(_data.data[i].quantity);
                     }
-                    if (_data.data[i].item.id == "97653f2a-d058-47bd-9f0f-ff6c254c88f3")
+                    else if (_data.data[i].item.id == "97653f2a-d058-47bd-9f0f-ff6c254c88f3")
                     {
+                        RRLoader.SetActive(false);
                         SetRRValue(_data.data[i].quantity);
                     }
                 }
