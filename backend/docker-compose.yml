@@ -1,0 +1,44 @@
+version: '3.3'  # Define the version to utilize the latest features available in Docker Compose
+services:
+  node-app:
+    image: node:20  # Ensure you're using Node.js 20 for the latest features
+    build:
+      context: .
+      dockerfile: Dockerfile  # Specify the Dockerfile if not named "Dockerfile"
+    environment:
+      MONGODB_URL: mongodb://mongodb:27017
+    ports:
+      - '1111:3000'
+      - '9229:9229'
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/usr/src/node-app
+    networks:
+      - node-network
+    working_dir: /usr/src/node-app  # Ensure this matches your application directory
+    restart: unless-stopped
+  mongodb:
+    build:
+      context: .
+      dockerfile: Dockerfile2  # Use your MongoDB Dockerfile
+    ports:
+      - '27017:27017'
+    container_name: solanabackend-mongodb-1
+    volumes:
+      - dbdata:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro  # Mount the initialization script
+    restart: unless-stopped
+    networks:
+      - node-network
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "omechano"
+      MONGO_INITDB_ROOT_PASSWORD: "34313232#$#!#@#@"
+
+volumes:
+  dbdata:
+
+networks:
+  node-network:
+    driver: bridge
+    external: true
