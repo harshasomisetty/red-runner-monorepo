@@ -15,7 +15,7 @@ async function GetRelativeRank(userId) {
     }
 
     // Find the rank of the user
-    const userRank = await LeaderboardEntry.countDocuments({ score: { $gt: userEntry.score } }) + 1;
+    const userRank = (await LeaderboardEntry.countDocuments({ score: { $gt: userEntry.score } })) + 1;
 
     // Calculate the skip value, ensuring it is non-negative
     const skipValue = Math.max(userRank - 6, 0);
@@ -50,7 +50,6 @@ async function GetRelativeRank(userId) {
   }
 }
 
-
 /**
  * Logout
  * @returns {Promise}
@@ -67,45 +66,39 @@ const AddLeaderboardEntry = async (userId, score) => {
       if (userEntryDocument.score < score) {
         userEntryDocument.score = score;
         await userEntryDocument.save();
-        console.log("Score updated to a higher value.");
+        console.log('Score updated to a higher value.');
       } else {
-        console.log("Existing score is higher or equal, no update made.");
+        console.log('Existing score is higher or equal, no update made.');
       }
 
       return userEntryDocument;
-
     } else {
       // Insert new document if none exists
       const user = await userService.getUserById(userId);
       const leaderboardEntry = new LeaderboardEntry({ userId: userId, score: score, name: user.name });
       await leaderboardEntry.save();
-      console.log("New leaderboard entry inserted.");
-      return leaderboardEntry
+      console.log('New leaderboard entry inserted.');
+      return leaderboardEntry;
     }
-
-
   } catch (error) {
-    console.error("Error updating or inserting leaderboard entry:", error);
+    console.error('Error updating or inserting leaderboard entry:', error);
   }
 };
 
 const GetLeaderboard = async () => {
   try {
     // Find document by user ID
-    const sortedLeaderboard = await LeaderboardEntry.find({})
-      .sort({ score: -1 })
-      .limit(50)
+    const sortedLeaderboard = await LeaderboardEntry.find({}).sort({ score: -1 }).limit(50);
 
     // Convert the sorted leaderboard entries to JSON format
     return JSON.stringify(sortedLeaderboard, null, 2);
-
   } catch (error) {
-    console.error("Error updating or inserting leaderboard entry:", error);
+    console.error('Error updating or inserting leaderboard entry:', error);
   }
 };
 
 module.exports = {
   AddLeaderboardEntry,
   GetLeaderboard,
-  GetRelativeRank
+  GetRelativeRank,
 };

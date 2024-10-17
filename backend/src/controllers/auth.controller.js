@@ -3,7 +3,6 @@ const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, emailService } = require('../services');
 const { verifyFirebaseToken } = require('../services/firebase.service');
 const ApiError = require('../utils/ApiError');
-const { User } = require('../models');
 const gsService = require('../services/gs.service');
 const { v4: uuidv4 } = require('uuid');
 const socketModule = require('../socket/socket.controller');
@@ -20,7 +19,7 @@ const registerOrLogin = catchAsync(async (req, res) => {
     await verifyFirebaseToken(userId, tokenId);
 
     let user;
-    const doesUserExist = await User.isUserExists(userId);
+    const doesUserExist = await userService.doesUserExist(userId);
     if (doesUserExist) {
       user = await userService.getUserById(userId);
     } else {
