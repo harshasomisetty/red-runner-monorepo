@@ -1,26 +1,50 @@
-const httpStatus = require('http-status');
-const { User } = require('../models');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const validator = require('validator');
 const ApiError = require('../utils/ApiError');
-/**
- * Create a user
- * @param {Object} userBody
- * @returns {Promise<User>}
- */
+const gsUtil = require('../utils/gsUtil');
+
 const createUser = async (userBody) => {
-  try {
-    return await User.create(userBody);
-  } catch (e) {
-    throw e;
+  if (!validator.isEmail(userBody.email)) {
+    throw new ApiError(400, 'Invalid email');
   }
+
+  if (!userBody.name) {
+    userBody.name = gsUtil.shortName();
+  }
+
+  return prisma.user.create({ data: userBody });
 };
 
-const DoesUserWithUserExists = async (userId) => {
-  return await User.isUserExists(userId);
+const getUserById = async (id) => {
+  return prisma.user.findUnique({ where: { id } });
+};
+
+const getUserByEmail = async (email) => {
+  return prisma.user.findUnique({ where: { email } });
+};
+
+const updateUserById = async (userId, updateBody) => {
+  return prisma.user.update({
+    where: { id: userId },
+    data: updateBody,
+  });
+};
+
+const deleteUserById = async (userId) => {
+  return prisma.user.delete({ where: { id: userId } });
+};
+
+const doesUserExist = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: { userId: userId },
+  });
+  return !!user;
 };
 
 /**
  * Query for users
- * @param {Object} filter - Mongo filter
+ * @param {Object} filter - Filter conditions
  * @param {Object} options - Query options
  * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
@@ -28,71 +52,45 @@ const DoesUserWithUserExists = async (userId) => {
  * @returns {Promise<QueryResult>}
  */
 const queryUsers = async (filter, options) => {
-  const users = await User.paginate(filter, options);
-  return users;
-};
+  const page = options.page || 1;
+  const limit = options.limit || 10;
+  const sortBy = options.sortBy || 'createdAt:desc';
+  const [field, order] = sortBy.split(':');
 
-/**
- * Get user by id
- * @returns {Promise<User>}
- * @param id
- */
-const getUserById = async (id) => {
-  return User.findOne({ userId: id });
+  const skip = (page - 1) * limit;
+
+  const [users, totalCount] = await Promise.all([
+    prisma.user.findMany({
+      where: filter,
+      take: limit,
+      skip: skip,
+      orderBy: { [field]: order.toLowerCase() },
+    }),
+    prisma.user.count({ where: filter }),
+  ]);
+
+  return {
+    results: users,
+    page,
+    limit,
+    totalPages: Math.ceil(totalCount / limit),
+    totalResults: totalCount,
+  };
 };
 
 const getUserByWallet = async (wallet) => {
-  return User.findOne({ walletId: wallet });
-};
-
-/**
- * Get user by email
- * @param {string} email
- * @returns {Promise<User>}
- */
-const getUserByEmail = async (email) => {
-  return User.findOne({ email });
-};
-
-/**
- * Update user by id
- * @param {ObjectId} userId
- * @param {Object} updateBody
- * @returns {Promise<User>}
- */
-const updateUserById = async (userId, updateBody) => {
-  const user = await getUserById(userId);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-  if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
-  Object.assign(user, updateBody);
-  await user.save();
-  return user;
-};
-
-/**
- * Delete user by id
- * @param {ObjectId} userId
- * @returns {Promise<User>}
- */
-const deleteUserById = async (userId) => {
-  const user = await getUserById(userId);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-  await user.remove();
-  return user;
+  return prisma.user.findUnique({
+    where: { walletId: wallet },
+  });
 };
 
 module.exports = {
   createUser,
-  queryUsers,
   getUserById,
   getUserByEmail,
-  getUserByWallet,
   updateUserById,
   deleteUserById,
+  doesUserExist,
+  queryUsers,
+  getUserByWallet,
 };
