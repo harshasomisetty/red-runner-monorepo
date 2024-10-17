@@ -1,9 +1,9 @@
 const { gsService, shopService } = require('../services');
+const paymentService = require('../services/payment.service');
 const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
 const httpStatus = require('http-status');
 const DataParser = require('../parsers/inventoryData.parser');
-const { Payment } = require('../models');
 const { PaymentStatus } = require('../utils/staticData');
 const gsUtil = require('../utils/gsUtil');
 const staticData = require('../utils/staticData');
@@ -171,16 +171,16 @@ const buyItem = catchAsync(async (req, res) => {
       );
     }
 
-    const paymentModel = new Payment({
+    const paymentData = {
       userId: req.body.userId,
       paymentId: payment.data['id'],
       itemId: req.body.itemId,
       status: PaymentStatus.PENDING,
       consentUrl: payment.data['checkoutUrl'],
       isAutoMinted: req.body.currencyId !== 'USDC', //in the case of USDC the asset is not autominted//
-    });
+    };
 
-    await paymentModel.save();
+    await paymentService.createPayment(paymentData);
     res.status(httpStatus.OK).send(payment.data);
   } catch (e) {
     if (e instanceof ApiError) {

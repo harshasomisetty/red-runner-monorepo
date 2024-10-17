@@ -13,11 +13,31 @@ const createUser = async (userBody) => {
     userBody.name = gsUtil.shortName();
   }
 
+  // Check if user already exists by email or userId
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [{ email: userBody.email }, { userId: userBody.userId }],
+    },
+  });
+
+  if (existingUser) {
+    if (existingUser.email === userBody.email) {
+      throw new ApiError(409, 'Email already in use');
+    }
+    if (existingUser.userId === userBody.userId) {
+      throw new ApiError(409, 'User ID already exists');
+    }
+  }
+
   return prisma.user.create({ data: userBody });
 };
 
 const getUserById = async (id) => {
   return prisma.user.findUnique({ where: { id } });
+};
+
+const getUserByUserId = async (userId) => {
+  return prisma.user.findUnique({ where: { userId } });
 };
 
 const getUserByEmail = async (email) => {
@@ -87,6 +107,7 @@ const getUserByWallet = async (wallet) => {
 module.exports = {
   createUser,
   getUserById,
+  getUserByUserId,
   getUserByEmail,
   updateUserById,
   deleteUserById,
