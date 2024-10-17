@@ -1,10 +1,10 @@
 // Define the DataParser class
-const Currency = require('../models/currency.model');
-const UniqueAsset = require('../models/uniqueAsset.model');
+const Currency = require('./currency.model');
+const UniqueAsset = require('./uniqueAsset.model');
 
 class DataParser {
   constructor(jsonData) {
-    this.data = jsonData.data.map(item => this.createInstance(item));
+    this.data = jsonData.data.map((item) => this.createInstance(item));
     this.meta = jsonData.meta;
   }
 
@@ -21,13 +21,13 @@ class DataParser {
 
   GetClientModel() {
     return {
-      data: this.data.map(item => item.GetClientModel()),
-      meta: this.meta
-    }
+      data: this.data.map((item) => item.GetClientModel()),
+      meta: this.meta,
+    };
   }
 
   displayAllData() {
-    this.data.forEach(item => {
+    this.data.forEach((item) => {
       if (item instanceof Currency) {
         item.displayCurrencyInfo();
       } else if (item instanceof UniqueAsset) {
@@ -43,4 +43,4 @@ class DataParser {
   }
 }
 
-module.exports=DataParser;
+module.exports = DataParser;

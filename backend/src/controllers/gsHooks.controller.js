@@ -149,7 +149,7 @@ const MarketplaceHooks = catchAsync(async (req, res) => {
         sellerId: data.sellerId,
       };
 
-      const user = await userService.getUserById(internalData.sellerId);
+      const user = await userService.getUserByUserId(internalData.sellerId);
 
       if (user) {
         switch (eventType) {

@@ -1,7 +1,5 @@
 const userService = require('./user.service');
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const { LeaderboardEntry } = require('../models');
 
 /**
  * Get relative rank for a given userId.
@@ -11,22 +9,19 @@ const prisma = new PrismaClient();
 async function GetRelativeRank(userId) {
   try {
     // Find the user's entry
-    const userEntry = await prisma.leaderboardEntry.findUnique({ where: { userId } });
+    const userEntry = await LeaderboardEntry.findOne({ userId }).exec();
     if (!userEntry) {
       throw new Error('User not found in leaderboard');
     }
 
     // Find the rank of the user
-    const userRank =
-      (await prisma.leaderboardEntry.count({
-        where: { score: { gt: userEntry.score } },
-      })) + 1;
+    const userRank = (await LeaderboardEntry.countDocuments({ score: { $gt: userEntry.score } })) + 1;
 
     // Calculate the skip value, ensuring it is non-negative
     const skipValue = Math.max(userRank - 6, 0);
 
     // Calculate the total number of documents
-    const totalEntries = await prisma.leaderboardEntry.count();
+    const totalEntries = await LeaderboardEntry.countDocuments().exec();
 
     // Calculate the limit to ensure we don't go out of bounds
     let limitValue = 11;
@@ -42,11 +37,11 @@ async function GetRelativeRank(userId) {
     }
 
     // Find the five entries above and five entries below
-    const relativeEntries = await prisma.leaderboardEntry.findMany({
-      orderBy: { score: 'desc' },
-      skip: skipValue,
-      take: limitValue,
-    });
+    const relativeEntries = await LeaderboardEntry.find({})
+      .sort({ score: -1 })
+      .skip(skipValue) // Use the calculated skip value
+      .limit(limitValue) // Use the calculated limit value
+      .exec();
 
     return relativeEntries;
   } catch (error) {
@@ -56,7 +51,7 @@ async function GetRelativeRank(userId) {
 }
 
 /**
- * Add or update a leaderboard entry
+ * Logout
  * @returns {Promise}
  * @param userId
  * @param score
@@ -64,48 +59,41 @@ async function GetRelativeRank(userId) {
 const AddLeaderboardEntry = async (userId, score) => {
   try {
     // Find document by user ID
-    const userEntryDocument = await prisma.leaderboardEntry.findUnique({ where: { userId } });
+    const userEntryDocument = await LeaderboardEntry.findOne({ userId: userId });
 
     if (userEntryDocument) {
       // Update the score only if the new score is higher
       if (userEntryDocument.score < score) {
-        const updatedEntry = await prisma.leaderboardEntry.update({
-          where: { userId },
-          data: { score },
-        });
+        userEntryDocument.score = score;
+        await userEntryDocument.save();
         console.log('Score updated to a higher value.');
-        return updatedEntry;
       } else {
         console.log('Existing score is higher or equal, no update made.');
-        return userEntryDocument;
       }
+
+      return userEntryDocument;
     } else {
       // Insert new document if none exists
-      const user = await userService.getUserByUserId(userId);
-      const leaderboardEntry = await prisma.leaderboardEntry.create({
-        data: { userId, score, name: user.name },
-      });
+      const user = await userService.getUserById(userId);
+      const leaderboardEntry = new LeaderboardEntry({ userId: userId, score: score, name: user.name });
+      await leaderboardEntry.save();
       console.log('New leaderboard entry inserted.');
       return leaderboardEntry;
     }
   } catch (error) {
     console.error('Error updating or inserting leaderboard entry:', error);
-    throw error;
   }
 };
 
 const GetLeaderboard = async () => {
   try {
-    // Find top 50 entries sorted by score
-    const sortedLeaderboard = await prisma.leaderboardEntry.findMany({
-      orderBy: { score: 'desc' },
-      take: 50,
-    });
+    // Find document by user ID
+    const sortedLeaderboard = await LeaderboardEntry.find({}).sort({ score: -1 }).limit(50);
 
     // Convert the sorted leaderboard entries to JSON format
     return JSON.stringify(sortedLeaderboard, null, 2);
   } catch (error) {
-    console.error('Error getting leaderboard:', error);
+    console.error('Error updating or inserting leaderboard entry:', error);
   }
 };
 
