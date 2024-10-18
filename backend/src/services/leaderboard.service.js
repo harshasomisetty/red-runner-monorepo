@@ -57,39 +57,41 @@ async function GetRelativeRank(userId) {
 
 /**
  * Add or update a leaderboard entry
- * @returns {Promise}
- * @param userId
- * @param score
+ * @param {string} userId
+ * @param {number} score
+ * @returns {Promise<LeaderboardEntry>}
  */
 const AddLeaderboardEntry = async (userId, score) => {
   try {
-    // Find document by user ID
-    const userEntryDocument = await prisma.leaderboardEntry.findUnique({ where: { userId } });
-
-    if (userEntryDocument) {
-      // Update the score only if the new score is higher
-      if (userEntryDocument.score < score) {
-        const updatedEntry = await prisma.leaderboardEntry.update({
-          where: { userId },
-          data: { score },
-        });
-        console.log('Score updated to a higher value.');
-        return updatedEntry;
-      } else {
-        console.log('Existing score is higher or equal, no update made.');
-        return userEntryDocument;
-      }
-    } else {
-      // Insert new document if none exists
-      const user = await userService.getUserByUserId(userId);
-      const leaderboardEntry = await prisma.leaderboardEntry.create({
-        data: { userId, score, name: user.name },
-      });
-      console.log('New leaderboard entry inserted.');
-      return leaderboardEntry;
+    const user = await userService.getUserByUserId(userId);
+    if (!user) {
+      throw new Error(`User with userId ${userId} not found`);
     }
+
+    // Find the user's highest scoring entry
+    const highestEntry = await prisma.leaderboardEntry.findFirst({
+      where: { userId: user.id },
+      orderBy: { score: 'desc' },
+    });
+
+    if (highestEntry && highestEntry.score >= score) {
+      console.log(`Existing score (${highestEntry.score}) is higher or equal, no update made.`);
+      return highestEntry;
+    }
+
+    // Create a new entry
+    const newEntry = await prisma.leaderboardEntry.create({
+      data: {
+        userId: user.id,
+        score,
+        name: user.name,
+      },
+    });
+
+    console.log(`New leaderboard entry created for user ${userId} with score ${score}`);
+    return newEntry;
   } catch (error) {
-    console.error('Error updating or inserting leaderboard entry:', error);
+    console.error('Error creating leaderboard entry:', error);
     throw error;
   }
 };

@@ -5,17 +5,17 @@ const prisma = new PrismaClient();
 
 const createPayment = async (paymentData) => {
   return prisma.payment.create({
-    data: {
-      userId: paymentData.userId,
-      paymentId: paymentData.paymentId,
-      itemId: paymentData.itemId,
-      status: PaymentStatus.PENDING,
-      consentUrl: paymentData.consentUrl,
-      isAutoMinted: paymentData.isAutoMinted,
-    },
+    data: paymentData,
+  });
+};
+
+const getPaymentByPaymentId = async (paymentId) => {
+  return prisma.payment.findUnique({
+    where: { paymentId },
   });
 };
 
 module.exports = {
   createPayment,
+  getPaymentByPaymentId,
 };

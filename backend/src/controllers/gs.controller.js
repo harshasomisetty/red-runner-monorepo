@@ -8,6 +8,8 @@ const { PaymentStatus } = require('../utils/staticData');
 const gsUtil = require('../utils/gsUtil');
 const staticData = require('../utils/staticData');
 const userService = require('../services/user.service');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 const getUserWalletAddress = catchAsync(async (req, res) => {
   try {
@@ -132,62 +134,115 @@ const transferSolDevToUser = catchAsync(async (req, res) => {
 });
 
 const userClaimsCoins = catchAsync(async (req, res) => {
-  try {
-    const quantity = req.body.quantity;
-    const userId = req.body.userId;
+  const { quantity, userId } = req.body;
 
-    await userService.updateUserById(userId, { coinsCollected: quantity });
+  console.log(`User ${userId} is attempting to claim ${quantity} coins`);
+
+  try {
+    // First, get the user by userId
+    const user = await userService.getUserByUserId(userId);
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    // Update the user's coins
+    await userService.updateUserById(user.id, {
+      coinsCollected: {
+        increment: quantity,
+      },
+    });
 
     const rrQuantity = quantity * staticData.CoinToSolRatio;
 
-    const response = await gsService.TransferRRDevWalletToUser(req.body.userId, rrQuantity.toString());
+    const response = await gsService.TransferRRDevWalletToUser(userId, rrQuantity.toString());
 
-    res.status(httpStatus.OK).send(response.data);
-  } catch (e) {
-    if (e instanceof ApiError) {
-      res.status(e.statusCode).send({ message: e.message });
-      return;
+    // Check if response.data exists before sending it
+    if (response && response.data) {
+      res.status(httpStatus.OK).send(response.data);
+    } else {
+      res.status(httpStatus.OK).send({ message: 'Coins claimed successfully' });
     }
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
+  } catch (error) {
+    console.error('Error in userClaimsCoins:', error);
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).send({ message: error.message });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'An unexpected error occurred' });
+    }
   }
 });
 
 const buyItem = catchAsync(async (req, res) => {
-  try {
-    const itemToBuy = shopService.GetItemMintableByKey(req.body.itemId);
-    let payment;
+  const { userId, itemId, currencyId } = req.body;
+  console.log(`User ${userId} is attempting to buy item ${itemId} with currency ${currencyId}`);
 
-    if (req.body.currencyId === 'SOL') {
-      //This requires a different flow
-      payment = await gsService.CreateSolPayment(req.body.userId, itemToBuy);
+  try {
+    // First, check if the user exists
+    const user = await userService.getUserByUserId(userId);
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, `User with ID ${userId} not found`);
+    }
+
+    const itemToBuy = shopService.GetItemMintableByKey(itemId);
+    if (!itemToBuy) {
+      throw new ApiError(httpStatus.NOT_FOUND, `Item with ID ${itemId} not found`);
+    }
+    console.log(`Item to buy:`, itemToBuy);
+
+    let payment;
+    if (currencyId === 'SOL') {
+      console.log('Creating SOL payment');
+      payment = await gsService.CreateSolPayment(userId, itemToBuy);
     } else {
+      console.log('Creating credit card payment');
       payment = await gsService.CreateCreditCardPayment(
-        req.body.userId,
-        req.body.itemId,
-        req.body.currencyId,
-        itemToBuy['price'][req.body.currencyId],
+        userId,
+        itemId,
+        currencyId,
+        itemToBuy['price'][currencyId],
         itemToBuy['name'],
         itemToBuy['description']
       );
     }
 
+    console.log('Payment created:', payment);
+
+    if (!payment || !payment.data || !payment.data.id || !payment.data.checkoutUrl) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Invalid payment response');
+    }
+
+    // Check if a payment with this paymentId already exists
+    const existingPayment = await paymentService.getPaymentByPaymentId(payment.data.id);
+
+    if (existingPayment) {
+      console.log('Payment already exists, returning existing payment');
+      return res.status(httpStatus.OK).send(payment.data);
+    }
+
     const paymentData = {
-      userId: req.body.userId,
-      paymentId: payment.data['id'],
-      itemId: req.body.itemId,
-      status: PaymentStatus.PENDING,
-      consentUrl: payment.data['checkoutUrl'],
-      isAutoMinted: req.body.currencyId !== 'USDC', //in the case of USDC the asset is not autominted//
+      userId: user.id,
+      paymentId: payment.data.id,
+      itemId,
+      status: 'PENDING',
+      consentUrl: payment.data.checkoutUrl,
+      isAutoMinted: currencyId !== 'USDC',
     };
 
+    console.log('Creating payment record:', paymentData);
     await paymentService.createPayment(paymentData);
+
+    console.log('Payment record created successfully');
     res.status(httpStatus.OK).send(payment.data);
-  } catch (e) {
-    if (e instanceof ApiError) {
-      res.status(e.statusCode).send({ message: e.message });
-      return;
+  } catch (error) {
+    console.error('Error in buyItem:', error);
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).send({ message: error.message });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+        message: 'An unexpected error occurred while processing the purchase',
+        error: error.message,
+      });
     }
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
   }
 });
 
