@@ -1,7 +1,6 @@
 const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
 const httpStatus = require('http-status');
-const { AssetMint, Payment } = require('../models');
 const {
   MarketPlaceEvent,
   AssetMintEvent,
@@ -13,6 +12,8 @@ const {
 const { gsService } = require('../services');
 const { SendUserMessageOnSocket } = require('../socket/socket.controller');
 const userService = require('../services/user.service');
+const assetMintService = require('../services/assetMint.service');
+const paymentService = require('../services/payment.service');
 
 const PaymentsHook = catchAsync(async (req, res) => {
   try {
@@ -36,46 +37,50 @@ const PaymentsHook = catchAsync(async (req, res) => {
 
       console.log(`Event Type:${eventType} Status: ${internalData.status} PaymentId:${internalData.paymentId}`);
 
-      const paymentModel = await Payment.findOne({ paymentId: internalData.paymentId });
+      const paymentModel = await paymentService.findPaymentByPaymentId(internalData.paymentId);
 
       if (paymentModel) {
+        let newStatus;
         switch (eventType) {
           case PaymentEvent.INITIATED:
-            paymentModel.status = PaymentStatus.INITIATED;
+            newStatus = PaymentStatus.INITIATED;
             SendUserMessageOnSocket(paymentModel.userId, 'paymentInitiated', '');
-
             break;
           case PaymentEvent.FAILED:
-            paymentModel.status = PaymentStatus.FAILED;
+            newStatus = PaymentStatus.FAILED;
             SendUserMessageOnSocket(paymentModel.userId, 'paymentFailed', '');
             break;
           case PaymentEvent.COMPLETED:
-            paymentModel.status = PaymentStatus.COMPLETED;
+            newStatus = PaymentStatus.COMPLETED;
+            SendUserMessageOnSocket(paymentModel.userId, 'paymentComplete', '');
 
             //Initiate minting if required//
             if (!paymentModel.isAutoMinted) {
-              const asset = await gsService.MintAssetToUser(paymentModel.userId, paymentModel.itemId);
+              try {
+                const asset = await gsService.MintAssetToUser(paymentModel.userId, paymentModel.itemId);
 
-              const mintModel = new AssetMint({
-                userId: paymentModel.userId,
-                gsAssetId: asset.data['id'],
-                itemId: paymentModel.itemId,
-                status: AssetMintStatus.PENDING,
-                paymentDocumentId: paymentModel._id,
-              });
+                const assetMintData = {
+                  userId: paymentModel.userId,
+                  gsAssetId: asset.data['id'],
+                  itemId: paymentModel.itemId,
+                  status: AssetMintStatus.PENDING,
+                  paymentId: paymentModel.id,
+                };
 
-              await mintModel.save();
+                const mintModel = await assetMintService.createAssetMint(assetMintData);
+                console.log('Asset mint record created:', mintModel);
+              } catch (error) {
+                console.error('Error in minting asset or creating asset mint record:', error);
+                // Handle the error appropriately for your application
+              }
             }
-
-            SendUserMessageOnSocket(paymentModel.userId, 'paymentComplete', '');
-
             break;
           default:
-            paymentModel.status = PaymentStatus.PENDING;
+            newStatus = PaymentStatus.PENDING;
             break;
         }
 
-        await paymentModel.save();
+        await paymentService.updatePayment(paymentModel.id, { status: newStatus });
       }
 
       // res.status(httpStatus.FOUND).send();
@@ -187,7 +192,7 @@ const MarketplaceHooks = catchAsync(async (req, res) => {
 const AssetMintingHook = catchAsync(async (req, res) => {
   try {
     const eventType = req.body.type;
-    console.log('Event Type:' + eventType);
+    console.log('Event Type:', eventType);
 
     if (!Object.values(AssetMintEvent).includes(eventType)) return;
 
@@ -205,37 +210,34 @@ const AssetMintingHook = catchAsync(async (req, res) => {
 
       console.log(`Event Type:${eventType} Status: ${internalData.status} assetID:${internalData.assetId}`);
 
-      const mintModel = await AssetMint.findOne({ gsAssetId: internalData.assetId });
+      const mintModel = await assetMintService.findAssetMintByGsAssetId(internalData.assetId);
 
-      switch (eventType) {
-        case AssetMintEvent.INITIATED:
-          mintModel && (mintModel.status = AssetMintStatus.INITIATED);
-
-          SendUserMessageOnSocket(internalData.userId, 'assetMintInitiated', '');
-          break;
-        case AssetMintEvent.FAILED:
-          mintModel && (mintModel.status = AssetMintStatus.FAILED);
-
-          SendUserMessageOnSocket(internalData.userId, 'assetMintFailed', '');
-          break;
-        case AssetMintEvent.COMPLETED:
-          mintModel && (mintModel.status = AssetMintStatus.COMPLETED);
-          //TODO: Send socket message to user using: For now this can only be done in case of USD credit card payments//
-          const itemIdToSend = mintModel !== null ? mintModel.itemId : internalData.assetId;
-          SendUserMessageOnSocket(internalData.userId, 'assetMintComplete', itemIdToSend);
-
-          break;
-        default:
-          mintModel && (mintModel.status = AssetMintStatus.PENDING);
-          break;
+      if (mintModel) {
+        switch (eventType) {
+          case AssetMintEvent.INITIATED:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.INITIATED);
+            SendUserMessageOnSocket(internalData.userId, 'assetMintInitiated', '');
+            break;
+          case AssetMintEvent.FAILED:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.FAILED);
+            SendUserMessageOnSocket(internalData.userId, 'assetMintFailed', '');
+            break;
+          case AssetMintEvent.COMPLETED:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.COMPLETED);
+            const itemIdToSend = mintModel.itemId;
+            SendUserMessageOnSocket(internalData.userId, 'assetMintComplete', itemIdToSend);
+            break;
+          default:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.PENDING);
+            break;
+        }
+      } else {
+        console.log(`No AssetMint record found for assetId: ${internalData.assetId}`);
       }
-      if (mintModel) await mintModel.save();
-
-      // res.status(httpStatus.FOUND).send();
     }
   } catch (e) {
-    console.log(e);
-    // throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+    console.error('Error in AssetMintingHook:', e);
+    // Handle the error appropriately
   }
 });
 
