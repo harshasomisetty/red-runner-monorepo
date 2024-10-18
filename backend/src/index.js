@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const { PrismaClient } = require('@prisma/client');
 const app = require('./app');
 const config = require('./config/config');
@@ -13,15 +12,6 @@ async function main() {
   try {
     await prisma.$connect();
     logger.info('Connected to PostgreSQL via Prisma');
-
-    const mongoUrl = config.mongoose.url;
-    await mongoose.connect(mongoUrl, {
-      ...config.mongoose.options,
-      user: config.mongoose.username,
-      pass: config.mongoose.password,
-      dbName: config.mongoose.dbName,
-    });
-    logger.info('Connected to MongoDB');
 
     server = http.createServer(app);
     const io = socket.Init(server);
@@ -43,12 +33,10 @@ const exitHandler = async () => {
     server.close(async () => {
       logger.info('Server closed');
       await prisma.$disconnect();
-      await mongoose.disconnect();
       process.exit(1);
     });
   } else {
     await prisma.$disconnect();
-    await mongoose.disconnect();
     process.exit(1);
   }
 };
@@ -67,7 +55,6 @@ process.on('SIGTERM', async () => {
     server.close();
   }
   await prisma.$disconnect();
-  await mongoose.disconnect();
 });
 
-module.exports = { prisma, mongoose };
+module.exports = { prisma };
