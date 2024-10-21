@@ -1,8 +1,0 @@
-# Use the official MongoDB 4 image from the Docker Hub
-FROM mongo:4-bionic
-
-# Copy the custom MongoDB configuration file into the container
-COPY mongod.conf /etc/mongod.conf
-
-# Override the default command to use the custom configuration file
-CMD ["mongod", "--config", "/etc/mongod.conf"]

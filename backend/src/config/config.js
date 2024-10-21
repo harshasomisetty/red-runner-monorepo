@@ -7,8 +7,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
-    PORT: Joi.number().default(3000),
-    MONGODB_URL: Joi.string().required().description('Mongo DB url'),
+    PORT: Joi.number(),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -29,10 +28,8 @@ const envVarsSchema = Joi.object()
     GAMESHIFT_BASE_URL: Joi.string().required().description('GameShift base URL'),
     GAMESHIFT_HOOKS_VALIDATION_KEY: Joi.string().required().description('Webhooks Validation Key'),
     GAMESHIFT_TOKEN_RR_ID: Joi.string().required().description('GameShift Token RR ID'),
-    MONGO_INITDB_ROOT_USERNAME: Joi.string().required().description('Mongo Username'),
-    MONGO_INITDB_ROOT_PASSWORD: Joi.string().required().description('Mongo Password'),
-    MONGO_DBNAME: Joi.string().required().description('Mongo DB name'),
-
+    DATABASE_URL: Joi.string().required().description('Database URL'),
+    QR_BACKEND_URL: Joi.string().required().description('QR Backend URL'),
   })
   .unknown();
 
@@ -45,17 +42,6 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
-  mongoose: {
-    url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
-    username: envVars.MONGO_INITDB_ROOT_USERNAME,
-    password: envVars.MONGO_INITDB_ROOT_PASSWORD,
-    dbName: envVars.MONGO_DBNAME,
-    options: {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
-  },
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
@@ -69,7 +55,7 @@ module.exports = {
     gsWPubKey: envVars.GAMESHIFT_DEVELOPER_WALLET_PUBLIC_KEY,
     gsBaseUrl: envVars.GAMESHIFT_BASE_URL,
     gsHooksValidationKey: envVars.GAMESHIFT_HOOKS_VALIDATION_KEY,
-    gsTokenRRId: envVars.GAMESHIFT_TOKEN_RR_ID
+    gsTokenRRId: envVars.GAMESHIFT_TOKEN_RR_ID,
   },
   email: {
     smtp: {
@@ -82,4 +68,6 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
+  databaseUrl: envVars.DATABASE_URL,
+  qrBackendUrl: envVars.QR_BACKEND_URL,
 };

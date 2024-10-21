@@ -1,5 +1,0 @@
-version: '3.3'  # Define the version to utilize the latest features available in Docker Compose
-services:
-  node-app:
-    container_name: node-app-dev
-    command: /bin/sh -c "yarn checkPath && yarn dev -L"

@@ -1,7 +1,6 @@
 const express = require('express');
 const helmet = require('helmet');
 const xss = require('xss-clean');
-const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const cors = require('cors');
 const passport = require('passport');
@@ -32,17 +31,18 @@ app.use(express.urlencoded({ extended: true }));
 
 // sanitize request data
 app.use(xss());
-app.use(mongoSanitize());
 
 // gzip compression
 app.use(compression());
 
 // enable cors
-app.use(cors({
-  origin: '*', // or specify your domain: 'https://gameshift.game.clvtechnologies.com'
-  methods: ['GET', 'POST', 'OPTIONS'], // Define allowed methods
-  credentials: true // Set to true if you're using cookies or authentication tokens
-}));
+app.use(
+  cors({
+    origin: '*', // or specify your domain: 'https://gameshift.game.clvtechnologies.com'
+    methods: ['GET', 'POST', 'OPTIONS'], // Define allowed methods
+    credentials: true, // Set to true if you're using cookies or authentication tokens
+  })
+);
 
 app.options('*', cors({ origin: '*' }));
 
