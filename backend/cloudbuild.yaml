@@ -1,11 +1,11 @@
 steps:
   # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/${PROJECT_ID}/red-runner-monorepo:$COMMIT_SHA', './backend']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/red-runner-monorepo/backend:$COMMIT_SHA', './backend']
 
-  # Push the Docker image to Google Container Registry
+  # Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/${PROJECT_ID}/red-runner-monorepo:$COMMIT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/red-runner-monorepo/backend:$COMMIT_SHA']
 
   # Deploy to Google Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -14,14 +14,14 @@ steps:
       - 'deploy'
       - 'red-runner-monorepo'
       - '--image'
-      - 'gcr.io/${PROJECT_ID}/red-runner-monorepo:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/red-runner-monorepo/backend:$COMMIT_SHA'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
 
 images:
-  - 'gcr.io/${PROJECT_ID}/red-runner-monorepo:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/red-runner-monorepo/backend:$COMMIT_SHA'
 
 options:
   logging: CLOUD_LOGGING_ONLY
