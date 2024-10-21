@@ -5,4 +5,3 @@ module.exports.tokenService = require('./token.service');
 module.exports.userService = require('./user.service');
 module.exports.gsService = require('./gs.service');
 module.exports.leaderboardService = require('./leaderboard.service');
-

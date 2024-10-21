@@ -1,17 +1,16 @@
-const mongoose = require('mongoose');
-const config = require('../../src/config/config');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 const setupTestDB = () => {
   beforeAll(async () => {
-    await mongoose.connect(config.mongoose.url, config.mongoose.options);
-  });
-
-  beforeEach(async () => {
-    await Promise.all(Object.values(mongoose.connection.collections).map(async (collection) => collection.deleteMany()));
+    // Ensure we're connected to the database
+    await prisma.$connect();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
+    // Disconnect after all tests are done
+    await prisma.$disconnect();
   });
 };
 

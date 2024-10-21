@@ -1,5 +1,7 @@
 const userService = require('./user.service');
-const { LeaderboardEntry } = require('../models');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 /**
  * Get relative rank for a given userId.
@@ -9,19 +11,22 @@ const { LeaderboardEntry } = require('../models');
 async function GetRelativeRank(userId) {
   try {
     // Find the user's entry
-    const userEntry = await LeaderboardEntry.findOne({ userId }).exec();
+    const userEntry = await prisma.leaderboardEntry.findUnique({ where: { userId } });
     if (!userEntry) {
       throw new Error('User not found in leaderboard');
     }
 
     // Find the rank of the user
-    const userRank = await LeaderboardEntry.countDocuments({ score: { $gt: userEntry.score } }) + 1;
+    const userRank =
+      (await prisma.leaderboardEntry.count({
+        where: { score: { gt: userEntry.score } },
+      })) + 1;
 
     // Calculate the skip value, ensuring it is non-negative
     const skipValue = Math.max(userRank - 6, 0);
 
     // Calculate the total number of documents
-    const totalEntries = await LeaderboardEntry.countDocuments().exec();
+    const totalEntries = await prisma.leaderboardEntry.count();
 
     // Calculate the limit to ensure we don't go out of bounds
     let limitValue = 11;
@@ -37,11 +42,11 @@ async function GetRelativeRank(userId) {
     }
 
     // Find the five entries above and five entries below
-    const relativeEntries = await LeaderboardEntry.find({})
-      .sort({ score: -1 })
-      .skip(skipValue) // Use the calculated skip value
-      .limit(limitValue) // Use the calculated limit value
-      .exec();
+    const relativeEntries = await prisma.leaderboardEntry.findMany({
+      orderBy: { score: 'desc' },
+      skip: skipValue,
+      take: limitValue,
+    });
 
     return relativeEntries;
   } catch (error) {
@@ -50,62 +55,64 @@ async function GetRelativeRank(userId) {
   }
 }
 
-
 /**
- * Logout
- * @returns {Promise}
- * @param userId
- * @param score
+ * Add or update a leaderboard entry
+ * @param {string} userId
+ * @param {number} score
+ * @returns {Promise<LeaderboardEntry>}
  */
 const AddLeaderboardEntry = async (userId, score) => {
   try {
-    // Find document by user ID
-    const userEntryDocument = await LeaderboardEntry.findOne({ userId: userId });
-
-    if (userEntryDocument) {
-      // Update the score only if the new score is higher
-      if (userEntryDocument.score < score) {
-        userEntryDocument.score = score;
-        await userEntryDocument.save();
-        console.log("Score updated to a higher value.");
-      } else {
-        console.log("Existing score is higher or equal, no update made.");
-      }
-
-      return userEntryDocument;
-
-    } else {
-      // Insert new document if none exists
-      const user = await userService.getUserById(userId);
-      const leaderboardEntry = new LeaderboardEntry({ userId: userId, score: score, name: user.name });
-      await leaderboardEntry.save();
-      console.log("New leaderboard entry inserted.");
-      return leaderboardEntry
+    const user = await userService.getUserByUserId(userId);
+    if (!user) {
+      throw new Error(`User with userId ${userId} not found`);
     }
 
+    // Find the user's highest scoring entry
+    const highestEntry = await prisma.leaderboardEntry.findFirst({
+      where: { userId: user.id },
+      orderBy: { score: 'desc' },
+    });
 
+    if (highestEntry && highestEntry.score >= score) {
+      console.log(`Existing score (${highestEntry.score}) is higher or equal, no update made.`);
+      return highestEntry;
+    }
+
+    // Create a new entry
+    const newEntry = await prisma.leaderboardEntry.create({
+      data: {
+        userId: user.id,
+        score,
+        name: user.name,
+      },
+    });
+
+    console.log(`New leaderboard entry created for user ${userId} with score ${score}`);
+    return newEntry;
   } catch (error) {
-    console.error("Error updating or inserting leaderboard entry:", error);
+    console.error('Error creating leaderboard entry:', error);
+    throw error;
   }
 };
 
 const GetLeaderboard = async () => {
   try {
-    // Find document by user ID
-    const sortedLeaderboard = await LeaderboardEntry.find({})
-      .sort({ score: -1 })
-      .limit(50)
+    // Find top 50 entries sorted by score
+    const sortedLeaderboard = await prisma.leaderboardEntry.findMany({
+      orderBy: { score: 'desc' },
+      take: 50,
+    });
 
     // Convert the sorted leaderboard entries to JSON format
     return JSON.stringify(sortedLeaderboard, null, 2);
-
   } catch (error) {
-    console.error("Error updating or inserting leaderboard entry:", error);
+    console.error('Error getting leaderboard:', error);
   }
 };
 
 module.exports = {
   AddLeaderboardEntry,
   GetLeaderboard,
-  GetRelativeRank
+  GetRelativeRank,
 };

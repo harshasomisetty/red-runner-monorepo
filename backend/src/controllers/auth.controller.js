@@ -3,7 +3,6 @@ const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, emailService } = require('../services');
 const { verifyFirebaseToken } = require('../services/firebase.service');
 const ApiError = require('../utils/ApiError');
-const { User } = require('../models');
 const gsService = require('../services/gs.service');
 const { v4: uuidv4 } = require('uuid');
 const socketModule = require('../socket/socket.controller');
@@ -20,29 +19,40 @@ const registerOrLogin = catchAsync(async (req, res) => {
     await verifyFirebaseToken(userId, tokenId);
 
     let user;
-    const doesUserExist = await User.isUserExists(userId);
+    const doesUserExist = await userService.doesUserExist(userId);
+
     if (doesUserExist) {
-      user = await userService.getUserById(userId);
+      user = await userService.getUserByUserId(userId);
+
+      if (!user) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'User exists but could not be retrieved');
+      }
     } else {
       try {
         await gsService.registerUser(userId, email);
-        req.body.walletId = await gsService.getUserWalletAddress(userId);
-        req.body.name = userId.substring(0, 7);
-        user = await userService.createUser(req.body);
-      } catch (e) {
-        if (e.statusCode === 409) {
-          const gsUser = await gsService.getUserByReferenceId(userId);
 
-          if (gsUser && gsUser['referenceId'] === userId && gsUser['email'] === email)
-            // Create the user in our database
-            user = await userService.createUser({
-              userId: gsUser['referenceId'],
-              walletId: gsUser['address'],
-              email,
-            });
+        const walletId = await gsService.getUserWalletAddress(userId);
+
+        const name = userId.substring(0, 7);
+
+        user = await userService.createUser({ userId, email, walletId, name });
+      } catch (e) {
+        if (e instanceof ApiError) {
+          if (e.statusCode === 409) {
+            user = await userService.getUserByUserId(userId);
+            if (!user) {
+              throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to retrieve existing user');
+            }
+          } else {
+            throw e;
+          }
+        } else if (e.code === 'P2002') {
+          user = await userService.getUserByUserId(userId);
+          if (!user) {
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to retrieve existing user');
+          }
         } else {
-          // If the retrieved user doesn't match the provided wallet and email
-          throw new ApiError(httpStatus.CONFLICT, 'User exists with different credentials');
+          throw e;
         }
       }
     }
@@ -53,9 +63,9 @@ const registerOrLogin = catchAsync(async (req, res) => {
   } catch (e) {
     if (e instanceof ApiError) {
       res.status(e.statusCode).send({ message: e.message });
-      return;
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
     }
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
   }
 });
 

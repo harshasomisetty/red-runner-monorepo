@@ -1,23 +1,17 @@
-const mongoose = require('mongoose');
+const { PrismaClient } = require('@prisma/client');
 const app = require('./app');
 const config = require('./config/config');
-console.log(config.env);
-console.log(config.mongoose);
 const logger = require('./config/logger');
 const http = require('http');
 const socket = require('./socket/socket.controller');
 
+const prisma = new PrismaClient();
 let server;
-const mongoUrl = config.mongoose.url;
-mongoose
-  .connect(mongoUrl, {
-    ...config.mongoose.options,
-    user: config.mongoose.username,
-    pass: config.mongoose.password,
-    dbName: config.mongoose.dbName,
-  })
-  .then(() => {
-    logger.info('Connected to MongoDB');
+
+async function main() {
+  try {
+    await prisma.$connect();
+    logger.info('Connected to PostgreSQL via Prisma');
 
     server = http.createServer(app);
     const io = socket.Init(server);
@@ -26,15 +20,23 @@ mongoose
     server.listen(config.port, () => {
       logger.info(`Listening to port ${config.port}`);
     });
-  });
+  } catch (error) {
+    logger.error('Unable to connect to the databases:', error);
+    process.exit(1);
+  }
+}
 
-const exitHandler = () => {
+main();
+
+const exitHandler = async () => {
   if (server) {
-    server.close(() => {
+    server.close(async () => {
       logger.info('Server closed');
+      await prisma.$disconnect();
       process.exit(1);
     });
   } else {
+    await prisma.$disconnect();
     process.exit(1);
   }
 };
@@ -47,9 +49,12 @@ const unexpectedErrorHandler = (error) => {
 process.on('uncaughtException', unexpectedErrorHandler);
 process.on('unhandledRejection', unexpectedErrorHandler);
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM received');
   if (server) {
     server.close();
   }
+  await prisma.$disconnect();
 });
+
+module.exports = { prisma };

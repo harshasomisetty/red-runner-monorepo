@@ -4,6 +4,8 @@ const ApiError = require('../utils/ApiError');
 const { shopService } = require('./index');
 const gsUtil = require('../utils/gsUtil');
 const httpStatus = require('http-status');
+const axios = require('axios');
+
 /**
  * Create a user
  * @returns {Promise<User>}
@@ -59,8 +61,6 @@ const getUserWalletAddress = async (referenceId) => {
   }
 };
 
-const axios = require('axios');
-
 const getUserByWalletAddress = async (walletAddress) => {
   try {
     const response = await axios.get(`https://api.gameshift.dev/nx/users/wallet/${walletAddress}`, {
@@ -88,9 +88,10 @@ const getUserByWalletAddress = async (walletAddress) => {
 
 const getUserByReferenceId = async (userId) => {
   try {
-    return await gameShiftSdk.projectUserController_get({referenceId:userId, 'x-api-key': config.gs.gsApiKey})
+    return await gameShiftSdk.projectUserController_get({ referenceId: userId, 'x-api-key': config.gs.gsApiKey });
   } catch (error) {
-    if (e.data !== undefined) throw new ApiError(e.data.statusCode, e.data.message);}
+    if (e.data !== undefined) throw new ApiError(e.data.statusCode, e.data.message);
+  }
 };
 
 // Example usage
@@ -158,9 +159,6 @@ const GetMarketPlaceAssets = async (dictionary) => {
     if (e.data !== undefined) throw new ApiError(e.data.statusCode, e.data.message);
     throw e;
   }
-
-
-
 };
 
 const MintAssetToUser = async (referenceId, assetId) => {
@@ -405,5 +403,5 @@ module.exports = {
   BuyAssetFromMarketplace,
   GetMarketPlaceAssets,
   TransferRRDevWalletToUser,
-  getUserByReferenceId
+  getUserByReferenceId,
 };

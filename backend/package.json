@@ -50,6 +50,7 @@
   ],
   "dependencies": {
     "@api/gameshift": "file:./.api/apis/gameshift",
+    "@prisma/client": "^5.20.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
@@ -61,6 +62,7 @@
     "firebase-admin": "^12.3.0",
     "helmet": "^4.1.0",
     "http-status": "^1.4.0",
+    "jest": "^29.7.0",
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
@@ -74,6 +76,7 @@
     "qrcode": "^1.5.4",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "supertest": "^7.0.0",
     "swagger-jsdoc": "^6.0.8",
     "swagger-ui-express": "^4.1.6",
     "unique-names-generator": "^4.7.1",

@@ -1,19 +1,26 @@
 const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
 const httpStatus = require('http-status');
-const { AssetMint, Payment, User } = require('../models');
-const { MarketPlaceEvent,AssetMintEvent, AssetMintStatus, PaymentEvent, PaymentStatus, PayoutEvent } = require('../utils/staticData');
+const {
+  MarketPlaceEvent,
+  AssetMintEvent,
+  AssetMintStatus,
+  PaymentEvent,
+  PaymentStatus,
+  PayoutEvent,
+} = require('../utils/staticData');
 const { gsService } = require('../services');
-const {SendUserMessageOnSocket} = require('../socket/socket.controller');
-
+const { SendUserMessageOnSocket } = require('../socket/socket.controller');
+const userService = require('../services/user.service');
+const assetMintService = require('../services/assetMint.service');
+const paymentService = require('../services/payment.service');
 
 const PaymentsHook = catchAsync(async (req, res) => {
   try {
     const eventType = req.body.type;
-    console.log("Event Type:"+eventType);
+    console.log('Event Type:' + eventType);
 
-    if(!Object.values(PaymentEvent).includes(eventType))
-      return;
+    if (!Object.values(PaymentEvent).includes(eventType)) return;
 
     const data = req.body.data;
 
@@ -25,52 +32,55 @@ const PaymentsHook = catchAsync(async (req, res) => {
         unit: data.unit,
         details: data.details,
         amount: data.amount,
-        paymentId: data.paymentId
+        paymentId: data.paymentId,
       };
 
-      console.log(`Event Type:${eventType} Status: ${internalData.status} PaymentId:${internalData.paymentId}` );
+      console.log(`Event Type:${eventType} Status: ${internalData.status} PaymentId:${internalData.paymentId}`);
 
-      const paymentModel = await Payment.findOne({ paymentId: internalData.paymentId });
+      const paymentModel = await paymentService.findPaymentByPaymentId(internalData.paymentId);
 
       if (paymentModel) {
+        let newStatus;
         switch (eventType) {
           case PaymentEvent.INITIATED:
-            paymentModel.status = PaymentStatus.INITIATED;
-            SendUserMessageOnSocket(paymentModel.userId,"paymentInitiated","");
-
+            newStatus = PaymentStatus.INITIATED;
+            SendUserMessageOnSocket(paymentModel.userId, 'paymentInitiated', '');
             break;
           case PaymentEvent.FAILED:
-            paymentModel.status = PaymentStatus.FAILED;
-            SendUserMessageOnSocket(paymentModel.userId,"paymentFailed","");
+            newStatus = PaymentStatus.FAILED;
+            SendUserMessageOnSocket(paymentModel.userId, 'paymentFailed', '');
             break;
           case PaymentEvent.COMPLETED:
-            paymentModel.status = PaymentStatus.COMPLETED;
+            newStatus = PaymentStatus.COMPLETED;
+            SendUserMessageOnSocket(paymentModel.userId, 'paymentComplete', '');
 
             //Initiate minting if required//
-            if(!paymentModel.isAutoMinted)
-            {
-              const asset= await gsService.MintAssetToUser(paymentModel.userId,paymentModel.itemId);
+            if (!paymentModel.isAutoMinted) {
+              try {
+                const asset = await gsService.MintAssetToUser(paymentModel.userId, paymentModel.itemId);
 
-              const mintModel = new AssetMint({
-                userId: paymentModel.userId,
-                gsAssetId: asset.data["id"],
-                itemId: paymentModel.itemId,
-                status: AssetMintStatus.PENDING,
-                paymentDocumentId: paymentModel._id
-              });
+                const assetMintData = {
+                  userId: paymentModel.userId,
+                  gsAssetId: asset.data['id'],
+                  itemId: paymentModel.itemId,
+                  status: AssetMintStatus.PENDING,
+                  paymentId: paymentModel.id,
+                };
 
-              await mintModel.save();
+                const mintModel = await assetMintService.createAssetMint(assetMintData);
+                console.log('Asset mint record created:', mintModel);
+              } catch (error) {
+                console.error('Error in minting asset or creating asset mint record:', error);
+                // Handle the error appropriately for your application
+              }
             }
-
-            SendUserMessageOnSocket(paymentModel.userId,"paymentComplete","");
-
             break;
           default:
-            paymentModel.status = PaymentStatus.PENDING;
+            newStatus = PaymentStatus.PENDING;
             break;
         }
 
-        await paymentModel.save();
+        await paymentService.updatePayment(paymentModel.id, { status: newStatus });
       }
 
       // res.status(httpStatus.FOUND).send();
@@ -84,10 +94,9 @@ const PaymentsHook = catchAsync(async (req, res) => {
 const PayoutHooks = catchAsync(async (req, res) => {
   try {
     const eventType = req.body.type;
-    console.log("Event Type:"+eventType);
+    console.log('Event Type:' + eventType);
 
-    if(!Object.values(PayoutEvent).includes(eventType))
-      return;
+    if (!Object.values(PayoutEvent).includes(eventType)) return;
 
     const data = req.body.data;
 
@@ -99,24 +108,24 @@ const PayoutHooks = catchAsync(async (req, res) => {
         amount: data.amount,
         from: data.from,
         to: data.to,
-        transactionId: data.paymentId
+        transactionId: data.paymentId,
       };
 
-      console.log(`Event Type:${eventType} Status: ${internalData.status} TransactionId:${internalData.transactionId}` );
+      console.log(`Event Type:${eventType} Status: ${internalData.status} TransactionId:${internalData.transactionId}`);
 
-      const user = await User.findOne({walletId: internalData.to});
+      const user = await userService.getUserByWallet(internalData.to);
 
       if (user) {
         switch (eventType) {
           case PayoutEvent.INITIATED:
-            SendUserMessageOnSocket(user.userId,"payoutInitiated","");
+            SendUserMessageOnSocket(user.userId, 'payoutInitiated', '');
             break;
           case PayoutEvent.FAILED:
-            SendUserMessageOnSocket(user.userId,"payoutFailed",);
+            SendUserMessageOnSocket(user.userId, 'payoutFailed');
             break;
           case PayoutEvent.COMPLETED:
             //TODO:Just send the socket a message here that you got monays
-            SendUserMessageOnSocket(user.userId,"payoutComplete",internalData.amount);
+            SendUserMessageOnSocket(user.userId, 'payoutComplete', internalData.amount);
             break;
           default:
             break;
@@ -135,10 +144,9 @@ const MarketplaceHooks = catchAsync(async (req, res) => {
   try {
     const eventType = req.body.type;
 
-    if(!Object.values(MarketPlaceEvent).includes(eventType))
-      return;
+    if (!Object.values(MarketPlaceEvent).includes(eventType)) return;
 
-    console.log("Event Type:"+eventType);
+    console.log('Event Type:' + eventType);
     const data = req.body.data;
 
     if (data) {
@@ -146,18 +154,18 @@ const MarketplaceHooks = catchAsync(async (req, res) => {
         sellerId: data.sellerId,
       };
 
-      const user = await User.findOne({ userId: internalData.sellerId });
+      const user = await userService.getUserByUserId(internalData.sellerId);
 
       if (user) {
         switch (eventType) {
           case MarketPlaceEvent.LISTED:
-            SendUserMessageOnSocket(user.userId, "marketAssetListed", "");
+            SendUserMessageOnSocket(user.userId, 'marketAssetListed', '');
             break;
           case MarketPlaceEvent.UNLISTED:
-            SendUserMessageOnSocket(user.userId, "marketAssetUnListed","");
+            SendUserMessageOnSocket(user.userId, 'marketAssetUnListed', '');
             break;
           case MarketPlaceEvent.BOUGHT:
-            SendUserMessageOnSocket(user.userId, "marketAssetBought","");
+            SendUserMessageOnSocket(user.userId, 'marketAssetBought', '');
             break;
           default:
             break;
@@ -181,15 +189,12 @@ const MarketplaceHooks = catchAsync(async (req, res) => {
  * };
  */
 
-
 const AssetMintingHook = catchAsync(async (req, res) => {
   try {
-
     const eventType = req.body.type;
-    console.log("Event Type:"+eventType);
+    console.log('Event Type:', eventType);
 
-    if(!Object.values(AssetMintEvent).includes(eventType))
-      return;
+    if (!Object.values(AssetMintEvent).includes(eventType)) return;
 
     const data = req.body.data;
 
@@ -200,44 +205,39 @@ const AssetMintingHook = catchAsync(async (req, res) => {
         assetId: data.assetId,
         collectionId: data.collectionId,
         details: data.details,
-        userId: data.userId
+        userId: data.userId,
       };
 
-      console.log(`Event Type:${eventType} Status: ${internalData.status} assetID:${internalData.assetId}` );
+      console.log(`Event Type:${eventType} Status: ${internalData.status} assetID:${internalData.assetId}`);
 
-      const mintModel = await AssetMint.findOne({ gsAssetId: internalData.assetId });
+      const mintModel = await assetMintService.findAssetMintByGsAssetId(internalData.assetId);
 
-      switch (eventType) {
-        case AssetMintEvent.INITIATED:
-          mintModel && (mintModel.status = AssetMintStatus.INITIATED);
-
-          SendUserMessageOnSocket(internalData.userId,"assetMintInitiated","");
-          break;
-        case AssetMintEvent.FAILED:
-          mintModel && (mintModel.status = AssetMintStatus.FAILED);
-
-          SendUserMessageOnSocket(internalData.userId,"assetMintFailed","");
-          break;
-        case AssetMintEvent.COMPLETED:
-
-          mintModel && (mintModel.status = AssetMintStatus.COMPLETED);
-          //TODO: Send socket message to user using: For now this can only be done in case of USD credit card payments//
-          const itemIdToSend = (mintModel !== null) ? mintModel.itemId : internalData.assetId;
-          SendUserMessageOnSocket(internalData.userId,"assetMintComplete", itemIdToSend);
-
-          break;
-        default:
-          mintModel && (mintModel.status = AssetMintStatus.PENDING);
-          break;
+      if (mintModel) {
+        switch (eventType) {
+          case AssetMintEvent.INITIATED:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.INITIATED);
+            SendUserMessageOnSocket(internalData.userId, 'assetMintInitiated', '');
+            break;
+          case AssetMintEvent.FAILED:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.FAILED);
+            SendUserMessageOnSocket(internalData.userId, 'assetMintFailed', '');
+            break;
+          case AssetMintEvent.COMPLETED:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.COMPLETED);
+            const itemIdToSend = mintModel.itemId;
+            SendUserMessageOnSocket(internalData.userId, 'assetMintComplete', itemIdToSend);
+            break;
+          default:
+            await assetMintService.updateAssetMintStatus(mintModel.id, AssetMintStatus.PENDING);
+            break;
+        }
+      } else {
+        console.log(`No AssetMint record found for assetId: ${internalData.assetId}`);
       }
-      if (mintModel)
-        await mintModel.save();
-
-      // res.status(httpStatus.FOUND).send();
     }
   } catch (e) {
-    console.log(e);
-    // throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+    console.error('Error in AssetMintingHook:', e);
+    // Handle the error appropriately
   }
 });
 
@@ -260,5 +260,5 @@ module.exports = {
   AssetMintingHook,
   PaymentsHook,
   PayoutHooks,
-  MarketplaceHooks
+  MarketplaceHooks,
 };
