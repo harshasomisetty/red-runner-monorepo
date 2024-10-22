@@ -25,9 +25,8 @@ public static class StaticDataBank
 
     #region Backend Api's
 
-    public static readonly string SOCKET_URL = "http://localhost:3000";
-    // public static readonly string SOCKET_URL = "https://gameshift.clvtechnologies.com";
-    // public static readonly string SOCKET_URL = "https://red-runner-backend-952100349016.us-central1.run.app";
+    // public static readonly string SOCKET_URL = "http://localhost:3000";
+    public static readonly string SOCKET_URL = "https://red-runner-monorepo-952100349016.us-central1.run.app";
 
     public static readonly string QR_SOCKET_URL = SOCKET_URL + "/qr-signup";
     public static readonly string BackendBaseUrl = SOCKET_URL + "/v1/";
