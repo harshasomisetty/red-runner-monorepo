@@ -21,7 +21,7 @@ async function main() {
       logger.info(`Listening to port ${config.port}`);
     });
   } catch (error) {
-    console.log('Final error', error);
+    console.log('Finalmente error', error);
     if (error.code === 'P1001' || error.message.includes("Can't reach database server")) {
       logger.error('Failed to connect to the database:', error.message);
       logger.error('Database connection details:', config.database);
