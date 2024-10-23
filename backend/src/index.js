@@ -21,7 +21,14 @@ async function main() {
       logger.info(`Listening to port ${config.port}`);
     });
   } catch (error) {
-    logger.error('Unable to connect to the databases:', error);
+    console.log('Final error', error);
+    if (error.code === 'P1001' || error.message.includes("Can't reach database server")) {
+      logger.error('Failed to connect to the database:', error.message);
+      logger.error('Database connection details:', config.database);
+    } else {
+      logger.error('An unexpected error occurred:', error.message);
+    }
+    logger.error('Stack trace:', error.stack);
     process.exit(1);
   }
 }

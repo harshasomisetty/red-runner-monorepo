@@ -72,78 +72,90 @@ const registerOrLogin = catchAsync(async (req, res) => {
 const walletLogin = catchAsync(async (req, res) => {
   const { wallet, email, sessionId } = req.body;
 
-  console.log('Wallet login', wallet, email, sessionId);
+  console.log('Wallet login latest', wallet, email, sessionId);
 
-  let user = await userService.getUserByWallet(wallet);
-  let userByEmail = await userService.getUserByEmail(email);
+  try {
+    let user = await userService.getUserByWallet(wallet);
+    console.log('User by wallet:', user);
+    let userByEmail = await userService.getUserByEmail(email);
+    console.log('User by email:', userByEmail);
 
-  if (user) {
-    if (user.email !== email) {
-      const abbreviatedEmail = abbreviateEmail(user.email);
-      const abbreviatedInputEmail = abbreviateEmail(email);
+    if (user) {
+      if (user.email !== email) {
+        const abbreviatedEmail = abbreviateEmail(user.email);
+        const abbreviatedInputEmail = abbreviateEmail(email);
+        throw new ApiError(
+          httpStatus.CONFLICT,
+          `Wallet is associated with a different email: ${abbreviatedEmail}. Input email ${abbreviatedInputEmail} is ${
+            userByEmail
+              ? `associated with wallet: ${abbreviateWallet(userByEmail.walletId)}`
+              : 'not associated with any wallet'
+          }.`
+        );
+      }
+    } else if (userByEmail) {
+      const abbreviatedWallet = abbreviateWallet(userByEmail.walletId);
+      const abbreviatedInputWallet = abbreviateWallet(wallet);
       throw new ApiError(
         httpStatus.CONFLICT,
-        `Wallet is associated with a different email: ${abbreviatedEmail}. Input email ${abbreviatedInputEmail} is ${
-          userByEmail
-            ? `associated with wallet: ${abbreviateWallet(userByEmail.walletId)}`
-            : 'not associated with any wallet'
-        }.`
+        `Email is associated with a different wallet: ${abbreviatedWallet}. Input wallet ${abbreviatedInputWallet} is not associated with any email.`
       );
-    }
-  } else if (userByEmail) {
-    const abbreviatedWallet = abbreviateWallet(userByEmail.walletId);
-    const abbreviatedInputWallet = abbreviateWallet(wallet);
-    throw new ApiError(
-      httpStatus.CONFLICT,
-      `Email is associated with a different wallet: ${abbreviatedWallet}. Input wallet ${abbreviatedInputWallet} is not associated with any email.`
-    );
-  } else {
-    try {
-      const userId = generateUserId();
-      await gsService.registerUserWithWallet(userId, email, wallet);
-      user = await userService.createUser({
-        userId,
-        walletId: wallet,
-        email,
-      });
-    } catch (error) {
-      if (error.statusCode === 409) {
-        // User already exists in GameShift, but not in our database
-        // Retrieve the user from GameShift
-        const gsUser = await gsService.getUserByWalletAddress(wallet);
-        if (gsUser && gsUser.address === wallet && gsUser.email === email) {
-          // Create the user in our database
-          user = await userService.createUser({
-            userId: gsUser.referenceId,
-            walletId: wallet,
-            email,
-          });
+    } else {
+      try {
+        const userId = generateUserId();
+        await gsService.registerUserWithWallet(userId, email, wallet);
+        user = await userService.createUser({
+          userId,
+          walletId: wallet,
+          email,
+        });
+      } catch (error) {
+        console.error('Error creating user:', error);
+        if (error.statusCode === 409) {
+          // User already exists in GameShift, but not in our database
+          // Retrieve the user from GameShift
+          const gsUser = await gsService.getUserByWalletAddress(wallet);
+          if (gsUser && gsUser.address === wallet && gsUser.email === email) {
+            // Create the user in our database
+            user = await userService.createUser({
+              userId: gsUser.referenceId,
+              walletId: wallet,
+              email,
+            });
+          } else {
+            const abbreviatedEmail = abbreviateEmail(gsUser ? gsUser.email : email);
+            const abbreviatedWallet = abbreviateWallet(gsUser ? gsUser.address : wallet);
+            throw new ApiError(
+              httpStatus.CONFLICT,
+              `User exists with different credentials. Email: ${abbreviatedEmail}, Wallet: ${abbreviatedWallet}`
+            );
+          }
         } else {
-          const abbreviatedEmail = abbreviateEmail(gsUser ? gsUser.email : email);
-          const abbreviatedWallet = abbreviateWallet(gsUser ? gsUser.address : wallet);
-          throw new ApiError(
-            httpStatus.CONFLICT,
-            `User exists with different credentials. Email: ${abbreviatedEmail}, Wallet: ${abbreviatedWallet}`
-          );
+          // For other errors, rethrow
+          throw error;
         }
-      } else {
-        // For other errors, rethrow
-        throw error;
       }
     }
+
+    const tokens = await tokenService.generateAuthTokens(user);
+
+    // only send sockets if the leaderboard request is made from a logged in session
+    if (sessionId) {
+      socketModule.SendQRSignupMessage(sessionId, 'qrLoginCompleted', {
+        user,
+        tokens,
+      });
+    }
+
+    res.status(httpStatus.OK).send({ message: 'Login completed', user, tokens });
+  } catch (error) {
+    console.error('Error in walletLogin:', error);
+    if (error instanceof ApiError) {
+      res.status(error.statusCode).send({ message: error.message });
+    } else {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'An unexpected error occurred' });
+    }
   }
-
-  const tokens = await tokenService.generateAuthTokens(user);
-
-  // only send sockets if the leaderboard request is made from a logged in session
-  if (sessionId) {
-    socketModule.SendQRSignupMessage(sessionId, 'qrLoginCompleted', {
-      user,
-      tokens,
-    });
-  }
-
-  res.status(httpStatus.OK).send({ message: 'Login completed', user, tokens });
 });
 
 function abbreviateEmail(email) {

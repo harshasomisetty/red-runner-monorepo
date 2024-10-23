@@ -99,9 +99,24 @@ const queryUsers = async (filter, options) => {
 };
 
 const getUserByWallet = async (wallet) => {
-  return prisma.user.findUnique({
-    where: { walletId: wallet },
-  });
+  try {
+    console.log(`Attempting to find user with wallet: ${wallet}`);
+    const user = await prisma.user.findFirst({
+      where: { walletId: wallet },
+    });
+
+    if (!user) {
+      console.log(`No user found with wallet address: ${wallet}`);
+      return null;
+    }
+
+    console.log(`User found with wallet address: ${wallet}`);
+    return user;
+  } catch (error) {
+    console.error(`Error in getUserByWallet: ${error.message}`);
+    console.error(error.stack);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error retrieving user by wallet address');
+  }
 };
 
 module.exports = {
