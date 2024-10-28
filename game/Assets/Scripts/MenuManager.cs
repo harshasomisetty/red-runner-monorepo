@@ -1,6 +1,8 @@
 using TMPro;
 using UnityEngine;
 using DG.Tweening;
+using System.Runtime.InteropServices;
+using Trisibo; // Add this line
 
 
 public class MenuManager : MonoBehaviour
@@ -55,20 +57,14 @@ public class MenuManager : MonoBehaviour
 
     public void CopyWalletAdress()
     {
-#if UNITY_WEBGL
-        CopyText();
+#if UNITY_WEBGL && !UNITY_EDITOR
+    WebGLCopyAndPaste.Copy(StaticDataBank.walletAddress);
 #else
-            GUIUtility.systemCopyBuffer = ""+StaticDataBank.walletAddress;
-            Debug.Log("Copy wallet Address");
+        GUIUtility.systemCopyBuffer = StaticDataBank.walletAddress;
 #endif
         GlobalCanvasManager.Instance.SocketPrompter.ShowPopup("Wallet Address copied");
     }
-    [System.Obsolete]
-    public void CopyText()
-    {
-        Debug.Log("Calling to JS Method Googl");
-        Application.ExternalEval($"copyToClipboard('{StaticDataBank.walletAddress}');");
-    }
+
     public void ChangeSkin(int skinIndex)
     {
         //m_MainCharacter.Skeleton.ChangeCharacterSkin(skinIndex, CharacterSkins);
@@ -79,15 +75,17 @@ public class MenuManager : MonoBehaviour
 
     public void ToggleWithdrawPanel()
     {
-        if(_withDrawOpen)
+        if (_withDrawOpen)
         {
-            WithDrawPanel.DOScaleY(0f, 0.3f).OnComplete(delegate {
+            WithDrawPanel.DOScaleY(0f, 0.3f).OnComplete(delegate
+            {
                 _withDrawOpen = false;
             });
         }
         else
         {
-            WithDrawPanel.DOScaleY(1f, 0.3f).OnComplete(delegate {
+            WithDrawPanel.DOScaleY(1f, 0.3f).OnComplete(delegate
+            {
                 _withDrawOpen = true;
             });
         }
@@ -102,4 +100,7 @@ public class MenuManager : MonoBehaviour
             }
         });
     }
+
+    [DllImport("__Internal")]
+    private static extern void CopyToClipboard(string str);
 }
