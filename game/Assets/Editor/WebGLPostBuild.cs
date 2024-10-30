@@ -101,7 +101,11 @@ public class WebGLPostProcessBuild
 
       Debug.Log("Custom JavaScript and OAuth script added to index.html");
 
+
       PutOauthFile(target, pathToBuiltProject);
+
+      // ModifyCanvasSettings(target, pathToBuiltProject);
+
     }
   }
 
@@ -123,6 +127,52 @@ public class WebGLPostProcessBuild
       File.Copy(sourceFilePath, destinationPath, true);
 
       Debug.Log("File moved to WebGL build folder successfully!");
+    }
+  }
+
+  [PostProcessBuild]
+  private static void ModifyCanvasSettings(BuildTarget target, string pathToBuiltProject)
+  {
+    if (target == BuildTarget.WebGL)
+    {
+      string indexPath = Path.Combine(pathToBuiltProject, "index.html");
+      string indexContent = File.ReadAllText(indexPath);
+
+      // Find and replace the if/else block with just the mobile style code
+      string oldCode = @"if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = ""unity-mobile"";
+        canvas.className = ""unity-mobile"";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = ""900px"";
+        canvas.style.height = ""600px"";
+      }";
+
+      string newCode = @"// Fill the whole browser client area with the game canvas
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = ""unity-mobile"";
+        canvas.className = ""unity-mobile"";";
+
+      indexContent = indexContent.Replace(oldCode, newCode);
+      File.WriteAllText(indexPath, indexContent);
+
+      Debug.Log("Canvas settings modified to always use fullscreen style!");
     }
   }
 }
