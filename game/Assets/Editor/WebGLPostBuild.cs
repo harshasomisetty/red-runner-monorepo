@@ -5,27 +5,28 @@ using System.IO;
 
 public class WebGLPostProcessBuild
 {
-    [PostProcessBuild]
-    public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
+  [PostProcessBuild]
+  public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
+  {
+    if (target == BuildTarget.WebGL)
     {
-        if (target == BuildTarget.WebGL)
-        {
-            // Path to the index.html file in the WebGL build folder
-            string indexPath = Path.Combine(pathToBuiltProject, "index.html");
+      // Path to the index.html file in the WebGL build folder
+      string indexPath = Path.Combine(pathToBuiltProject, "index.html");
 
-            // Read the existing index.html content
-            string indexContent = File.ReadAllText(indexPath);
+      // Read the existing index.html content
+      string indexContent = File.ReadAllText(indexPath);
 
-            // JavaScript function to add with improved options for a pop-up window
-            string jsToAdd = @"
+      if (!indexContent.Contains("function OpenPopupWindow"))
+      {
+        string jsToAdd = @"
     <script type='text/javascript'>
         function OpenPopupWindow(url, title) {
             var width = 960;
             var height = 540;
             var left = (screen.width - width) / 2;
             var top = (screen.height - height) / 2;
-            var options = 'width=' + width + ', height=' + height + 
-                          ', top=' + top + ', left=' + left + 
+            var options = 'width=' + width + ', height=' + height +
+                          ', top=' + top + ', left=' + left +
                           ', resizable=yes, scrollbars=yes, toolbar=no, menubar=no, location=no, directories=no, status=no';
 
             var newWindow = window.open(url, title, options);
@@ -38,23 +39,21 @@ public class WebGLPostProcessBuild
         }
     </script>";
 
-            // Insert the JavaScript just before the closing </head> tag
-            string closingHeadTag = "</head>";
-            if (indexContent.Contains(closingHeadTag))
-            {
-                indexContent = indexContent.Replace(closingHeadTag, jsToAdd + "\n" + closingHeadTag);
-            }
+        string closingHeadTag = "</head>";
+        indexContent = indexContent.Replace(closingHeadTag, jsToAdd + "\n" + closingHeadTag);
+      }
 
-            // Adding the OAuth.js script to the body
-            string oauthScript = "<script src=\"OAuth.js\"></script>";
-            string openingBodyTag = "<body>";
-            if (indexContent.Contains(openingBodyTag))
-            {
-                indexContent = indexContent.Replace(openingBodyTag, openingBodyTag + "\n" + oauthScript);
-            }
 
-            // Replace the specific block in the body script
-            string originalScriptBlock = @"
+      // Only add the OAuth.js script once if it doesn't already exist
+      string oauthScript = "<script src=\"OAuth.js\"></script>";
+      if (!indexContent.Contains(oauthScript))
+      {
+        string openingBodyTag = "<body>";
+        indexContent = indexContent.Replace(openingBodyTag, openingBodyTag + "\n" + oauthScript);
+      }
+
+      // Replace the specific block in the body script
+      string originalScriptBlock = @"
       var script = document.createElement(""script"");
       script.src = loaderUrl;
       script.onload = () => {
@@ -72,7 +71,7 @@ public class WebGLPostProcessBuild
 
       document.body.appendChild(script);";
 
-            string replacementScriptBlock = @"
+      string replacementScriptBlock = @"
       var script = document.createElement(""script"");
       script.src = loaderUrl;
       script.onload = () => {
@@ -92,38 +91,38 @@ public class WebGLPostProcessBuild
 
       document.body.appendChild(script);";
 
-            if (indexContent.Contains(originalScriptBlock))
-            {
-                indexContent = indexContent.Replace(originalScriptBlock, replacementScriptBlock);
-            }
+      if (indexContent.Contains(originalScriptBlock))
+      {
+        indexContent = indexContent.Replace(originalScriptBlock, replacementScriptBlock);
+      }
 
-            // Write the modified content back to index.html
-            File.WriteAllText(indexPath, indexContent);
+      // Write the modified content back to index.html
+      File.WriteAllText(indexPath, indexContent);
 
-            Debug.Log("Custom JavaScript and OAuth script added to index.html");
-            
-            PutOauthFile(target, pathToBuiltProject);
-        }
+      Debug.Log("Custom JavaScript and OAuth script added to index.html");
+
+      PutOauthFile(target, pathToBuiltProject);
     }
+  }
 
-    [PostProcessBuild]
-    private static void PutOauthFile(BuildTarget target, string pathToBuiltProject)
+  [PostProcessBuild]
+  private static void PutOauthFile(BuildTarget target, string pathToBuiltProject)
+  {
+    if (target == BuildTarget.WebGL)
     {
-        if (target == BuildTarget.WebGL)
-        {
-            // Path to the WebGL build folder
-            string buildPath = pathToBuiltProject;
+      // Path to the WebGL build folder
+      string buildPath = pathToBuiltProject;
 
-            // Your desired file's path in the Unity project
-            string sourceFilePath = Path.Combine(Application.dataPath, "Files/OAuth.js"); // Replace with your file's path
+      // Your desired file's path in the Unity project
+      string sourceFilePath = Path.Combine(Application.dataPath, "Files/OAuth.js"); // Replace with your file's path
 
-            // Destination path - where the index.html is located
-            string destinationPath = Path.Combine(buildPath, "OAuth.js"); // The same filename as the source
+      // Destination path - where the index.html is located
+      string destinationPath = Path.Combine(buildPath, "OAuth.js"); // The same filename as the source
 
-            // Copy the file
-            File.Copy(sourceFilePath, destinationPath, true);
+      // Copy the file
+      File.Copy(sourceFilePath, destinationPath, true);
 
-            Debug.Log("File moved to WebGL build folder successfully!");
-        }
+      Debug.Log("File moved to WebGL build folder successfully!");
     }
+  }
 }

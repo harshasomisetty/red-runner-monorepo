@@ -38,3 +38,5 @@ sysinfo.txt
 
 
 */.env
+
+**/*.DS_Store
