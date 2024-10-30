@@ -5,7 +5,7 @@ Red Runner, Awesome Platformer Game.
 It is now free and open source and always will be. :clap: :tada:
 
 | [:sparkles: Getting Started](#getting-started) | [:rocket: Download](#download) | [:camera: Screenshots](#screenshots) |
-| --------------- | -------- | ----------- |
+| ---------------------------------------------- | ------------------------------ | ------------------------------------ |
 
 <p align="center">
   <img src="https://img.itch.zone/aW1hZ2UvMTU4NTg4LzcyNzg3Mi5wbmc=/original/AU5pWY.png" />
@@ -83,6 +83,9 @@ Also you can the build version of the Red Runner using the following ways:
 [:rocket: Patreon](https://www.patreon.com/BayatGames)
 
 [:newspaper: Support and News](https://github.com/BayatGames/Support)
+
+[Menu Music](https://www.youtube.com/watch?v=mRN_T6JkH-c)
+[Gameplay Music](https://www.youtube.com/watch?v=OuRvOCf9mJ4)
 
 ## License
 
