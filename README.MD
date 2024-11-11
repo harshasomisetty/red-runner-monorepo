@@ -11,6 +11,7 @@ This repository contains three main components of the Red Runner project:
 red-runner/
 ├── backend/     # Game server
 ├── game/        # Unity game files
+│   └── exports/ # WebGL build output
 └── login/       # Wallet login interface
 ```
 
@@ -18,7 +19,7 @@ red-runner/
 
 ### Installation
 
-In each project directory (`backend/`, `game/`, and `login/`), run:
+In each project directory (`backend/` and `login/`), run:
 
 ```bash
 yarn install
@@ -28,12 +29,14 @@ When prompted, type `y` to confirm the installation.
 
 ### Running the Projects
 
-#### Backend Server
-```bash
-yarn start:debug
-```
+#### Game (Unity)
+1. Open the project in Unity
+2. Select `Build As` and choose WebGL as the build target
+3. Export the build to the `exports/` directory
+4. The game will run locally from this export
+5. When committed to GitHub, the export will automatically deploy via Vercel (or your chosen hosting platform)
 
-#### Game Frontend
+#### Backend Server
 ```bash
 yarn dev
 ```
@@ -43,6 +46,8 @@ yarn dev
 yarn dev
 ```
 
-## More Documentation
+## Deployment
 
-Additional documentation will be added in future updates.
+The game's WebGL build can be deployed to:
+- Vercel (automatic deployment when pushing to GitHub)
+- Any other web hosting platform of your choice
